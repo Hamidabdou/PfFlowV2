@@ -118,3 +118,14 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/2.0/howto/static-files/
+MEDIA_ROOT= [os.path.join(BASE_DIR, 'media'),]
+MEDIA_URL = '/media/'
+
+LOGIN_REDIRECT_URL = '/'
+TEMPLATE_DIRS = (os.path.join(BASE_DIR,  'templates'),)
+NET_CONF_TEMPLATES = os.path.join(BASE_DIR,'static/net_conf_templates')
+
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),]
+
