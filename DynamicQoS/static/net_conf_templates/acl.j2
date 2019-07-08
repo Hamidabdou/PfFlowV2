@@ -1,0 +1,28 @@
+{% if classe.filter.time_range is not none %}
+time-range {{classe.filter.time_range.name}}
+periodic daily {{classe.filter.time_range.begin}} to {{classe.filter.time_range.end}}
+ip access-list extended {{classe.filter.name}}
+{% if classe.filter.source is not none and classe.filter.dest is not none %}
+permit ip {{classe.filter.source.address}} {{classe.filter.source.wild_card}} {{classe.filter.dest.address}} {{classe.filter.dest.wild_card}} time-range {{classe.filter.time-range.name}}
+
+{% elif classe.filter.source is not none %}
+permit ip {{classe.filter.source.address}} {{classe.filter.source.wild_card}} any time-range {{classe.filter.time_range.name}}
+
+{% elif classe.filter.dest is not none %}
+permit ip any {{classe.filter.dest.address}} {{classe.filter.dest.wild_card}} time-range {{classe.filter.time_range.name}}
+{% else %}
+permit ip any any time-range {{classe.filter.time_range.name}}
+{% endif %}
+{% else %}
+{% if classe.filter.source is not none and classe.filter.dest is not none %}
+permit ip {{classe.filter.source.address}} {{classe.filter.source.wild_card}} {{classe.filter.dest.address}} {{classe.filter.dest.wild_card}}
+
+{% elif classe.filter.source is not none %}
+permit ip {{classe.filter.source.address}} {{classe.filter.source.wild_card}} any
+
+{% elif classe.filter.dest is not none %}
+permit ip any {{classe.filter.dest.address}} {{classe.filter.dest.wild_card}}
+{% else %}
+permit ip any any
+{% endif %}
+{% endif %}

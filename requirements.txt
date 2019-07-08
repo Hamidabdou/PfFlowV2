@@ -1,0 +1,10 @@
+django==2.0.4
+mongoengine
+numpy
+netmiko
+jinja2
+netaddr
+json
+napalm
+django-rest-framework-mongoengine
+

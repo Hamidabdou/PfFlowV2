@@ -1,0 +1,49 @@
+{% if swit.zone_type == 'Ingress'  %}
+{% for class in swit.policyIn.classes %}
+class-map {{class.match_type}} {{class.name}}
+match {{class.application.match}}
+{% if class.filter is not none %}
+match access-group name {{class.filter.name}}
+{% endif %}
+{% endfor %}
+policy-map {{swit.policyIn.name}}
+{% for class in swit.policyIn.classes %}
+class {{class.name}}
+set dscp {{class.application.dscp_value.dscp_value}}
+{% endfor %}
+{% for interface in swit.interfaces %}
+{% if interface.zone_type == 'Ingress'  %}
+interface {{interface.interface_name}}
+service-policy input {{swit.policyIn.name}}
+exit
+{% endif %}
+{% endfor %}
+{% endif %}
+{% for regroupment_class in swit.policyOut.regroupment_classes %}
+class-map {{regroupment_class.name}}
+{% for class in regroupment_class.classes %}
+match ip dscp {{class.dscp_value.dscp_value}}
+{% endfor %}
+{% endfor %}
+policy-map {{swit.policyOut.name}}
+{% for class in swit.policyOut.regroupment_classes %}
+class {{class.name}}
+bandwidth percent 40
+police cir 850000 pir 1200000
+conform-action transmit
+exceed-action set-dscp-transmit af21
+violate-action drop
+compress header ip tcp
+random-detect dscp-based
+random-detect ecn
+{% endfor %}
+class class-default
+fair-queue
+random-detect dscp-based
+{% for interface in swit.interfaces %}
+{% if interface.zone_type == 'Egress'  %}
+interface {{interface.interface_name}}
+service-policy output {{swit.policyOut.name}}
+exit
+{% endif %}
+{% endfor %}
