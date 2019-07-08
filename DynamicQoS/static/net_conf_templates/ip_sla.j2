@@ -1,0 +1,7 @@
+ip sla {{operation}}
+udp-jitter {{ responder_ip}} {{ destination_port }} source-ip {{ src_ip }} source-port {{ src-port }} 
+frequency 60
+tos {{ TOS }}
+exit
+
+ip sla schedule {{operation}} life forever start-time now 

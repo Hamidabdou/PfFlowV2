@@ -1,0 +1,49 @@
+{% if switch.zone_type == 'Ingress'  %}
+{% for class in switch.policy_in.classes %}
+class-map {{class.name}}
+{{class.match}}
+{% endfor %}
+policy-map {{switch.policyIn.name}}
+{% for class in switch.policyIn.classes %}
+class {{class.name}}
+set dscp {{class.dscp_value}}
+{% endfor %}
+{% for interface in switch.interfaces %}
+{% if interface.zone_type == 'Ingress'  %}
+interface {{interface.interface_name}}
+service-policy input {{switch.policy_in.name}}
+exit
+{% endif %}
+{% endfor %}
+{% endif %}
+{% for interface in switch.interfaces %}
+{% if interface.zone_type == 'Egress'  %}
+{% for policy in policies %}
+{% if policy.interface == interface %}
+{% for class in policy.regroupment_classes %}
+class-map {{class.name}}
+{% for app in class.classes %}
+match ip dscp {{app.dscp_value}}
+{% endfor %}
+
+{% endfor %}
+policy-map {{policy.name}}
+{% for class in policy.regroupment_classes %}
+class {{class.name}}
+bandwidth percent {{class.bandwidth}}
+police cir percent {{class.policing.cir}} pir percent {{class.policing.pir}}
+conform-action transmit
+exceed-action set-dscp-transmit {{class.policing.dscp_transmit}}
+violate-action drop
+random-detect dscp-based
+{% for dscp in dscp_list %}
+{% if dscp.regroupment_class == class %}
+random-detect dscp {{dscp.dscp_value}} {{dscp.drop_min}} {{dscp.drop_max}} {{dscp.denominator}}
+{% endif %}
+{% endfor %}
+random-detect ecn
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endfor %}
