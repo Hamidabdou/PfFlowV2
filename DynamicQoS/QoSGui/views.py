@@ -1,3 +1,6 @@
+import json
+
+from django.core.files import File
 from django.shortcuts import render
 
 # Create your views here.
@@ -13,7 +16,7 @@ from QoSGui.forms import *
 
 from QoSmonitor.models import topology
 
-
+from DynamicQoS.settings import MEDIA_ROOT
 
 
 @login_required(login_url='/login/')
@@ -42,7 +45,7 @@ def add_topology(request):
     if TopoForm.is_valid():
         tp = topology(topology_name=request.POST['Name'], topology_desc=request.POST['TopologyDesc'])
         tp.save()
-    return HttpResponseRedirect(reverse('Home', kwargs={}))
+    return HttpResponseRedirect(reverse('Topologies', kwargs={}))
 
 def topologies(request):
     TopoForm = AddTopologyForm()
@@ -51,6 +54,8 @@ def topologies(request):
     return render(request,'draw.html',context = ctx)
 
 def DrawTopology(request,topo_id):
+
+
 
     JsonFile = GetJsonFile(initial={'Text': """{ "class": "go.GraphLinksModel",
             "copiesArrays": true,
@@ -66,6 +71,44 @@ def save_json_topology(request,topo_id):
     JsonFile = GetJsonFile(request.POST)
     if JsonFile.is_valid:
         topology_json=request.POST['Text']
-        print(topology_json)
+        data = json.loads(topology_json)
+        file_url = (str(MEDIA_ROOT[0]) + "/topologies/" + str(topo_id) + ".json")
+        with open(file_url, "w") as f:
+            myfile = File(f)
+            myfile.write(request.POST['Text'])
+
+        for device in data['nodeDataArray']:
+            """
+               getting nodes data
+
+            """
+            if not device['category'] == 'cloud':
+
+                try:
+                    location = device['Location']
+                except KeyError:
+                    location = ''
+                try:
+                    address = device['Address']
+                except KeyError:
+                    address = ''
+
+                try:
+                    username = device['Username']
+                except KeyError:
+                    username = ''
+                try:
+                    password = device['Password']
+                except KeyError:
+                    password = ''
+                try:
+                    secret = device['Secret']
+                except KeyError:
+                    secret = ''
+
+                """
+                creating the devices
+                """
+                print(address+' '+location+' '+username+' '+password+' '+secret)
 
     return HttpResponseRedirect(reverse('Home', kwargs={}))

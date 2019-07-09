@@ -112,6 +112,21 @@ class device(DynamicDocument):
 
                 return {self.hostname : res }
 
+
+        def get_interfaces_index(self):
+                interfaces_f={}
+                connection = self.connect()
+                interfaces_sh = connection.cli(["show snmp mib ifmib ifindex"])
+                interfaces_sh_sp = (interfaces_sh["show snmp mib ifmib ifindex"]).splitlines()
+
+                for intf in interfaces_sh_sp:
+                        parts = intf.split(': ')
+                        interfaces_f.update({parts[0]: parts[1].strip('Ifindex = ')})
+                print(interfaces_f)
+
+
+
+
 class link(DynamicDocument):
         from_device = ReferenceField(device)
         from_interface =  ReferenceField(interface)
@@ -229,6 +244,9 @@ class topology(DynamicDocument):
         def configure_scp(self):
                 for device in self.devices:
                         device.connect().cli(["ip scp server enable"])
+        def configure_snmp(self):
+                for device in self.devices:
+                        device.connect().cli(["snmp-server community public RO","snmp-server community private RW"])
 
 
 class flow(DynamicDocument):
