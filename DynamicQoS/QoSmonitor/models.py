@@ -7,6 +7,7 @@ import random
 
 class interface(DynamicDocument):
         interface_name = StringField(required=True)
+        interface_index = IntField(required=True)
         interface_address = StringField(required=True)
         interface_prefixlen = IntField(required=True)
         interface_speed = IntField(required = True)
@@ -121,8 +122,8 @@ class device(DynamicDocument):
 
                 for intf in interfaces_sh_sp:
                         parts = intf.split(': ')
-                        interfaces_f.update({parts[0]: parts[1].strip('Ifindex = ')})
-                print(interfaces_f)
+                        interfaces_f.update({parts[0]: int(parts[1].strip('Ifindex = '))})
+                return interfaces_f
 
 
 
@@ -180,13 +181,14 @@ class topology(DynamicDocument):
                 for device in self.devices:
                         connection = device.connect()
                         ports = connection.get_interfaces_ip()
+                        interfaces_indexes=device.get_interfaces_index()
                         speeds = connection.get_interfaces()
                         interfaces_list = []
                         for port in ports:
                                 port_speed = speeds[port]["speed"]
                                 for ip in ports[port]["ipv4"]:
                                         cidr = ports[port]["ipv4"][ip]["prefix_length"]
-                                        interface_ins = interface(interface_name = port , interface_address = ip , interface_prefixlen = int(cidr),interface_speed = port_speed)
+                                        interface_ins = interface(interface_name = port ,interface_index=interfaces_indexes[port], interface_address = ip , interface_prefixlen = int(cidr),interface_speed = port_speed)
                                         interface_ins.save()
                                         interfaces_list.append(interface_ins)
                         connection.close()
