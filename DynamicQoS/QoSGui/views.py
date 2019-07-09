@@ -1,4 +1,5 @@
 import json
+import os
 
 from django.core.files import File
 from django.shortcuts import render
@@ -26,15 +27,21 @@ def home(request):
 
 
 def drag_drop(request,topo_id):
+    print(os.path.isfile(str(MEDIA_ROOT[0]) + "/topologies/" + str(topo_id) + ".json"))
+    if os.path.isfile(str(MEDIA_ROOT[0]) + "/topologies/" + str(topo_id) + ".json"):
+        with open(str(MEDIA_ROOT[0]) + "/topologies/" + str(topo_id) + ".json", 'r') as file:
+            data = file.read().replace('\n', '')
+            print(data)
+            JsonFile = GetJsonFile(initial={'Text': data})
+    else:
 
-
-    JsonFile = GetJsonFile(initial={'Text': """{ "class": "go.GraphLinksModel",
-               "copiesArrays": true,
-               "copiesArrayObjects": true,
-               "linkFromPortIdProperty": "fromPort",
-              "linkToPortIdProperty": "toPort",
-               "nodeDataArray": [],
-               "linkDataArray": []}"""})
+        JsonFile = GetJsonFile(initial={'Text': """{ "class": "go.GraphLinksModel",
+                   "copiesArrays": true,
+                   "copiesArrayObjects": true,
+                   "linkFromPortIdProperty": "fromPort",
+                   "linkToPortIdProperty": "toPort",
+                   "nodeDataArray": [],
+                   "linkDataArray": []}"""})
 
     ctx = {'json': JsonFile, 'id': topo_id}
     return render(request, 'dragndrop.html', context=ctx)
@@ -53,19 +60,24 @@ def topologies(request):
     ctx = {'topology':TopoForm,'topologies':topologies}
     return render(request,'draw.html',context = ctx)
 
-def DrawTopology(request,topo_id):
-
-
-
-    JsonFile = GetJsonFile(initial={'Text': """{ "class": "go.GraphLinksModel",
-            "copiesArrays": true,
-            "copiesArrayObjects": true,
-            "linkFromPortIdProperty": "fromPort",
-            "linkToPortIdProperty": "toPort",
-            "nodeDataArray": [],
-            "linkDataArray": []}"""})
-    ctx = {'json':JsonFile,'id':topo_id}
-    return render(request,'dragndrop.html',context=ctx)
+# def DrawTopology(request,topo_id):
+#     print(os.path.isfile(str(MEDIA_ROOT[0]) + "/topologies/" + str(topo_id) + ".json"))
+#     if os.path.isfile(str(MEDIA_ROOT[0]) + "/topologies/" + str(topo_id) + ".json"):
+#         with open(str(MEDIA_ROOT[0]) + "/topologies/" + str(topo_id) + ".json", 'r') as file:
+#             data = file.read().replace('\n', '')
+#             print(data)
+#             JsonFile = GetJsonFile(initial={'Text': data})
+#     else:
+#
+#         JsonFile = GetJsonFile(initial={'Text': """{ "class": "go.GraphLinksModel",
+#                 "copiesArrays": true,
+#                 "copiesArrayObjects": true,
+#                 "linkFromPortIdProperty": "fromPort",
+#                 "linkToPortIdProperty": "toPort",
+#                 "nodeDataArray": [],
+#                 "linkDataArray": []}"""})
+#     ctx = {'json':JsonFile,'id':topo_id}
+#     return render(request,'dragndrop.html',context=ctx)
 
 def save_json_topology(request,topo_id):
     JsonFile = GetJsonFile(request.POST)
@@ -77,38 +89,39 @@ def save_json_topology(request,topo_id):
             myfile = File(f)
             myfile.write(request.POST['Text'])
 
-        for device in data['nodeDataArray']:
-            """
-               getting nodes data
-
-            """
-            if not device['category'] == 'cloud':
-
-                try:
-                    location = device['Location']
-                except KeyError:
-                    location = ''
-                try:
-                    address = device['Address']
-                except KeyError:
-                    address = ''
-
-                try:
-                    username = device['Username']
-                except KeyError:
-                    username = ''
-                try:
-                    password = device['Password']
-                except KeyError:
-                    password = ''
-                try:
-                    secret = device['Secret']
-                except KeyError:
-                    secret = ''
-
-                """
-                creating the devices
-                """
-                print(address+' '+location+' '+username+' '+password+' '+secret)
+        #
+        # for device in data['nodeDataArray']:
+        #     """
+        #        getting nodes data
+        #
+        #     """
+        #     if not device['category'] == 'cloud':
+        #
+        #         try:
+        #             location = device['Location']
+        #         except KeyError:
+        #             location = ''
+        #         try:
+        #             address = device['Address']
+        #         except KeyError:
+        #             address = ''
+        #
+        #         try:
+        #             username = device['Username']
+        #         except KeyError:
+        #             username = ''
+        #         try:
+        #             password = device['Password']
+        #         except KeyError:
+        #             password = ''
+        #         try:
+        #             secret = device['Secret']
+        #         except KeyError:
+        #             secret = ''
+        #
+        #         """
+        #         creating the devices
+        #         """
+        #         print(address+' '+location+' '+username+' '+password+' '+secret)
 
     return HttpResponseRedirect(reverse('Home', kwargs={}))
