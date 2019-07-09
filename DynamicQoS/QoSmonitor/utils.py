@@ -5,7 +5,7 @@ from mongoengine import *
 from scapy.all import * 
 from scapy.layers.netflow import NetflowSession
 from functools import partial
-from models import * 
+from .models import *
 
 
 def dbcollect(phb_behavior:topology,pkt):
@@ -110,3 +110,10 @@ def valid_cover(graph, cover):
                     num_edge[i] += 1
                     num_edge[j] += 1
     return valid, num_edge
+
+def check_if_exists(klass, *args, **kwargs):
+    try:
+        ob = klass.objects.get(*args, **kwargs)
+        return True
+    except klass.DoesNotExist:
+        return False

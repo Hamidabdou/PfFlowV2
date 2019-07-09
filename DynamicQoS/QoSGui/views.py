@@ -19,6 +19,8 @@ from QoSmonitor.models import topology
 
 from DynamicQoS.settings import MEDIA_ROOT
 
+from QoSmonitor.utils import check_if_exists
+
 
 @login_required(login_url='/login/')
 def home(request):
@@ -79,6 +81,7 @@ def topologies(request):
 #     ctx = {'json':JsonFile,'id':topo_id}
 #     return render(request,'dragndrop.html',context=ctx)
 
+
 def save_json_topology(request,topo_id):
     JsonFile = GetJsonFile(request.POST)
     if JsonFile.is_valid:
@@ -88,8 +91,12 @@ def save_json_topology(request,topo_id):
         with open(file_url, "w") as f:
             myfile = File(f)
             myfile.write(request.POST['Text'])
-
-        #
+        topo_exists = check_if_exists(topology,id='5d24e5a53cfc30dcc3aebdb5')
+        print(topo_exists)
+        topo_exists = check_if_exists(topology, id='5d24e5a53cfc30dcc3aebdb4')
+        print(topo_exists)
+        topology_ins=topology.objects.get(id='5d24e5a53cfc30dcc3aebdb5')
+        print (topology_ins)
         # for device in data['nodeDataArray']:
         #     """
         #        getting nodes data
@@ -123,5 +130,6 @@ def save_json_topology(request,topo_id):
         #         creating the devices
         #         """
         #         print(address+' '+location+' '+username+' '+password+' '+secret)
+        #
 
     return HttpResponseRedirect(reverse('Home', kwargs={}))
