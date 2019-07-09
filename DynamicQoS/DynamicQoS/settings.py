@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'QoSGui',
     'QoSmonitor',
     'QoSmanager',
+    'rest_framework_mongoengine',
+    'rest_framework',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
