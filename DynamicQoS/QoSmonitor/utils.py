@@ -1,17 +1,13 @@
 import hashlib 
-from mongoengine import *
 import mongoengine
-from mongoengine import * 
 from scapy.all import * 
 from scapy.layers.netflow import NetflowSession
 from functools import partial
-from models import * 
+from .models import * 
 from ntp import * 
 
 
 def dbcollect(phb_behavior:topology,pkt):
-
-        mongoengine.connect("testdb", host = "0.0.0.0",port = 27017)
         sys_uptime = pkt[NetflowHeaderV9].sysUptime
         devices = phb_behavior.devices
         monitor = None 
@@ -124,9 +120,9 @@ def valid_cover(graph, cover):
                     num_edge[j] += 1
     return valid, num_edge
 
-def check_if_exists(klass, *args, **kwargs):
+def check_if_exists(cls, *args, **kwargs):
     try:
-        ob = klass.objects.get(*args, **kwargs)
+        ob = cls.objects.get(*args, **kwargs)
         return True
-    except klass.DoesNotExist:
+    except cls.DoesNotExist:
         return False
