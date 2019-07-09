@@ -10,7 +10,7 @@ from models import *
 
 def dbcollect(phb_behavior:topology,pkt):
 
-        mongoengine.connect("flowsdb", host = "0.0.0.0",port = 27017)
+
         sys_uptime = pkt[NetflowHeaderV9].sysUptime
         devices = phb_behavior.devices
         monitor = None 
