@@ -8,3 +8,6 @@ json
 napalm
 django-rest-framework-mongoengine
 django-background-tasks
+djangorestframework
+markdown
+django-filter

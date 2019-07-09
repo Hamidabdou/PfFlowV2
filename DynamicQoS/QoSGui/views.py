@@ -91,12 +91,10 @@ def save_json_topology(request,topo_id):
         with open(file_url, "w") as f:
             myfile = File(f)
             myfile.write(request.POST['Text'])
-        topo_exists = check_if_exists(topology,id='5d24e5a53cfc30dcc3aebdb5')
-        print(topo_exists)
-        topo_exists = check_if_exists(topology, id='5d24e5a53cfc30dcc3aebdb4')
-        print(topo_exists)
-        topology_ins=topology.objects.get(id='5d24e5a53cfc30dcc3aebdb5')
-        print (topology_ins)
+
+        topology_ins=topology.objects.get(id=topo_id)
+
+
         # for device in data['nodeDataArray']:
         #     """
         #        getting nodes data
