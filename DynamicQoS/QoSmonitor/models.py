@@ -237,6 +237,8 @@ class topology(DynamicDocument):
                                         link_ins.calculate_speed()
                                         link_ins.save()
                                         self.links.append(link_ins)
+                        self.update(set__links=self.links)
+
 
         def configure_ntp(self):
                 ntp_master = random.choice(self.devices)
