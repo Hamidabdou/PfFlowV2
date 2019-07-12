@@ -22,16 +22,18 @@ class AddDevice(generics.CreateAPIView):
 		user = self.request.data.get("management.username")
 		passwd = self.request.data.get("management.password")
 		driver = get_network_driver("ios")
-		device = driver(addr,user,passwd)
+		device = driver(addr,user,passwd,timeout = 5)
+		fqdn = None 
 		device.open()
-		serializer.save(hostname = device.get_facts()['fqdn'])
+		fqdn = device.get_facts()['fqdn']
 		device.close()
+		serializer.save(hostname = fqdn)
 
-class DeviceList(generics.ListAPIView):
+"""class DeviceList(generics.ListAPIView):
 	serializer_class = deviceListSerializer
 	def get_queryset(self):
 		queryset = device.objects.all()
-		return queryset
+		return queryset"""
 
 
 class TopologyList(APIView):
@@ -39,11 +41,16 @@ class TopologyList(APIView):
 		result={'topologies':[]}
 		topologies = topology.objects()
 		for topo in topologies:
-			print('....')
 			result['topologies'].append(json.loads(output_references_topology(topo)))
-
-
-
-
 		return Response(result)
+  
+  
+class TopologyByName(APIView):
+	def get(self,request):
+		topology_name = request.query_params.get("name")
+		topologies = topology.objects(topology_name = topology_name )
+		for topo in topologies:
+			result = json.loads(output_references_topology(topo))
+		return Response(result)
+
 

@@ -18,16 +18,15 @@ class deviceSerializer(serializers.DocumentSerializer):
 					user = management["username"]
 					passwd = management['password']
 					driver = get_network_driver("ios")
-					device = driver(addr,user,passwd)
+					device = driver(addr,user,passwd,timeout = 10)
 					try:
 						device.open()
 						device.close()
 						return value 
 					except Exception as e :
-						sr.ValidationError(e)
-
+						raise sr.ValidationError(e)
 	class Meta:
-		model = device 
+		model = device
 		fields = ["management"]
 
 
@@ -41,4 +40,11 @@ class deviceListSerializer(serializers.DocumentSerializer):
 	management = accessSerializer(many = False)
 	class Meta:
 		model = device
+		fields = "__all__"
+
+
+class topologySerialzer(serializers.DocumentSerializer):
+	
+	class Meta:
+		model = topology 
 		fields = "__all__"
