@@ -21,3 +21,4 @@ def output_references_topology(topology):
   ]
 
     return json.dumps(topology_dct,indent=4)
+
