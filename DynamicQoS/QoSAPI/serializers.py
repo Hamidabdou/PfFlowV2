@@ -24,7 +24,8 @@ class deviceSerializer(serializers.DocumentSerializer):
 						device.close()
 						return value 
 					except Exception as e :
-						sr.ValidationError(e)
+						return sr.ValidationError(e)
+
 
 	class Meta:
 		model = device 
