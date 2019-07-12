@@ -36,6 +36,15 @@ class AddDevice(generics.CreateAPIView):
 		return queryset"""
 
 
+class TopologyList(APIView):
+	def get(self, request):
+		result={'topologies':[]}
+		topologies = topology.objects()
+		for topo in topologies:
+			result['topologies'].append(json.loads(output_references_topology(topo)))
+		return Response(result)
+  
+  
 class TopologyByName(APIView):
 	def get(self,request):
 		topology_name = request.query_params.get("name")
