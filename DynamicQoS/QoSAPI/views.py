@@ -34,7 +34,7 @@ class DeviceList(generics.ListAPIView):
 		return queryset
 
 
-class MyOwnView(APIView):
+class TopologyList(APIView):
 	def get(self, request):
 		result={'topologies':[]}
 		topologies = topology.objects()
