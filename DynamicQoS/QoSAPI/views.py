@@ -38,7 +38,7 @@ class MyOwnView(APIView):
 	def get(self, request):
 		result={'topologies':[]}
 		topologies = topology.objects()
-		for topo in topologies:
+		for togetpo in topologies:
 			print('....')
 			result['topologies'].append(json.loads(output_references_topology(topo)))
 
