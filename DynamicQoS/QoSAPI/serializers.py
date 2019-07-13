@@ -17,18 +17,15 @@ class deviceSerializer(serializers.DocumentSerializer):
 					addr = management["management_address"]
 					user = management["username"]
 					passwd = management['password']
-					"""driver = get_network_driver("ios")
+					driver = get_network_driver("ios")
 					device = driver(addr,user,passwd,timeout = 10)
 					try:
 						device.open()
 						device.close()
 						return value 
 					except Exception as e :
-						raise sr.ValidationError(e)"""
-					if management["management_interface"] == "loopback0":
-						return value
-					else :
-						raise sr.ValidationError("It is not a management interface")
+						raise sr.ValidationError(e)
+					
 	class Meta:
 		model = device
 		fields = ["management","topology_name"]
