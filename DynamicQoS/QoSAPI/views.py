@@ -13,29 +13,55 @@ from napalm import get_network_driver
 from rest_framework import status
 from rest_framework.response import Response
 from .utils import output_references_topology, output_references_topology_brief
-
+from rest_framework import serializers as sr
 
 
 
 
 class AddTopology(generics.CreateAPIView):
 	serializer_class = topologySerializer
+	queryset = topology.objects()
+
+	def perform_create(self, serializer):
+		topo_name = self.request.data.get("topology_name")
+		topology_qs = topology.objects(topology_name = topo_name)
+		if len(topology_qs) == 0 :
+			serializer.save()
+		else:
+			raise sr.ValidationError("topology name {} exists ! try another one.".format(topo_name))
+
 
 class AddDevice(generics.CreateAPIView):
 	serializer_class = deviceSerializer
 	
 	def perform_create(self, serializer):
+		print(serializer)
 		addr = self.request.data.get("management.management_address")
 		user = self.request.data.get("management.username")
 		passwd = self.request.data.get("management.password")
 		driver = get_network_driver("ios")
-		print(self.request.data)
-		device = driver(addr,user,passwd,timeout = 5)
-		fqdn = None 
-		device.open()
-		fqdn = device.get_facts()['fqdn']
-		device.close()
-		serializer.save(hostname = fqdn)
+		topo_name = self.request.data.get("topology_name")
+		topology_qs = topology.objects(topology_name = topo_name)
+		if len(topology_qs) == 0:
+			raise sr.ValidationError("topology doesn't exists")
+		else :
+			device = driver(addr,user,passwd,timeout = 5)
+			fqdn = None
+			device_list = topology_qs[0].devices
+			device.open()
+			fqdn = device.get_facts()['fqdn']
+			device.close()
+			device_serializer = serializer.save(hostname = fqdn)
+			new_device = device.objects.get(id = device_serializer.id)
+			other_list = [new_device]
+			for device_cursor in device_list:
+				other_list.append(device.objects.get(id = device_cursor.id))
+			topology_qs[0].update(set__devices = other_list)
+		
+		 
+		
+		
+		
 
 """class DeviceList(generics.ListAPIView):
     serializer_class = deviceListSerializer

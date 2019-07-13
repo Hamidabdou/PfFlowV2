@@ -11,35 +11,37 @@ class accessSerializer(serializers.EmbeddedDocumentSerializer):
 
 class deviceSerializer(serializers.DocumentSerializer):
 	management = accessSerializer(many = False)
-
+	topology_name = sr.CharField()
 	def validate(self,value):
 					management = value['management']
 					addr = management["management_address"]
 					user = management["username"]
 					passwd = management['password']
-					driver = get_network_driver("ios")
+					"""driver = get_network_driver("ios")
 					device = driver(addr,user,passwd,timeout = 10)
 					try:
 						device.open()
 						device.close()
 						return value 
 					except Exception as e :
-						raise sr.ValidationError(e)
+						raise sr.ValidationError(e)"""
+					if management["management_interface"] == "loopback0":
+						return value
+					else :
+						raise sr.ValidationError("It is not a management interface")
 	class Meta:
 		model = device
-		fields = ["management"]
+		fields = ["management","topology_name"]
 
 
 
 class topologySerializer(serializers.DocumentSerializer):
-	
 	class Meta:
 		model = topology
 		fields = ["topology_name","topology_desc"]
 
 class deviceListSerializer(serializers.DocumentSerializer):
 	management = accessSerializer(many = False)
-	topology_ref = topologySerializer(many = False)
 	class Meta:
 		model = device
 		fields = "__all__"
