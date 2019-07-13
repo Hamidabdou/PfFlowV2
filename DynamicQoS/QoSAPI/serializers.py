@@ -31,20 +31,20 @@ class deviceSerializer(serializers.DocumentSerializer):
 
 
 
-class interfaceSerializer(serializers.DocumentSerializer):
+class topologySerializer(serializers.DocumentSerializer):
+	
 	class Meta:
-		model = interface 
-		fields = "__all__"
+		model = topology
+		fields = ["topology_name","topology_desc"]
 
 class deviceListSerializer(serializers.DocumentSerializer):
 	management = accessSerializer(many = False)
+	topology_ref = topologySerializer(many = False)
 	class Meta:
 		model = device
 		fields = "__all__"
 
 
-class topologySerialzer(serializers.DocumentSerializer):
-	
-	class Meta:
-		model = topology 
-		fields = "__all__"
+
+
+

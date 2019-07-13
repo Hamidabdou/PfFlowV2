@@ -15,20 +15,27 @@ from rest_framework.response import Response
 from .utils import output_references_topology, output_references_topology_brief
 
 
-class AddDevice(generics.CreateAPIView):
-    serializer_class = deviceSerializer
 
-    def perform_create(self, serializer):
-        addr = self.request.data.get("management.management_address")
-        user = self.request.data.get("management.username")
-        passwd = self.request.data.get("management.password")
-        driver = get_network_driver("ios")
-        device = driver(addr,user,passwd,timeout = 5)
-        fqdn = None
-        device.open()
-        fqdn = device.get_facts()['fqdn']
-        device.close()
-        serializer.save(hostname = fqdn)
+
+
+class AddTopology(generics.CreateAPIView):
+	serializer_class = topologySerializer
+
+class AddDevice(generics.CreateAPIView):
+	serializer_class = deviceSerializer
+	
+	def perform_create(self, serializer):
+		addr = self.request.data.get("management.management_address")
+		user = self.request.data.get("management.username")
+		passwd = self.request.data.get("management.password")
+		driver = get_network_driver("ios")
+		print(self.request.data)
+		device = driver(addr,user,passwd,timeout = 5)
+		fqdn = None 
+		device.open()
+		fqdn = device.get_facts()['fqdn']
+		device.close()
+		serializer.save(hostname = fqdn)
 
 """class DeviceList(generics.ListAPIView):
     serializer_class = deviceListSerializer
@@ -47,6 +54,7 @@ class TopologyList(APIView):
   
   
 class TopologyByName(APIView):
+
     def get(self,request):
 
         if len(request.query_params)==0:
