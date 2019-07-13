@@ -14,6 +14,12 @@ from rest_framework import status
 from rest_framework.response import Response
 from .utils import output_references_topology
 
+
+
+
+class AddTopology(generics.CreateAPIView):
+	serializer_class = topologySerializer
+
 class AddDevice(generics.CreateAPIView):
 	serializer_class = deviceSerializer
 	
@@ -22,6 +28,7 @@ class AddDevice(generics.CreateAPIView):
 		user = self.request.data.get("management.username")
 		passwd = self.request.data.get("management.password")
 		driver = get_network_driver("ios")
+		print(self.request.data)
 		device = driver(addr,user,passwd,timeout = 5)
 		fqdn = None 
 		device.open()
@@ -48,7 +55,7 @@ class TopologyList(APIView):
 class TopologyByName(APIView):
 	def get(self,request):
 		topology_name = request.query_params.get("name")
-		topologies = topology.objects(topology_name = topology_name )
+		topologies = topology.objects(topology_name = topology_name)
 		for topo in topologies:
 			result = json.loads(output_references_topology(topo))
 		return Response(result)

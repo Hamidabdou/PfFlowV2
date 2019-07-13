@@ -11,6 +11,7 @@ def output_references_device(device):
         del(interf['_id'])
 
     return json.dumps(device_dct,indent=4)
+    
 
 
 
