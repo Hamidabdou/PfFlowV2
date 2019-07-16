@@ -6,6 +6,7 @@ match transport source-port
 match transport destination-port 
 match interface input 
 match interface output
+match ipv4 tos
 collect counter bytes
 collect counter packets 
 collect timestamp sys-uptime first
