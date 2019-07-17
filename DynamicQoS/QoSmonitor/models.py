@@ -33,6 +33,8 @@ class device(DynamicDocument):
         management = EmbeddedDocumentField(access)
         interfaces = ListField(ReferenceField(interface))
         is_responder = BooleanField(default = False)
+        is_ingress = BooleanField(default = False)
+        is_egress = BooleanField(required = False)
         
         def connect(self):
                 driver = get_network_driver("ios")
@@ -47,6 +49,7 @@ class device(DynamicDocument):
 
         def get_fqdn(self):
                 self.hostname = self.connect().get_facts()['fqdn']
+
 
         def get_interface_by_index(self,index):
             for interface in self.interfaces:
@@ -89,6 +92,7 @@ class device(DynamicDocument):
         def pull_ip_sla_stats(self,operation):
                 jitter_cmd = "show ip sla statistics {} | include Destination to Source Jitter".format(str(operation))
                 delay_cmd = "show ip sla statistics {} | include Destination to Source Latency".format(str(operation))
+                #packet_loss_ratio = "show ip sla statistics {} | include Destination to Source Latency".format(str(operation)) # TODO: get the packet loss ratio
                 config = [jitter_cmd,delay_cmd]
 
                 result = self.connect().cli(config)
@@ -283,7 +287,7 @@ class ip_sla_info(Document):
         avg_jitter = IntField(required = True)
         avg_delay = IntField(required = True)
         packet_loss = IntField(required = False) # For the moment it is false because i dont know how to get it 
-        timestamp = StringField(required = False) # temporary false until see how the netflow is sniffing the timestamp to combine it with ip sla 
+        timestamp = ComplexDateTimeField(required = False) # temporary false until see how the netflow is sniffing the timestamp to combine it with ip sla 
         ip_sla_ref = ReferenceField(ip_sla)
 
 class application(Document):

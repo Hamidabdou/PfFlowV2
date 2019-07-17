@@ -57,19 +57,6 @@ class AddDevice(generics.CreateAPIView):
 			for device_cursor in device_list:
 				other_list.append(device.objects.get(id = device_cursor.id))
 			topology_qs[0].update(set__devices = other_list)
-		
-		 
-		
-		
-		
-
-"""class DeviceList(generics.ListAPIView):
-    serializer_class = deviceListSerializer
-    def get_queryset(self):
-        queryset = device.objects.all()
-        return queryset"""
-
-  
   
 class TopologyByName(APIView):
 

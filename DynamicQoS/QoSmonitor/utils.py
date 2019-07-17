@@ -77,7 +77,8 @@ def dbcollect(phb_behavior:topology,pkt):
                             jitter , delay = src_device.pull_ip_sla_stats(sla[0].operation)
                             sla_info = ip_sla_info()
                             sla_info.avg_jitter = jitter 
-                            sla_info.avg_delay = delay 
+                            sla_info.avg_delay = delay
+                            sla_info.timestamp = datetime.datetime.fromtimestamp(sys_uptime)
                             sla_info.ip_sla_ref = sla
                             sla_info.save() 
         except Exception:
