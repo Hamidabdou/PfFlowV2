@@ -28,7 +28,7 @@ class deviceSerializer(serializers.DocumentSerializer):
 					
 	class Meta:
 		model = device
-		fields = ["management","topology_name","hostname"]
+		fields = ["management","topology_name"]
 
 
 
