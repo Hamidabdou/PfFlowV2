@@ -66,6 +66,7 @@ def dbcollect(phb_behavior:topology,pkt):
                                     sla_info_ins = ip_sla_info()
                                     sla_info_ins.avg_jitter = jitter 
                                     sla_info_ins.avg_delay = delay 
+                                    sla_info_ins.timestamp = datetime.datetime.fromtimestamp(sys_uptime)
                                     sla_info_ins.ip_sla_ref = similar_ip_sla[0]
                                     sla_info_ins.save()
 

@@ -4,7 +4,7 @@ from netaddr import *
 from jinja2 import Environment, FileSystemLoader
 from napalm import get_network_driver 
 import random
-#import numpy as np 
+import numpy as np 
 
 class interface(DynamicDocument):
         interface_name = StringField(required=True)
@@ -33,9 +33,7 @@ class device(DynamicDocument):
         management = EmbeddedDocumentField(access)
         interfaces = ListField(ReferenceField(interface))
         is_responder = BooleanField(default = False)
-        is_ingress = BooleanField(default = False)
-        is_egress = BooleanField(required = False)
-        
+
         def connect(self):
                 driver = get_network_driver("ios")
                 device = None
@@ -273,7 +271,7 @@ class netflow_fields(DynamicDocument):
         first_switched = ComplexDateTimeField(required = True)
         last_switched  = ComplexDateTimeField(required = True)
         #QoS parameters
-        bandwidth = FloatField(required = False)
+        bandwidth = FloatField(required = True)
         #=======================================
         # Device related Information
         collection_time = ComplexDateTimeField(required = True)
