@@ -1,5 +1,7 @@
 import json
 
+from QoSmonitor.models import application
+
 
 def output_references_device(device):
 
@@ -57,4 +59,52 @@ def output_references_device_brief(device):
     del(device_dct['interfaces'])
 
     return json.dumps(device_dct,indent=4)
+
+def output_references_ip_sla_info(ip_sla_info):
+        ip_sla_info_dct = json.loads(ip_sla_info.to_json(indent=2))
+        del (ip_sla_info_dct['_id'])
+        del (ip_sla_info_dct['ip_sla_ref'])
+
+        return json.dumps(ip_sla_info_dct, indent=4)
+
+
+def output_references_ip_sla(ip_sla):
+    ip_sla_dct = json.loads(ip_sla.to_json(indent=2))
+    ip_sla_dct["sender_device_ref"] = json.loads(output_references_device_brief(ip_sla.sender_device_ref))
+    ip_sla_dct["responder_device_ref"] = json.loads(output_references_device_brief(ip_sla.responder_device_ref))
+    del (ip_sla_dct['_id'])
+
+    return json.dumps(ip_sla_dct, indent=4)
+
+
+def get_application_by_id(app_id):
+    try:
+        return application.objects.get(application_ID=app_id).application_NAME
+    except:
+        return str(app_id)
+
+
+def output_references_flow_field(flow_field):
+    flow_field_dct = json.loads(flow_field.to_json(indent=2))
+    flow_field_dct["device"] = json.loads(output_references_device_brief(flow_field.device))
+    flow_field_dct["input_int"] = str(flow_field.input_int.interface_name)
+    flow_field_dct["output_int"] = str(flow_field.output_int.interface_name)
+    del (flow_field_dct['_id'])
+    del (flow_field_dct['flow'])
+    return json.dumps(flow_field_dct, indent=4)
+
+
+def output_references_flow(flow, flow_fields):
+    flow_dct = json.loads(flow.to_json(indent=2))
+    flow_dct["ip_sla_ref"] = json.loads(output_references_ip_sla(flow.ip_sla_ref))
+    flow_dct["application_ID"] = str(get_application_by_id(flow.application_ID))
+    del (flow_dct['_id'])
+    del (flow_dct['ip_sla_ref'])
+    flow_dct["flow_fields"] = [
+        json.loads(output_references_flow_field(fl_feild)) for fl_feild in flow_fields
+    ]
+
+    return json.dumps(flow_dct, indent=4)
+
+
 
