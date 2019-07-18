@@ -7,4 +7,4 @@ urlpatterns = [
     path('topology',TopologyByName.as_view(), name = "topology-by-name"),
 
 ]
-app_name = 'QoSAPI'
+app_name = 'APIv1'
