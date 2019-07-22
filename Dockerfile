@@ -7,6 +7,10 @@ ENV APP_PATH /opt/$APP_DIR_NAME
 COPY requirements.txt /
 RUN pip install -r requirements.txt
 RUN rm requirements.txt
+#installing scapy
+RUN git clone https://github.com/secdev/scapy.git
+WORKDIR scapy
+RUN python setup.py install
 
 #adding entrypoint scripts
 COPY docker-entrypoint.sh /
