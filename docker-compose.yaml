@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+        dqos:
+                image: dqos
+                build: ./
+                restart: always
+                network_mode: host
+                
+        mongo:
+                image: mongo
+                restart: always
+                environment:
+                        MONGO_INITDB_USERNAME: root
+                        MONGO_INITDB_PASSWORD: rootpasswd
+                ports:
+                        - 27017:27017
