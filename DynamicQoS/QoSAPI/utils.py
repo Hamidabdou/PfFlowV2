@@ -4,7 +4,6 @@ from QoSmonitor.models import application
 
 
 def output_references_device(device):
-
     device_dct = json.loads(device.to_json(indent=2))
     del(device_dct['_id'])
     device_dct["interfaces"] = [
@@ -49,6 +48,7 @@ def output_references_topology_brief(topology):
     del (topology_dct['links'])
 
     return json.dumps(topology_dct, indent=4)
+
 
 def output_references_device_brief(device):
 

@@ -1,4 +1,4 @@
-flow recorder IQoSrecorder
+flow record IQoSrecord
 match ipv4 source address
 match ipv4 destination address
 match ipv4 protocol 
@@ -14,8 +14,8 @@ collect timestamp sys-uptime last
 collect application name
 
 flow exporter IQoSExporter 
-destination {{ dst }}
-source {{self.loopback_addr}}
+destination {{ destination }}
+source {{source}}
 transport udp 2055
 export-protocol netflow-v9
 template data timeout 60
@@ -24,8 +24,8 @@ option application-attributes timeout  30
 
 
 flow monitor IQoSmonitor 
-record IQoSrecorder
-exporter IQoSexporter 
+record IQoSrecord
+exporter IQoSExporter 
 cache timeout active 60
 cache timeout inactive 15
 exit

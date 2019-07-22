@@ -23,7 +23,8 @@ def dbcollect(phb_behavior:topology,pkt):
                     netflow_fields_ins.counter_pkts = int.from_bytes(record.IN_PKTS,'big')
                     netflow_fields_ins.first_switched = datetime.datetime.fromtimestamp(record.FIRST_SWITCHED)
                     netflow_fields_ins.last_switched = datetime.datetime.fromtimestamp(record.LAST_SWITCHED)
-                    netflow_fields_ins.bandwidth = int.from_bytes(record.IN_BYTES,'big') * 8 / (record.LAST_SWITCHED - record.FIRST_SWITCHED) / 100 #bps 
+                    time = (record.LAST_SWITCHED - record.FIRST_SWITCHED) / 100
+                    netflow_fields_ins.bandwidth = int.from_bytes(record.IN_BYTES,'big') * 8 / time  #bps 
                     input_interface = monitor.get_interface_by_index(int.from_bytes(record.INPUT_SNMP,'big'))
                     netflow_fields_ins.input_int = input_interface
                     output_interface = monitor.get_interface_by_index(int.from_bytes(record.OUTPUT_SNMP,'big'))
@@ -31,10 +32,14 @@ def dbcollect(phb_behavior:topology,pkt):
                     netflow_fields_ins.collection_time = datetime.datetime.fromtimestamp(sys_uptime)
                     flow_input = "{}:{}->{}:{}|{}|{}|{}".format(str(record.IPV4_SRC_ADDR),str(record.L4_SRC_PORT),str(record.IPV4_DST_ADDR) , str(record.L4_SRC_PORT) ,str(record.TOS) , str(int.from_bytes(record.APPLICATION_ID,'big')),str(record.PROTOCOL))
                     flow_hash = hashlib.md5(flow_input.encode())
+                    print(str(flow_hash.hexdigest()))
                     src_device , dst_device = phb_behavior.get_ip_sla_devices(record)
                     flow_exist = None
-                    flow_exist = flow.objects(flow_id= flow_hash.hexdigest())
-                    if not(flow_exist):
+                    try:
+                        flow_exist = flow.objects(flow_id= flow_hash.hexdigest())[0]
+                    except:
+                        pass 
+                    if (flow_exist == None):
                             flow_ins = flow() 
                             flow_ins.flow_id = str(flow_hash.hexdigest())
                             flow_ins.ipv4_src_addr = record.IPV4_SRC_ADDR
@@ -46,22 +51,23 @@ def dbcollect(phb_behavior:topology,pkt):
                             flow_ins.application_ID = int.from_bytes(record.APPLICATION_ID,'big')
                             flow_ins.save()
                             netflow_fields_ins.flow_ref = flow_ins
-                            netflow_fields_ins.device = monitor
+                            netflow_fields_ins.device_ref = monitor
                             netflow_fields_ins.save()
-                            if (src_device != dst_device):
+                            if (src_device != dst_device) and (record.TOS != 192 or record.TOS != 224): # if someone ping the loopback or flow is for network control or internetwork control
                                 similar_ip_sla = ip_sla.objects(sender_device_ref = src_device , responder_device_ref = dst_device, type_of_service = record.TOS) #verify if ip sla exists for this flow 
                                 if (len(similar_ip_sla) == 0 ):
-                                    dst_device.configure_ip_sla_responder()
+                                    if dst_device.is_responder == False:
+                                        dst_device.configure_ip_sla_responder()
+                                        dst_device.is_responder = True
                                     sla = ip_sla()
                                     sla.sender_device_ref = src_device
                                     sla.responder_device_ref = dst_device
                                     sla.type_of_service = record.TOS 
                                     sla.save()
-                                    src_device.configure_ip_sla(sla.operation,record,dst_device)
+                                    src_device.configure_ip_sla(sla.operation,dst_device.management.management_address,record.TOS)
                                     flow_ins.ip_sla_ref = sla 
                                 else:
-                                    flow_ins.ip_sla = similar_ip_sla
-                                    print(similar_ip_sla[0].operation)
+                                    flow_ins.ip_sla = similar_ip_sla[0]
                                     jitter, delay = src_device.pull_ip_sla_stats(similar_ip_sla[0].operation)
                                     sla_info_ins = ip_sla_info()
                                     sla_info_ins.avg_jitter = jitter 
@@ -79,17 +85,19 @@ def dbcollect(phb_behavior:topology,pkt):
                             sla_info = ip_sla_info()
                             sla_info.avg_jitter = jitter 
                             sla_info.avg_delay = delay
+                            sla_info.packet_loss = 0 
                             sla_info.timestamp = datetime.datetime.fromtimestamp(sys_uptime)
                             sla_info.ip_sla_ref = sla
                             sla_info.save() 
-        except Exception:
+        except Exception as e:
+            print("First exception {}".format(e))
             try:
                 app_name = pkt[NetflowDataflowsetV9][NetflowOptionsRecordOptionV9].APPLICATION_NAME
                 app_id = pkt[NetflowDataflowsetV9][NetflowOptionsRecordOptionV9].APPLICATION_ID
-                app_ins = application(application_ID = app_id,application_NAME = app_name)
+                app_ins = application(application_ID = int.from_bytes(app_id,"big"),application_NAME = app_name)
                 app_ins.save()
-            except Exception:
-                print("Unknown packet")
+            except Exception as e:
+                print("2 exception {}".format(e))
 
 
 
@@ -97,17 +105,7 @@ def Sniff_Netflow(phb_behavior):
         sniff(session = NetflowSession , filter = "dst port 2055", prn = partial(dbcollect,phb_behavior))
 
 
-def valid_cover(graph, cover):
-    valid = True
-    num_edge = [0] * len(graph)
-    for i in range(0, len(graph)):
-        for j in range(i, len(graph)):
-            if graph[i][j] == 1:
-                if (i not in cover) and (j not in cover):
-                    valid = False
-                    num_edge[i] += 1
-                    num_edge[j] += 1
-    return valid, num_edge
+
 
 def check_if_exists(cls, *args, **kwargs):
     try:

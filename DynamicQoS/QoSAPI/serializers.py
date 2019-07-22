@@ -7,7 +7,7 @@ class accessSerializer(serializers.EmbeddedDocumentSerializer):
 	class Meta:
 		model = access
 		fields = "__all__"
-		
+
 
 class deviceSerializer(serializers.DocumentSerializer):
 	management = accessSerializer(many = False)
@@ -43,7 +43,24 @@ class deviceListSerializer(serializers.DocumentSerializer):
 		model = device
 		fields = "__all__"
 
+class statSerializer(serializers.DocumentSerializer):
+	management = accessSerializer(many = False)
+	class Meta:
+		model = netflow_fields
+		fields = "__all__"
+
+class discover_networkSerializer(sr.Serializer):
+	topology = sr.CharField()
+
+class configure_monitoringSerializer(sr.Serializer):
+	destination = sr.CharField()
+	topology = sr.CharField()
 
 
+class start_monitoringSerializer(sr.Serializer):
+	topology = sr.CharField()
 
+
+class preapare_envSerializer(sr.Serializer):
+	topology = sr.CharField()
 
