@@ -4,7 +4,7 @@ from scapy.all import *
 from scapy.layers.netflow import NetflowSession
 from functools import partial
 from .models import * 
-from ntplib import * 
+from ntplib import *
 
 
 def dbcollect(phb_behavior:topology,pkt):

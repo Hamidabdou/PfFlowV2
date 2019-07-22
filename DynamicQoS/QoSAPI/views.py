@@ -127,10 +127,6 @@ class discover_network(generics.CreateAPIView):
 
 
 
-
-
-
-
 class configure_monitoring(generics.CreateAPIView):
 	serializer_class =  configure_monitoringSerializer
 	queryset = "Nothing to do here it is out of models"
@@ -150,13 +146,22 @@ class configure_monitoring(generics.CreateAPIView):
 		if topology_exist.monitoring_enabled == True:
 			raise sr.ValidationError("Topology '{}' is already configured".format(topology_name))
 
-		monitors = topology_exist.get_monitors()
+		"""monitors = topology_exist.get_monitors()
 		for monitor in monitors:
 			try:
 				monitor.configure_netflow(destination = collector)
 			except Exception as e:
+				raise sr.ValidationError("ERROR : {}".format(e))"""
+				
+		for monitor in topology_exist.devices:
+			try:
+				monitor.configure_netflow(destination = collector)
+			except Exception as e :
 				raise sr.ValidationError("ERROR : {}".format(e))
+
+
 		topology_exist.monitoring_enabled = True
+		topology_exist.update(set__monitoring_enabled = True)
 		return Response("Monitoring is configured successfully")
 
 class start_monitoring(generics.CreateAPIView):
@@ -177,7 +182,8 @@ class start_monitoring(generics.CreateAPIView):
 
 		# TODO : Block here to start the monitoring
 
-		topology_exist.monitoring_activated == True
+		topology_exist.monitoring_activated = True
+		topology_exist.update(set__monitoring_activated = True)
 		return Response("Monitoring is starting successfully")
 
 

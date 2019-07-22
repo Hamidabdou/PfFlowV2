@@ -31,7 +31,7 @@ class access(DynamicEmbeddedDocument):
         password = StringField(required=True)
 
 class device(DynamicDocument):
-        hostname = StringField(required = False)
+        hostname = StringField(required = False, unique = True)
         management = EmbeddedDocumentField(access)
         interfaces = ListField(ReferenceField(interface))
         is_responder = BooleanField(default = False)
@@ -189,7 +189,7 @@ def valid_cover(graph, cover):
                     num_edge[j] += 1
     return valid, num_edge
 class topology(DynamicDocument):
-        topology_name = StringField(required=True)
+        topology_name = StringField(required=True, unique = True)
         topology_desc = StringField(required=False)
         devices = ListField(ReferenceField(device))
         links = ListField(ReferenceField(link))
