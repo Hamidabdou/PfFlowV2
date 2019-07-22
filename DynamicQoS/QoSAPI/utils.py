@@ -86,11 +86,11 @@ def get_application_by_id(app_id):
 
 def output_references_flow_field(flow_field):
     flow_field_dct = json.loads(flow_field.to_json(indent=2))
-    flow_field_dct["device"] = json.loads(output_references_device_brief(flow_field.device))
+    flow_field_dct["device_ref"] = json.loads(output_references_device_brief(flow_field.device))
     flow_field_dct["input_int"] = str(flow_field.input_int.interface_name)
     flow_field_dct["output_int"] = str(flow_field.output_int.interface_name)
     del (flow_field_dct['_id'])
-    del (flow_field_dct['flow'])
+    del (flow_field_dct['flow_ref'])
     return json.dumps(flow_field_dct, indent=4)
 
 
@@ -146,17 +146,17 @@ def ouput_interface_id(interface):
 
 def output_flow_table_print(nt_field, ip_sla_i):
         rslt = []
-        rslt.append(nt_field.flow.flow_id)
-        rslt.append(nt_field.device.hostname)
+        rslt.append(nt_field.flow_ref.flow_id)
+        rslt.append(nt_field.device_ref.hostname)
         rslt.append(nt_field.input_int.interface_name)
         rslt.append(nt_field.output_int.interface_name)
-        rslt.append(get_application_by_id(nt_field.flow.application_ID))
-        rslt.append(nt_field.flow.ipv4_src_addr)
-        rslt.append(nt_field.flow.transport_src_port)
-        rslt.append(nt_field.flow.ipv4_dst_addr)
-        rslt.append(nt_field.flow.transport_dst_port)
-        rslt.append(nt_field.flow.type_of_service)
-        rslt.append(nt_field.flow.ipv4_protocol)
+        rslt.append(get_application_by_id(nt_field.flow_ref.application_ID))
+        rslt.append(nt_field.flow_ref.ipv4_src_addr)
+        rslt.append(nt_field.flow_ref.transport_src_port)
+        rslt.append(nt_field.flow_ref.ipv4_dst_addr)
+        rslt.append(nt_field.flow_ref.transport_dst_port)
+        rslt.append(nt_field.flow_ref.type_of_service)
+        rslt.append(nt_field.flow_ref.ipv4_protocol)
         rslt.append(nt_field.counter_bytes)
         rslt.append(nt_field.counter_pkts)
         rslt.append(nt_field.bandwidth)

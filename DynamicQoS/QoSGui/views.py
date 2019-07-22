@@ -6,7 +6,7 @@ from django.shortcuts import render
 
 # Create your views here.
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse
 from mongoengine import *
 from django.shortcuts import render, redirect
@@ -20,6 +20,8 @@ from QoSmonitor.models import topology
 from DynamicQoS.settings import MEDIA_ROOT
 
 from QoSmonitor.utils import check_if_exists
+
+from QoSmonitor.tasks import *
 
 
 @login_required(login_url='/login/')
@@ -132,11 +134,11 @@ def save_json_topology(request,topo_id):
 
     return HttpResponseRedirect(reverse('Topologies', kwargs={}))
 
-def flow_table_view(request,topo_id):
-    topology_ins=topology.objects(topology_name=topo_id)[0]
+def flow_table_view(request):
 
 
-    ctx = {'topo_name':topology_ins.topology_name}
+
+    ctx = {}
     return render(request,'flowtable.html',context = ctx)
 
 
@@ -149,3 +151,10 @@ def charts_view(request,topo_id):
 
     ctx = {}
     return render(request,'ChartsPage.html',context = ctx)
+
+
+def test_background(request):
+    topo = topology.objects()[0]
+    sniff_back(topo.topology_name)
+
+    return HttpResponse("Started")

@@ -2,25 +2,17 @@
 
 from background_task import background
 
+from .utils import *
+from .models import *
 
 
 @background(queue='q1')
-def notify_user():
-    # lookup user by id and send them a message
-    # user = User.objects.all()
-    # print('testtesttest')
-    while True:
-        print('.......')
+def sniff_back(phb_behavior):
+    topo=topology.objects(topology_name=phb_behavior)[0]
+    Sniff_Netflow(topo)
+
     return None
 
 
-@background(queue='q2')
-def notify():
-    # lookup user by id and send them a message
-    # user = User.objects.all()
-    # print('testtesttest')
-    while True:
-        print('blabla')
-    return None
 
 
