@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'background_task',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -55,9 +56,13 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.BrokenLinkEmailsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
 
 ROOT_URLCONF = 'DynamicQoS.urls'
+CORS_ORIGIN_ALLOW_ALL = True
 
 BACKGROUND_TASK_RUN_ASYNC = True
 
@@ -91,7 +96,7 @@ DATABASES = {
 }
 
 
-connect('testdb', host='127.0.0.1',port = 27017)
+connect('monitordb', host='127.0.0.1',port = 27017)
 
 
 # Password validation
@@ -112,6 +117,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# REST_FRAMEWORK = {
+#     'DEFAULT_PERMISSION_CLASSES': [
+#         'rest_framework.permissions.IsAuthenticated',
+#     ]
+# }
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/
