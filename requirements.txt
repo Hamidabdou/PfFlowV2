@@ -12,3 +12,4 @@ django-background-tasks
 djangorestframework
 markdown
 django-filter
+django-cors-headers

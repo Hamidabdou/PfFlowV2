@@ -130,4 +130,22 @@ def save_json_topology(request,topo_id):
         #         print(address+' '+location+' '+username+' '+password+' '+secret)
         #
 
-    return HttpResponseRedirect(reverse('Home', kwargs={}))
+    return HttpResponseRedirect(reverse('Topologies', kwargs={}))
+
+def flow_table_view(request,topo_id):
+    topology_ins=topology.objects(topology_name=topo_id)[0]
+
+
+    ctx = {'topo_name':topology_ins.topology_name}
+    return render(request,'flowtable.html',context = ctx)
+
+
+def charts_test(request,topo_id):
+
+    ctx = {}
+    return render(request,'charts.html',context = ctx)
+
+def charts_view(request,topo_id):
+
+    ctx = {}
+    return render(request,'ChartsPage.html',context = ctx)
