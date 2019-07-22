@@ -4,7 +4,6 @@ numpy
 netmiko
 jinja2
 netaddr
-json
 napalm
 ntplib
 django-rest-framework-mongoengine
