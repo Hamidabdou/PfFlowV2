@@ -14,4 +14,6 @@ cat /create_superuser.py | ./manage.py shell
 
 # run the server
 echo "Starting the server..."
-python manage.py runserver
+python manage.py runserver &
+echo "Starting the background tasks..."
+python manage.py process_tasks
