@@ -61,5 +61,6 @@ class start_monitoringSerializer(sr.Serializer):
 	topology = sr.CharField()
 
 
-
+class preapare_envSerializer(sr.Serializer):
+	topology = sr.CharField()
 

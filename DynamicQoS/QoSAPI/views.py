@@ -81,6 +81,26 @@ class TopologyByName(APIView):
 
                 return Response(result)
 
+class preapare_environment(generics.CreateAPIView):
+	serializer_class = preapare_envSerializer
+	queryset = "Nothing to do here it is out of models"
+	def get(self,request):
+		return Response("Specify the topology to prepare the envirement")
+
+	def create(self,serializer):
+		topology_name = self.request.data.get("topology")
+		try:
+			topology_exist = topology.objects.get(topology_name = topology_name)
+		except:
+			raise sr.ValidationError("Topology '{}' doesn't exist".format(topology_name))
+		try :
+			topology_exist.configure_ntp()
+			configure_ntp.configure_scp()
+			configure_ntp.configure_snmp()
+		except Exception as e:
+			raise sr.ValidationError("ERROR : {}".format(e))
+
+
 class discover_network(generics.CreateAPIView):
 	serializer_class =  discover_networkSerializer
 	queryset = "Nothing to do here it is out of models"
