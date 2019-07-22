@@ -17,13 +17,15 @@
                     {% for topo in topologies %}
                     <li class="list-group-item">
                             <div>
-                                <i class="fa fa-connectdevelop">
+                                <i class="fa fa-li">
                                 </i> <h5 style="display: inline-block">{{ topo.topology_name }}</h5>
 
                                 <span class="pull-right">
-                                    <a class="mr-3 d-inline-block pull-right" href="#" ><i class="fa fa-remove"></i></a>
+                                    <a class="mr-3 d-inline-block pull-right" data-id="{{ topo.id }}" href="#" ><i class="fa fa-trash" data-toggle="modal" data-target="#kt_modal_3" ></i></a>
                                     <a class="mr-3 d-inline-block pull-right" href="#" ><i class="fa fa-magic"></i></a>
                                     <a class="mr-3 d-inline-block pull-right" href="{% url 'drag_drop' topo.id %}" ><i class="fa fa-sitemap"></i></a>
+
+
                                 </span>
                             </div>
                     </li>
@@ -68,6 +70,25 @@
     </div>
 
     </div>
+    <div class="modal fade" id="kt_modal_3" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" style="display: none;" aria-hidden="true">
+								<div class="modal-dialog" role="document">
+									<div class="modal-content">
+										<div class="modal-header">
+											<h5 class="modal-title" id="exampleModalLabel">Confirm Deletion</h5>
+											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+											</button>
+										</div>
+										<div class="modal-body">
+                                            <p>Are you sure you want to delete the topology ?</p>
+
+											</div>
+										<div class="modal-footer">
+											<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+											<button type="button" class="btn btn-danger">Delete</button>
+										</div>
+									</div>
+								</div>
+							</div>
 
 
 {%endblock%}

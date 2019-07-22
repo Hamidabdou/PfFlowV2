@@ -107,4 +107,76 @@ def output_references_flow(flow, flow_fields):
     return json.dumps(flow_dct, indent=4)
 
 
+def ouput_topology_id(topology):
+    topology_dct = json.loads(topology.to_json(indent=2))
+
+    topology_dct['id']=topology_dct['_id']['$oid']
+    del (topology_dct['_id'])
+    del (topology_dct['devices'])
+    del (topology_dct['links'])
+    del (topology_dct['topology_desc'])
+
+    return json.dumps(topology_dct, indent=4)
+
+
+def ouput_device_id(device):
+    device_dct = json.loads(device.to_json(indent=2))
+    device_dct['id'] = device_dct['_id']['$oid']
+    del (device_dct['_id'])
+    del (device_dct['interfaces'])
+    del (device_dct['management'])
+    del (device_dct['is_responder'])
+
+
+    return json.dumps(device_dct, indent=4)
+
+def ouput_interface_id(interface):
+    interface_dct = json.loads(interface.to_json(indent=2))
+    interface_dct['id'] = interface_dct['_id']['$oid']
+    del (interface_dct['_id'])
+    del (interface_dct['interface_index'])
+    del (interface_dct['interface_address'])
+    del (interface_dct['interface_speed'])
+    del (interface_dct['interface_prefixlen'])
+    del (interface_dct['ingress'])
+
+
+
+    return json.dumps(interface_dct, indent=4)
+
+def output_flow_table_print(nt_field, ip_sla_i):
+        rslt = []
+        rslt.append(nt_field.flow.flow_id)
+        rslt.append(nt_field.device.hostname)
+        rslt.append(nt_field.input_int.interface_name)
+        rslt.append(nt_field.output_int.interface_name)
+        rslt.append(get_application_by_id(nt_field.flow.application_ID))
+        rslt.append(nt_field.flow.ipv4_src_addr)
+        rslt.append(nt_field.flow.transport_src_port)
+        rslt.append(nt_field.flow.ipv4_dst_addr)
+        rslt.append(nt_field.flow.transport_dst_port)
+        rslt.append(nt_field.flow.type_of_service)
+        rslt.append(nt_field.flow.ipv4_protocol)
+        rslt.append(nt_field.counter_bytes)
+        rslt.append(nt_field.counter_pkts)
+        rslt.append(nt_field.bandwidth)
+
+        try:
+            rslt.append(ip_sla_i.avg_delay)
+        except:
+            rslt.append('Not Available')
+        try:
+            rslt.append(ip_sla_i.avg_jitter)
+        except:
+            rslt.append('Not Available')
+        try:
+            rslt.append(ip_sla_i.packet_loss)
+        except:
+            rslt.append('Not Available')
+
+        return json.dumps(rslt, indent=4)
+
+
+
+
 

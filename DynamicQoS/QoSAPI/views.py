@@ -1,6 +1,9 @@
+import datetime
 import json
 
 from django.shortcuts import render
+from rest_framework.decorators import permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from rest_framework.views import APIView
@@ -12,7 +15,7 @@ from QoSmonitor.models import *
 from napalm import get_network_driver
 from rest_framework import status
 from rest_framework.response import Response
-from .utils import output_references_topology, output_references_topology_brief
+from .utils import *
 from rest_framework import serializers as sr
 
 
@@ -102,3 +105,144 @@ class StatisticsTimed(APIView):
                 for topo in topologies:
                     result = json.loads(output_references_topology(topo))
                 return Response(result)
+
+class FlowTable(APIView):
+    def get(self, request):
+
+        if len(request.query_params) == 0:
+            return Response({'error': 'specify a correct query'})
+        else:
+
+            topo_name = request.query_params.get("topology")
+            # time = request.query_params.get("time")
+            input_topo=topology.objects(topology_name=topo_name)[0]
+            point = datetime.datetime.now() - datetime.timedelta(minutes=1.001)
+            fields = netflow_fields.objects(first_switched__lte=point, last_switched__gte=point)
+            fields_picked = []
+            print(len(fields))
+            for field in fields:
+                topo = topology.objects(devices__contains=field.device)
+                if input_topo == topo[0]:
+                    fields_picked.append(field)
+
+            print(fields_picked)
+            result_tuple=[]
+            for field in fields_picked:
+
+                related_ip_sla=ip_sla_info.objects(timestamp=field.collection_time,ip_sla_ref=field.flow.ip_sla_ref)
+                if len(related_ip_sla)!=0:
+                    result_tuple.append({'netflow_field':field,'sla_info':related_ip_sla[0]})
+                else:
+                    result_tuple.append({'netflow_field':field})
+
+            print(result_tuple)
+            result = {'data': []}
+            for entry in result_tuple:
+                if 'sla_info' in entry:
+                    result['data'].append(json.loads(output_flow_table_print(entry['netflow_field'], entry['sla_info'])))
+                else:
+                    result['data'].append(json.loads(output_flow_table_print(entry['netflow_field'], None)))
+
+            return Response(result)
+
+
+class FlowTableTwoRates(APIView):
+    def get(self, request):
+
+        if len(request.query_params) == 0:
+            return Response({'error': 'specify a correct query'})
+        else:
+
+            topo_name = request.query_params.get("topology")
+            time_start = request.query_params.get("time_start")
+            time_start=datetime.datetime.strptime(time_start,"%Y-%m-%d %H:%M:%S")
+            time_end = request.query_params.get("time_end")
+            time_end = datetime.datetime.strptime(time_end, "%Y-%m-%d %H:%M:%S")
+            input_topo=topology.objects(topology_name=topo_name)[0]
+            print(time_start)
+            print(time_end)
+            fields = netflow_fields.objects(first_switched__gte=time_start, last_switched__lte=time_end)
+            fields_picked = []
+            print(len(fields))
+            for field in fields:
+                topo = topology.objects(devices__contains=field.device)
+                if input_topo == topo[0]:
+                    fields_picked.append(field)
+
+            print(fields_picked)
+            result_tuple=[]
+            for field in fields_picked:
+
+                related_ip_sla=ip_sla_info.objects(timestamp=field.collection_time,ip_sla_ref=field.flow.ip_sla_ref)
+                if len(related_ip_sla)!=0:
+                    result_tuple.append({'netflow_field':field,'sla_info':related_ip_sla[0]})
+                else:
+                    result_tuple.append({'netflow_field':field})
+
+            print(result_tuple)
+            result = {'data': []}
+            for entry in result_tuple:
+                if 'sla_info' in entry:
+                    result['data'].append(json.loads(output_flow_table_print(entry['netflow_field'], entry['sla_info'])))
+                else:
+                    result['data'].append(json.loads(output_flow_table_print(entry['netflow_field'], None)))
+
+            return Response(result)
+
+
+
+class ListTopologiesBrief(APIView):
+
+    def get(self, request):
+
+        topologies=topology.objects()
+
+        result = [
+            json.loads(ouput_topology_id(topo)) for topo in topologies
+        ]
+
+        return Response(result)
+
+
+
+class ListDevicesBrief(APIView):
+    def get(self, request):
+
+        topology_id = request.query_params.get("id")
+        print(topology_id)
+        try:
+            tp=topology.objects.get(id=topology_id)
+        except:
+            pass
+        devices_list=tp.devices
+
+        result = [
+            json.loads(ouput_device_id(dv)) for dv in devices_list
+        ]
+
+        return Response(result)
+
+
+class ListInterfacesBrief(APIView):
+    def get(self, request):
+
+        device_id = request.query_params.get("id")
+        try:
+            dv=device.objects.get(id=device_id)
+        except:
+            pass
+        interface_list=dv.interfaces
+
+        result = [
+            json.loads(ouput_interface_id(intf)) for intf in interface_list
+        ]
+
+        return Response(result)
+
+
+
+
+
+
+
+
