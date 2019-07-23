@@ -145,6 +145,7 @@ def ouput_interface_id(interface):
     del (interface_dct['interface_prefixlen'])
     del (interface_dct['ingress'])
 
+
     return json.dumps(interface_dct, indent=4)
 
 
@@ -254,4 +255,4 @@ def get_flow_statistics(topo_name, flow_id, point):
         result["labels"] = {labels}
         result["bandwidth"] = {bandwidths}
 
-    return json.dumps(result, indent=4)
+     return json.dumps(result, indent=4)

@@ -111,6 +111,7 @@ def dbcollect(phb_behavior:topology,pkt):
 
 
 def Sniff_Netflow(phb_behavior):
+        print("test")
         sniff(session = NetflowSession , filter = "dst port 2055", prn = partial(dbcollect,phb_behavior))
 
 

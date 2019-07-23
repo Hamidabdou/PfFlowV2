@@ -14,5 +14,9 @@ urlpatterns = [
     path('interfacesbrief',ListInterfacesBrief.as_view(), name = "interfaces"),
     path('flowtable',FlowTable.as_view(), name = "flowtable"),
     path('flowtabletworates', FlowTableTwoRates.as_view(), name="flowtabletworates"),
+    path('current-flows', FlowsInterface.as_view(), name="currentflows"),
+    path('flow-charts', FlowCharts.as_view(), name="flow-charts"),
+
+
 ]
 app_name = 'APIv1'

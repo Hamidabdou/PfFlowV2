@@ -6,7 +6,7 @@ from django.shortcuts import render
 
 # Create your views here.
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse
 from mongoengine import *
 from django.shortcuts import render, redirect
@@ -15,11 +15,13 @@ from QoSmonitor.models import *
 
 from QoSGui.forms import *
 
-from QoSmonitor.models import topology
+from QoSmonitor.models import *
 
 from DynamicQoS.settings import MEDIA_ROOT
 
 from QoSmonitor.utils import check_if_exists
+
+from QoSmonitor.tasks import *
 
 
 @login_required(login_url='/login/')
@@ -132,11 +134,11 @@ def save_json_topology(request,topo_id):
 
     return HttpResponseRedirect(reverse('Topologies', kwargs={}))
 
-def flow_table_view(request,topo_id):
-    topology_ins=topology.objects(topology_name=topo_id)[0]
+def flow_table_view(request):
 
 
-    ctx = {'topo_name':topology_ins.topology_name}
+
+    ctx = {}
     return render(request,'flowtable.html',context = ctx)
 
 
@@ -149,3 +151,52 @@ def charts_view(request,topo_id):
 
     ctx = {}
     return render(request,'ChartsPage.html',context = ctx)
+
+
+def test_background(request):
+    topo = topology.objects()[0]
+    sniff_back(topo.topology_name)
+
+    return HttpResponse("Started")
+
+def discover_topology(request,topo_name):
+    topo=topology.objects(topology_name=topo_name)
+    try:
+        topo.get_networks()
+        topo.create_links()
+
+    except Exception as e:
+        print(e)
+
+    return HttpResponseRedirect(reverse('Topologies', kwargs={}))
+
+def prepare_environement(request,topo_name):
+    topo = topology.objects(topology_name=topo_name)
+    try:
+        topo.configure_ntp()
+        topo.configure_scp()
+        topo.configure_snmp()
+    except Exception as e:
+        print(e)
+    return HttpResponseRedirect(reverse('Topologies', kwargs={}))
+
+
+def configure_monitoring(request,topo_name,collector):
+    topo = topology.objects(topology_name=topo_name)
+    for dv in topo.devices:
+        try:
+             dv.configure_netflow(destination=collector)
+        except Exception as e:
+             print(e)
+
+    return HttpResponseRedirect(reverse('Topologies', kwargs={}))
+
+def start_monitoring(request,topo_name):
+    sniff_back(topo_name)
+
+    return HttpResponseRedirect(reverse('Topologies', kwargs={}))
+
+
+
+
+
