@@ -93,7 +93,7 @@
 												</div>
 												<div class="kt-widget17__stats">
 													<div class="kt-widget17__items">
-														<div class="kt-widget17__item" onclick=&quot;location.href="{% url 'Topologies' %}"&quot; >
+														<div class="kt-widget17__item">
 															<span class="kt-widget17__icon">
 																<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1" class="kt-svg-icon kt-svg-icon--brand">
 																	<g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
@@ -103,11 +103,11 @@
 																	</g>
 																</svg> </span>
 															<span class="kt-widget17__subtitle">
-																Topologies
+																<a href="{% url 'Topologies' %}"> Topologies </a>
 															</span>
 
 														</div>
-														<div class="kt-widget17__item" onclick=&quot;location.href="{% url 'FlowTable' %}"&quot;>
+														<div class="kt-widget17__item" >
 															<span class="kt-widget17__icon">
 																<svg xmlns="http://www.w3.org/2000/svg"   xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1" class="kt-svg-icon kt-svg-icon--success">
     <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
@@ -119,7 +119,7 @@
     </g>
 </svg> </span>
 															<span class="kt-widget17__subtitle">
-																Flows Table
+                                                                <a href="{% url 'FlowTable' %}">Flows Table</a>
 															</span>
 
 														</div>
@@ -137,7 +137,7 @@
 												</g>
 											</svg> </span>
 															<span class="kt-widget17__subtitle">
-																Charts
+                                                                <a href="{% url 'Charts' %}">Charts</a>
 															</span>
 
 														</div>

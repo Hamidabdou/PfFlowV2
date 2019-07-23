@@ -83,30 +83,6 @@ class TopologyByName(APIView):
                 return Response(result)
 
 
-class StatisticsTimed(APIView):
-    def get(self, request):
-
-        if len(request.query_params) == 0:
-            result = {'topologies': []}
-            return Response(result)
-        else:
-            topology_name = request.query_params.get("topology")
-            start_time = request.query_params.get("start_time")
-            end_time = request.query_params.get("end_time")
-            if topology_name == None:
-                return Response({'error': 'specify a correct query'})
-            topologies = topology.objects(topology_name=topology_name)
-            flows = topologie
-            if len(topologies) == 0:
-                return Response({'error': 'topology does not exists'})
-            else:
-
-                for topo in topologies:
-                    result = json.loads(output_references_topology(topo))
-
-                return Response(result)
-
-
 class preapare_environment(generics.CreateAPIView):
     serializer_class = preapare_envSerializer
     queryset = "Nothing to do here it is out of models"
@@ -341,3 +317,67 @@ class ListInterfacesBrief(APIView):
         ]
 
         return Response(result)
+
+
+class CurrentFlowsInterface(APIView):
+    def get(self, request):
+            result = {'topologies': []}
+            topologies = topology.objects()
+            for topo in topologies:
+                result['topologies'].append(json.loads(output_topology_level(topo)))
+            return Response(result)
+
+
+class FlowCharts(APIView):
+
+    def get(self,request):
+
+        flow_id = request.query_params.get("flow")
+        topology_name=request.query_params.get("topology")
+        point = request.query_params.get("points")
+        point=datetime.now()- timedelta(minutes=2)
+        flow_ins= flow.objects()[0]
+        result=json.loads(get_flow_statistics(topology_name, 'df54d54q324v2c1g53z45t4', point))
+        return Response(result)
+
+
+class FlowsInterface(APIView):
+    def get(self, request):
+
+        if len(request.query_params) == 0:
+            return Response({'error': 'specify a correct query'})
+        else:
+
+            topo_name = request.query_params.get("topology")
+            # time = request.query_params.get("time")
+            input_topo = topology.objects(topology_name=topo_name)[0]
+            point = datetime.now() - timedelta(minutes=1.001)
+            fields = netflow_fields.objects(first_switched__lte=point, last_switched__gte=point)
+            fields_picked = []
+            print(len(fields))
+            for field in fields:
+                topo = topology.objects(devices__contains=field.device_ref)
+                if input_topo == topo[0]:
+                    fields_picked.append(field)
+
+            print(fields_picked)
+            result_tuple = []
+            for field in fields_picked:
+
+                related_ip_sla = ip_sla_info.objects(timestamp=field.collection_time, ip_sla_ref=field.flow_ref.ip_sla_ref)
+                if len(related_ip_sla) != 0:
+                    result_tuple.append({'netflow_field': field, 'sla_info': related_ip_sla[0]})
+                else:
+                    result_tuple.append({'netflow_field': field})
+
+            print(result_tuple)
+            result = {'data': []}
+            for entry in result_tuple:
+                if 'sla_info' in entry:
+
+                    result['data'].append(json.loads(output_references_flow(entry['netflow_field'].flow_ref,[entry['netflow_field']])))
+                else:
+                    result['data'].append(json.loads(output_references_flow(entry['netflow_field'].flow_ref,[entry['netflow_field']])))
+
+            return Response(result)
+

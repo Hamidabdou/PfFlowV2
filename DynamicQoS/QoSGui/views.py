@@ -15,7 +15,7 @@ from QoSmonitor.models import *
 
 from QoSGui.forms import *
 
-from QoSmonitor.models import topology
+from QoSmonitor.models import *
 
 from DynamicQoS.settings import MEDIA_ROOT
 
@@ -158,3 +158,45 @@ def test_background(request):
     sniff_back(topo.topology_name)
 
     return HttpResponse("Started")
+
+def discover_topology(request,topo_name):
+    topo=topology.objects(topology_name=topo_name)
+    try:
+        topo.get_networks()
+        topo.create_links()
+
+    except Exception as e:
+        print(e)
+
+    return HttpResponseRedirect(reverse('Topologies', kwargs={}))
+
+def prepare_environement(request,topo_name):
+    topo = topology.objects(topology_name=topo_name)
+    try:
+        topo.configure_ntp()
+        topo.configure_scp()
+        topo.configure_snmp()
+    except Exception as e:
+        print(e)
+    return HttpResponseRedirect(reverse('Topologies', kwargs={}))
+
+
+def configure_monitoring(request,topo_name,collector):
+    topo = topology.objects(topology_name=topo_name)
+    for dv in topo.devices:
+        try:
+             dv.configure_netflow(destination=collector)
+        except Exception as e:
+             print(e)
+
+    return HttpResponseRedirect(reverse('Topologies', kwargs={}))
+
+def start_monitoring(request,topo_name):
+    sniff_back(topo_name)
+
+    return HttpResponseRedirect(reverse('Topologies', kwargs={}))
+
+
+
+
+
