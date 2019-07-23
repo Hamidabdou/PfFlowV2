@@ -23,6 +23,8 @@ from QoSmonitor.utils import check_if_exists
 
 from QoSmonitor.tasks import *
 
+from QoSmonitor.models import access
+
 
 @login_required(login_url='/login/')
 def home(request):
@@ -31,7 +33,6 @@ def home(request):
 
 
 def drag_drop(request,topo_id):
-    print(os.path.isfile(str(MEDIA_ROOT[0]) + "/topologies/" + str(topo_id) + ".json"))
     if os.path.isfile(str(MEDIA_ROOT[0]) + "/topologies/" + str(topo_id) + ".json"):
         with open(str(MEDIA_ROOT[0]) + "/topologies/" + str(topo_id) + ".json", 'r') as file:
             data = file.read().replace('\n', '')
@@ -96,41 +97,52 @@ def save_json_topology(request,topo_id):
 
         topology_ins=topology.objects.get(id=topo_id)
 
+        devices_list=[]
+        for device_str in data['nodeDataArray']:
+            """
+               getting nodes data
+            """
+            if not (device_str['category'] == 'cloud') and not (device_str['category']=='L3Switch'):
 
-        # for device in data['nodeDataArray']:
-        #     """
-        #        getting nodes data
-        #
-        #     """
-        #     if not device['category'] == 'cloud':
-        #
-        #         try:
-        #             location = device['Location']
-        #         except KeyError:
-        #             location = ''
-        #         try:
-        #             address = device['Address']
-        #         except KeyError:
-        #             address = ''
-        #
-        #         try:
-        #             username = device['Username']
-        #         except KeyError:
-        #             username = ''
-        #         try:
-        #             password = device['Password']
-        #         except KeyError:
-        #             password = ''
-        #         try:
-        #             secret = device['Secret']
-        #         except KeyError:
-        #             secret = ''
-        #
-        #         """
-        #         creating the devices
-        #         """
-        #         print(address+' '+location+' '+username+' '+password+' '+secret)
-        #
+                try:
+                    location = device_str['Location']
+                except KeyError:
+                    location = ''
+                try:
+                    address = device_str['Address']
+                except KeyError:
+                    address = ''
+
+                try:
+                    username = device_str['Username']
+                except KeyError:
+                    username = ''
+                try:
+                    password = device_str['Password']
+                except KeyError:
+                    password = ''
+                try:
+                    secret = device_str['Secret']
+                except KeyError:
+                    secret = ''
+
+                """
+                creating the devices
+                """
+                print(address+' '+location+' '+username+' '+password+' '+secret)
+                new_management=access(management_interface=address,username=username,password=password)
+                new_dv=device(management=new_management)
+                new_dv.get_fqdn()
+                new_dv.save()
+                devices_list.append(new_dv)
+
+        topology_ins.update(set__devices=devices_list)
+        topology_ins.get_networks()
+        topology_ins.create_links()
+
+
+
+
 
     return HttpResponseRedirect(reverse('Topologies', kwargs={}))
 
@@ -195,8 +207,3 @@ def start_monitoring(request,topo_name):
     sniff_back(topo_name)
 
     return HttpResponseRedirect(reverse('Topologies', kwargs={}))
-
-
-
-
-

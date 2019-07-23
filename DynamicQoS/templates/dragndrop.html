@@ -972,7 +972,60 @@
     <div style="opacity: 0.0">
         {{json.Text}}
     </div>
-    <button type="submit" class="btn btn-secondary btn-md">Create</button>
+    <button type="button" id="formsubmit" class="btn btn-primary" data-toggle="modal"
+                    data-target="#exampleModalCenter">
+                <i class="fas fa-search-plus"></i>
+                Discover Topology
+            </button>
+    <!-- Modal -->
+
+        <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog"
+             aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLongTitle"><strong> Confirmation</strong>
+                            </h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        </br>
+                        <img class="rounded mx-auto d-block" src="{% static 'img/confirm.png' %}">
+                        </br>
+                        <p class="text-center"><strong>Are you sure!! </strong>
+                            </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" onclick="myFunction()" class="btn btn-primary" data-toggle="modal"
+                                data-target="#showspinner">
+                            Yes
+                        </button>
+
+                        <script>
+                        function myFunction() {
+                          $('#exampleModalCenter').modal('hide');
+                        return false;
+}
+                        </script>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="showspinner" tabindex="-1" role="dialog"
+             aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <img class="rounded mx-auto d-block" src="{% static 'img/loadspinner.gif' %}">
+                    </div>
+                </div>
+            </div>
+        </div>
 </form>
 
 
