@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime,timedelta
 import json
 from netaddr import * 
 from django.shortcuts import render
@@ -16,7 +16,9 @@ from napalm import get_network_driver
 from rest_framework import status
 from rest_framework.response import Response
 from .utils import *
+from QoSmonitor.tasks import * 
 from rest_framework import serializers as sr
+
 
 
 class AddTopology(generics.CreateAPIView):
@@ -46,12 +48,12 @@ class AddDevice(generics.CreateAPIView):
 		if len(topology_qs) == 0:
 			raise sr.ValidationError("topology doesn't exists")
 		else :
-			device = driver(addr,user,passwd,timeout = 5)
+			device_connection = driver(addr,user,passwd,timeout = 5)
 			fqdn = None
 			device_list = topology_qs[0].devices
-			device.open()
-			fqdn = device.get_facts()['fqdn']
-			device.close()
+			device_connection.open()
+			fqdn = device_connection.get_facts()['fqdn']
+			device_connection.close()
 			device_serializer = serializer.save(hostname = fqdn)
 			new_device = device.objects.get(id = device_serializer.id)
 			other_list = [new_device]
@@ -122,10 +124,11 @@ class preapare_environment(generics.CreateAPIView):
 			raise sr.ValidationError("Topology '{}' doesn't exist".format(topology_name))
 		try :
 			topology_exist.configure_ntp()
-			configure_ntp.configure_scp()
-			configure_ntp.configure_snmp()
+			topology_exist.configure_scp()
+			topology_exist.configure_snmp()
 		except Exception as e:
 			raise sr.ValidationError("ERROR : {}".format(e))
+		return Response("the environment is preapared successfully")
 
 
 class discover_network(generics.CreateAPIView):
@@ -146,7 +149,8 @@ class discover_network(generics.CreateAPIView):
 			raise sr.ValidationError("ERROR : {}".format(e))
 
 		try:
-			topology_exist.create_links()
+			topo2 = topology.objects.get(topology_name = topology_name )
+			topo2.create_links()
 		except Exception as e:
 			raise sr.ValidationError("ERROR : {}".format(e))
 
@@ -203,15 +207,21 @@ class start_monitoring(generics.CreateAPIView):
 		except:
 			raise sr.ValidationError("Topology '{}' doesn't exist".format(topology_name))
 
-		if topology_exist.monitoring_activated == True:
-			raise sr.ValidationError("Topology '{}' is already monitored".format(topology_name))
+		#if topology_exist.monitoring_activated == True:
+		#	raise sr.ValidationError("Topology '{}' is already monitored".format(topology_name))
 
 
-		# TODO : Block here to start the monitoring
+		sniff_back(topology_name)
+		print("Are you sure ! ")
 
 		topology_exist.monitoring_activated = True
 		topology_exist.update(set__monitoring_activated = True)
 		return Response("Monitoring is starting successfully")
+
+"""class stop_monitoring(generics.CreateAPIView):
+	serializer_class =  start_monitoringSerializer
+	queryset = "Nothing to do here it is out of models"
+"""
 
 class FlowTable(APIView):
     def get(self, request):
@@ -223,12 +233,13 @@ class FlowTable(APIView):
             topo_name = request.query_params.get("topology")
             # time = request.query_params.get("time")
             input_topo=topology.objects(topology_name=topo_name)[0]
-            point = datetime.datetime.now() - datetime.timedelta(minutes=1.001)
+            point = datetime.now() - timedelta(minutes=1.001)
+            print(point)
             fields = netflow_fields.objects(first_switched__lte=point, last_switched__gte=point)
             fields_picked = []
             print(len(fields))
             for field in fields:
-                topo = topology.objects(devices__contains=field.device)
+                topo = topology.objects(devices__contains=field.device_ref)
                 if input_topo == topo[0]:
                     fields_picked.append(field)
 
@@ -236,7 +247,7 @@ class FlowTable(APIView):
             result_tuple=[]
             for field in fields_picked:
 
-                related_ip_sla=ip_sla_info.objects(timestamp=field.collection_time,ip_sla_ref=field.flow.ip_sla_ref)
+                related_ip_sla=ip_sla_info.objects(timestamp=field.collection_time,ip_sla_ref=field.flow_ref.ip_sla_ref)
                 if len(related_ip_sla)!=0:
                     result_tuple.append({'netflow_field':field,'sla_info':related_ip_sla[0]})
                 else:
@@ -262,9 +273,9 @@ class FlowTableTwoRates(APIView):
 
             topo_name = request.query_params.get("topology")
             time_start = request.query_params.get("time_start")
-            time_start=datetime.datetime.strptime(time_start,"%Y-%m-%d %H:%M:%S")
+            time_start= datetime.strptime(time_start,"%Y-%m-%d %H:%M:%S")
             time_end = request.query_params.get("time_end")
-            time_end = datetime.datetime.strptime(time_end, "%Y-%m-%d %H:%M:%S")
+            time_end = datetime.strptime(time_end, "%Y-%m-%d %H:%M:%S")
             input_topo=topology.objects(topology_name=topo_name)[0]
             print(time_start)
             print(time_end)
@@ -272,7 +283,7 @@ class FlowTableTwoRates(APIView):
             fields_picked = []
             print(len(fields))
             for field in fields:
-                topo = topology.objects(devices__contains=field.device)
+                topo = topology.objects(devices__contains=field.device_ref)
                 if input_topo == topo[0]:
                     fields_picked.append(field)
 
@@ -280,7 +291,7 @@ class FlowTableTwoRates(APIView):
             result_tuple=[]
             for field in fields_picked:
 
-                related_ip_sla=ip_sla_info.objects(timestamp=field.collection_time,ip_sla_ref=field.flow.ip_sla_ref)
+                related_ip_sla=ip_sla_info.objects(timestamp=field.collection_time,ip_sla_ref=field.flow_ref.ip_sla_ref)
                 if len(related_ip_sla)!=0:
                     result_tuple.append({'netflow_field':field,'sla_info':related_ip_sla[0]})
                 else:

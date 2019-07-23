@@ -15,5 +15,4 @@ urlpatterns = [
     path('flowtable',FlowTable.as_view(), name = "flowtable"),
     path('flowtabletworates', FlowTableTwoRates.as_view(), name="flowtabletworates"),
 ]
-
 app_name = 'APIv1'
