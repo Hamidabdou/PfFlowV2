@@ -8,6 +8,7 @@ import numpy as np
 from netmiko import ConnectHandler 
 import os 
 from datetime import datetime
+from DynamicQoS.settings import MEDIA_ROOT
 
 class interface(DynamicDocument):
         interface_name = StringField(required=True)
@@ -19,8 +20,8 @@ class interface(DynamicDocument):
 
         def configure_netflow(self):
                 output = ""
-                env = Environment(loader = FileSystemLoader(".")) #TODO : make the directory stick to netconf_file
-                template = env.get_template("netflow_int_config.j2")
+                ENV = Environment(loader=FileSystemLoader(str(MEDIA_ROOT[0]) + "/monitoring_conf/"))
+                template = ENV.get_template("netflow_interface_config.j2")
                 output = template.render(interface_name = self.interface_name)
                 return output
 
@@ -31,7 +32,7 @@ class access(DynamicEmbeddedDocument):
         password = StringField(required=True)
 
 class device(DynamicDocument):
-        hostname = StringField(required = False)
+        hostname = StringField(required = False, unique = True)
         management = EmbeddedDocumentField(access)
         interfaces = ListField(ReferenceField(interface))
         is_responder = BooleanField(default = False)
@@ -66,9 +67,8 @@ class device(DynamicDocument):
         def configure_netflow(self,destination):
                 global_output = ""
                 interfaces_output = ""
-                env = Environment(loader=FileSystemLoader("."))#TODO : make the directory stick to netconf_file
-                template = env.get_template("global_netflow_config.j2")
-                print(self.management.management_interface)
+                ENV = Environment(loader=FileSystemLoader(str(MEDIA_ROOT[0]) + "/monitoring_conf/"))
+                template = ENV.get_template("global_netflow_config.j2")
                 global_output = template.render(destination = destination,source = self.management.management_interface)
                 for interface in self.interfaces : 
                         interfaces_output += interface.configure_netflow()
@@ -93,8 +93,8 @@ class device(DynamicDocument):
 
 
         def configure_ip_sla(self,operation,dst_address,TOS):
-                env = Environment(loader=FileSystemLoader("."))
-                template = env.get_template("ip_sla.j2")
+                ENV = Environment(loader=FileSystemLoader(str(MEDIA_ROOT[0]) + "/monitoring_conf/"))
+                template = ENV.get_template("ip_sla.j2")
                 output = template.render(operation = operation,dst_address = dst_address, TOS = TOS)
                 connection = self.connect()
                 try:
@@ -110,9 +110,10 @@ class device(DynamicDocument):
 
 
         def configure_ip_sla_responder(self):
+                connection = self.connect()
                 try:
-                    self.connect().load_merge_candidate(config ='ip sla responder')
-                    self.connect().commit_config()
+                    connection.load_merge_candidate(config ='ip sla responder')
+                    connection.commit_config()
                     connection.close()
                     return True
                 except Exception as e:
@@ -123,14 +124,15 @@ class device(DynamicDocument):
         def pull_ip_sla_stats(self,operation):
                 jitter_cmd = "show ip sla statistics {} | include Destination to Source Jitter".format(str(operation))
                 delay_cmd = "show ip sla statistics {} | include Destination to Source Latency".format(str(operation))
-                #packet_loss_ratio = "show ip sla statistics {} | include Destination to Source Latency".format(str(operation)) # TODO: get the packet loss ratio
-                config = [jitter_cmd,delay_cmd]
+                packet_loss_ratio = "show ip sla statistics {} | include Loss Source to Destination".format(str(operation)) # TODO: get the packet loss ratio
+                config = [jitter_cmd,delay_cmd,packet_loss_ratio]
                 connection = self.connect()
                 result = connection.cli(config)
                 jitter = int(re.findall("\d+",result[jitter_cmd])[1])
                 delay = int(re.findall("\d+",result[delay_cmd])[1])
+                packet_loss = int(re.findall("\d+",result[packet_loss_ratio])[0])
                 connection.close()
-                return jitter, delay
+                return jitter, delay , packet_loss
 
         def get_cdp_neighbors(self):
                 connection = self.connect()
@@ -189,7 +191,7 @@ def valid_cover(graph, cover):
                     num_edge[j] += 1
     return valid, num_edge
 class topology(DynamicDocument):
-        topology_name = StringField(required=True)
+        topology_name = StringField(required=True, unique = True)
         topology_desc = StringField(required=False)
         devices = ListField(ReferenceField(device))
         links = ListField(ReferenceField(link))
@@ -237,6 +239,12 @@ class topology(DynamicDocument):
                         if device_cursor.hostname == "R1.cisco":
                             dst_device = device_cursor
 
+                if src_device == None:
+                    for device_cursor in self.devices:
+                        if device_cursor.hostname == "Data.cisco":
+                            src_device = device_cursor
+
+
                 return src_device,dst_device
 
 
@@ -244,13 +252,11 @@ class topology(DynamicDocument):
                 for device in self.devices:
                         connection = device.connect()
                         ports = connection.get_interfaces_ip()
-                        print(ports)
                         interfaces_index = device.get_interfaces_index()
                         speeds = connection.get_interfaces()
                         interfaces_list = []
                         for port in ports:
                                 port_speed = speeds[port]["speed"]
-                                print(port_speed)
                                 for ip in ports[port]["ipv4"]:
                                         cidr = ports[port]["ipv4"][ip]["prefix_length"]
                                         interface_ins = interface(interface_name = port , interface_index = interfaces_index[port] ,interface_address = ip , interface_prefixlen = int(cidr),interface_speed = port_speed)
@@ -270,6 +276,11 @@ class topology(DynamicDocument):
                                 interfacef = None 
                                 devicet = None  
                                 interfacet = None 
+                                interface_list = devicef.interfaces
+                                for inter in interface_list:
+
+                                    print(inter.interface_name)
+
 
                                 for interface in devicef.interfaces:
                                         if (interface.interface_name == neighbor["interfaces"]["from"]):
@@ -285,11 +296,10 @@ class topology(DynamicDocument):
                                                     interfacet = interface
                                 except Exception as e :
                                     print("Unable to connect device in phb behavior or cisco device from another entity")
-
                                 if(len(self.links) == 0):
                                     link_ins = link(from_device = devicef , from_interface = interfacef , to_device = devicet,to_interface = interfacet)
-                                    link_ins.save()
                                     link_ins.calculate_speed()
+                                    link_ins.save()
                                     self.links.append(link_ins)
 
                                 link_ins = link(from_device = devicef , from_interface = interfacef , to_device = devicet,to_interface = interfacet)
@@ -299,8 +309,8 @@ class topology(DynamicDocument):
                                                 exist = True 
                                                 break 
                                 if not(exist):
-                                        link_ins.save()
                                         link_ins.calculate_speed()
+                                        link_ins.save()
                                         self.links.append(link_ins)
                         self.update(set__links=self.links)
 
@@ -308,8 +318,9 @@ class topology(DynamicDocument):
                 ntp_master = random.choice(self.devices)
                 ntp_master_connection = ntp_master.connect()
                 configured_time = datetime.now()
-                ntp_master_connection.cli(["clock set {}".format(configured_time.strftime("%H:%M:%S %d %B %Y"))])
-                ntp_master_connection.cli(["ntp master"])
+                print("Hellooo")
+                print(configured_time)
+                ntp_master_connection.cli(["clock set {}".format(configured_time.strftime("%H:%M:%S %d %B %Y")),"ntp master"])
                 ntp_master_connection.close()
                 for device in self.devices:
                         if (device != ntp_master):

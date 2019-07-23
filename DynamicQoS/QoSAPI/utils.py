@@ -145,6 +145,7 @@ def ouput_interface_id(interface):
     del (interface_dct['interface_prefixlen'])
     del (interface_dct['ingress'])
 
+
     return json.dumps(interface_dct, indent=4)
 
 
@@ -153,7 +154,10 @@ def output_flow_table_print(nt_field, ip_sla_i):
     rslt.append(nt_field.flow_ref.flow_id)
     rslt.append(nt_field.device_ref.hostname)
     rslt.append(nt_field.input_int.interface_name)
-    rslt.append(nt_field.output_int.interface_name)
+    try:
+        rslt.append(nt_field.output_int.interface_name)
+    except:
+        rslt.append("None")
     rslt.append(get_application_by_id(nt_field.flow_ref.application_ID))
     rslt.append(nt_field.flow_ref.ipv4_src_addr)
     rslt.append(nt_field.flow_ref.transport_src_port)
@@ -251,4 +255,4 @@ def get_flow_statistics(topo_name, flow_id, point):
         result["labels"] = {labels}
         result["bandwidth"] = {bandwidths}
 
-        return json.dumps(result, indent=4)
+     return json.dumps(result, indent=4)

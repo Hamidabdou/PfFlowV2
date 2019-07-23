@@ -1,0 +1,5 @@
+{% if "Loopback" not in interface_name %}
+interface {{interface_name}}
+ip flow monitor IQoSmonitor input 
+exit
+{% endif %}

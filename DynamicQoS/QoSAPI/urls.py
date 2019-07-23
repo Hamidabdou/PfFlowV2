@@ -19,5 +19,4 @@ urlpatterns = [
 
 
 ]
-
 app_name = 'APIv1'
