@@ -315,18 +315,19 @@ class topology(DynamicDocument):
                         self.update(set__links=self.links)
 
         def configure_ntp(self):
-                ntp_master = random.choice(self.devices)
-                ntp_master_connection = ntp_master.connect()
                 configured_time = datetime.now()
-                print("Hellooo")
-                print(configured_time)
-                ntp_master_connection.cli(["clock set {}".format(configured_time.strftime("%H:%M:%S %d %B %Y")),"ntp master"])
-                ntp_master_connection.close()
+                ntp_master = random.choice(self.devices)
+                ntp_master_connection = ntp_master.netmiko_connect()
+                ntp_master_connection.send_command("clock set {}".format(configured_time.strftime("%H:%M:%S %d %B %Y")))
+                ntp_master_connection.config_mode()
+                ntp_master_connection.send_command("ntp master")
+                ntp_master_connection.disconnect()
                 for device in self.devices:
                         if (device != ntp_master):
-                                client_connection = device.connect()
-                                client_connection.cli(["ntp server {}".format(ntp_master.management.management_address)])
-                                client_connection.close()
+                                client_connection = device.netmiko_connect()
+                                client_connection.config_mode()
+                                client_connection.send_command("ntp server {}".format(ntp_master.management.management_address))
+                                client_connection.disconnect()
 
         def configure_scp(self):
                 for device in self.devices:
@@ -348,6 +349,12 @@ class ip_sla(Document):
         type_of_service = IntField(required = True)
         sender_device_ref = ReferenceField(device)
         responder_device_ref = ReferenceField(device)
+
+class notification(Document):
+        
+        message = StringField(required = True)
+        timestamp = StringField(required = True)
+        
 
 class flow(DynamicDocument):
         flow_id = StringField(primary_key = True)

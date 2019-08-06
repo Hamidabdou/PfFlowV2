@@ -191,7 +191,6 @@ class start_monitoring(generics.CreateAPIView):
 
 
 		sniff_back(topology_name)
-		print("Are you sure ! ")
 
 		topology_exist.monitoring_activated = True
 		topology_exist.update(set__monitoring_activated = True)
@@ -213,6 +212,7 @@ class FlowTable(APIView):
             # time = request.query_params.get("time")
             input_topo = topology.objects(topology_name=topo_name)[0]
             point = datetime.now() - timedelta(minutes=1.001)
+            print(point)
             fields = netflow_fields.objects(first_switched__lte=point, last_switched__gte=point)
             fields_picked = []
             print(len(fields))
@@ -252,9 +252,9 @@ class FlowTableTwoRates(APIView):
 
             topo_name = request.query_params.get("topology")
             time_start = request.query_params.get("time_start")
-            time_start = datetime.datetime.strptime(time_start, "%Y-%m-%d %H:%M:%S")
+            time_start = datetime.strptime(time_start, "%Y-%m-%d %H:%M:%S")
             time_end = request.query_params.get("time_end")
-            time_end = datetime.datetime.strptime(time_end, "%Y-%m-%d %H:%M:%S")
+            time_end = datetime.strptime(time_end, "%Y-%m-%d %H:%M:%S")
             input_topo = topology.objects(topology_name=topo_name)[0]
             print(time_start)
             print(time_end)

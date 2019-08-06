@@ -28,6 +28,7 @@ from QoSmonitor.models import access
 
 @login_required(login_url='/login/')
 def home(request):
+    publish(topic="LimitBreach/J", payload="Jitter Limit breach", qos=1, retain=False)
     ctx = {}
     return render(request,'home.html',context=ctx)
 
@@ -98,6 +99,13 @@ def save_json_topology(request,topo_id):
         topology_ins=topology.objects.get(id=topo_id)
 
         devices_list=[]
+        
+        try:
+            topo.configure_ntp()
+            topo.configure_scp()
+            topo.configure_snmp()
+        except Exception as e:
+            print(e)
         for device_str in data['nodeDataArray']:
             """
                getting nodes data
@@ -138,6 +146,7 @@ def save_json_topology(request,topo_id):
 
         topology_ins.update(set__devices=devices_list)
         topology_ins.get_networks()
+        topology_ins=topology.objects(topo_id)
         topology_ins.create_links()
 
 

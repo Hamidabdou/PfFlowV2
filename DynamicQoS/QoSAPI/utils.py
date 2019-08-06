@@ -136,14 +136,19 @@ def ouput_device_id(device):
 
 
 def ouput_interface_id(interface):
-    interface_dct = json.loads(interface.to_json(indent=2))
-    interface_dct['id'] = interface_dct['_id']['$oid']
-    del (interface_dct['_id'])
-    del (interface_dct['interface_index'])
-    del (interface_dct['interface_address'])
-    del (interface_dct['interface_speed'])
-    del (interface_dct['interface_prefixlen'])
-    del (interface_dct['ingress'])
+    try:
+        topo=topology.objects(topology_name="Hello")[0]
+        topo.update(set__topology_desc="something")
+        interface_dct = json.loads(interface.to_json(indent=2))
+        interface_dct['id'] = interface_dct['_id']['$oid']
+        del (interface_dct['_id'])
+        del (interface_dct['interface_index'])
+        del (interface_dct['interface_address'])
+        del (interface_dct['interface_speed'])
+        del (interface_dct['interface_prefixlen'])
+        del (interface_dct['ingress'])
+    except Exception as e :
+        print(e) 
 
 
     return json.dumps(interface_dct, indent=4)
@@ -255,4 +260,4 @@ def get_flow_statistics(topo_name, flow_id, point):
         result["labels"] = {labels}
         result["bandwidth"] = {bandwidths}
 
-     return json.dumps(result, indent=4)
+    return json.dumps(result, indent=4)

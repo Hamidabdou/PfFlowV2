@@ -1,11 +1,56 @@
 from background_task import background
 from .utils import *
 from .models import *
+from datetime import datetime
+import time
+import paho.mqtt.client as mqtt
 
+server = "postman.cloudmqtt.com"
+port = 11494
+username = "qvjbfmpb"
+password = "x6lBEK-EESRM"
+my_client = mqtt.Client()
+
+
+def connect():
+    my_client.username_pw_set(username=username, password=password)
+    my_client.connect(host=server, port=port)
+
+def on_connect(client, userdata, flags, rc):
+    print("Connected with result code " + str(rc))
+    # subscription in on_connect means that the subscription will be renewed
+    # if we re-connect in case of loosing the connection
+    # client.subscribe("$SYS/#")
+
+
+def publish(topic, payload, qos, retain):
+    return my_client.publish(topic=topic, payload=payload, qos=qos, retain=retain)
+
+
+def on_publish(client, userdata, mid):
+    print("mid: " + str(mid))
 
 @background(queue='q1')
 def sniff_back(phb_behavior):
     topo=topology.objects(topology_name=phb_behavior)[0]
     print("Strting ... ")
     Sniff_Netflow(topo)
+    return None
+
+@background(queue='q2')
+def Initialize_mqtt_client():
+    my_client.on_connect = on_connect
+    my_client.on_publish = on_publish
+    connect()
+    time.sleep(5)
+    publish(topic="LimitBreach/J", payload="Jitter Limit breach", qos=1, retain=False)
+    
+    slainfo = ip_sla_info.objects(avg_jitter__lte = 5)
+
+    for sla in slainfo:
+    	publish(topic="LimitBreach/J", payload="Jitter Limit breach", qos=1, retain=False)
+    	
+    notification_ins=notification(message="Jitter Breach",timestampt=str(datetime.now()))
+    
+    my_client.loop_forever()
     return None
