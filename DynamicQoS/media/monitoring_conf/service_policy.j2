@@ -1,0 +1,8 @@
+{% for interface in interfaces %}
+interface {{ interface.interface_name }}
+{% if interface.ingress == True %}
+service-policy input {{ policy_in.name }}
+{% else %}
+service-policy output {{ interface.policy_out_ref.name }}
+{% endif %}
+{% endfor %}

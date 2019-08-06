@@ -1,0 +1,11 @@
+{% for class in classes %}
+class-map {{class.name}}
+{{class.match}}
+match access-group {{ class.acl_name }}
+{% endfor %}
+exit
+policy-map {{a.name}}
+{% for class in classes %}
+class {{class.name}}
+set dscp {{class.dscp_value}}
+{% endfor %}

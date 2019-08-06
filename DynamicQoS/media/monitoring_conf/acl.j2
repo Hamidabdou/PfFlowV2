@@ -1,28 +1,54 @@
-{% if classe.filter.time_range is not none %}
-time-range {{classe.filter.time_range.name}}
-periodic daily {{classe.filter.time_range.begin}} to {{classe.filter.time_range.end}}
-ip access-list extended {{classe.filter.name}}
-{% if classe.filter.source is not none and classe.filter.dest is not none %}
-permit ip {{classe.filter.source.address}} {{classe.filter.source.wild_card}} {{classe.filter.dest.address}} {{classe.filter.dest.wild_card}} time-range {{classe.filter.time-range.name}}
+ip access-list extended {{a.acl_name}}
+{% if a.port_number|length %}
+{% if a.time_range is not none %}
+{% if a.source is not none and a.destination is not none %}
+permit {{a.protocol_type}} {{source.ip}} {{source_wild_card}} {{destination.ip}} {{destination_wild_card}} time-range {{a.time_range}} eq {{ a.port_number }}
 
-{% elif classe.filter.source is not none %}
-permit ip {{classe.filter.source.address}} {{classe.filter.source.wild_card}} any time-range {{classe.filter.time_range.name}}
+{% elif a.source is not none %}
+permit {{a.protocol_type}} {{source}} {{source_wild_card}} any time-range {{a.time_range}} eq {{ a.port_number }}
 
-{% elif classe.filter.dest is not none %}
-permit ip any {{classe.filter.dest.address}} {{classe.filter.dest.wild_card}} time-range {{classe.filter.time_range.name}}
+{% elif a.destination is not none %}
+permit {{a.protocol_type}} any {{destination}} {{destination_wild_card}} time-range {{a.time_range}} eq {{ a.port_number }}
 {% else %}
-permit ip any any time-range {{classe.filter.time_range.name}}
+permit {{a.protocol_type}} any any time-range {{a.time_range}} eq {{ a.port_number }}
 {% endif %}
 {% else %}
-{% if classe.filter.source is not none and classe.filter.dest is not none %}
-permit ip {{classe.filter.source.address}} {{classe.filter.source.wild_card}} {{classe.filter.dest.address}} {{classe.filter.dest.wild_card}}
+{% if a.source is not none and a.destination is not none %}
+permit {{a.protocol_type}} {{source}} {{source_wild_card}} {{destination}} {{destination_wild_card}} eq {{ a.port_number }}
 
-{% elif classe.filter.source is not none %}
-permit ip {{classe.filter.source.address}} {{classe.filter.source.wild_card}} any
+{% elif a.source is not none %}
+permit {{a.protocol_type}} {{source}} {{source_wild_card}} any eq {{ a.port_number }}
 
-{% elif classe.filter.dest is not none %}
-permit ip any {{classe.filter.dest.address}} {{classe.filter.dest.wild_card}}
+{% elif a.destination is not none %}
+permit {{a.protocol_type}} any {{destination}} {{destination_wild_card}} eq {{ a.port_number }}
 {% else %}
-permit ip any any
+permit {{a.protocol_type}} any any eq {{ a.port_number }}
+{% endif %}
+{% endif %}
+{% else %}
+{% if a.time_range is not none %}
+{% if a.source is not none and a.destination is not none %}
+permit {{a.protocol_type}} {{source.ip}} {{source_wild_card}} {{destination.ip}} {{destination_wild_card}} time-range {{a.time_range}}
+
+{% elif a.source is not none %}
+permit {{a.protocol_type}} {{source}} {{source_wild_card}} any time-range {{a.time_range}}
+
+{% elif a.destination is not none %}
+permit {{a.protocol_type}} any {{destination}} {{destination_wild_card}} time-range {{a.time_range}}
+{% else %}
+permit {{a.protocol_type}} any any time-range {{a.time_range}}
+{% endif %}
+{% else %}
+{% if a.source is not none and a.destination is not none %}
+permit {{a.protocol_type}} {{source}} {{source_wild_card}} {{destination}} {{destination_wild_card}}
+
+{% elif a.source is not none %}
+permit {{a.protocol_type}} {{source}} {{source_wild_card}} any
+
+{% elif a.destination is not none %}
+permit {{a.protocol_type}} any {{destination}} {{destination_wild_card}}
+{% else %}
+permit {{a.protocol_type}} any any
+{% endif %}
 {% endif %}
 {% endif %}

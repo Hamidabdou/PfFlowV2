@@ -1,0 +1,25 @@
+{% for group in groups %}
+class-map {{group.name}}
+{% for app in classes %}
+{% if app.group == group %}
+match ip dscp {{app.dscp_value}}
+{% endif %}
+{% endfor %}
+
+{% endfor %}
+{#policy-map {{a.name}}#}
+{#{% for class in regroupement_classes %}#}
+{#class {{class.name}}#}
+{#{% for dscp in dscp_list %}#}
+{#{% if dscp.regroupement_class == class %}#}
+{#random-detect dscp  {{ dscp.dscp_value}} {{ dscp.drop_min}} {{ dscp.drop_max}} {{ dscp.denominator}}#}
+{#{% endif %}#}
+{#{% endfor %}#}
+{#bandwidth percent {{class.bandwidth}}#}
+{#police cir percent {{class.policing.cir}} pir {{class.policing.pir}}#}
+{#conform-action transmit#}
+{#exceed-action set-dscp-transmit {{class.policing.dscp_transmit}}#}
+{#violate-action drop#}
+{#random-detect dscp-based#}
+{#{% endfor %}#}
+
