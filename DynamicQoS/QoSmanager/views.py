@@ -1,5 +1,5 @@
 import json
-
+from DynamicQoS.settings import MEDIA_ROOT
 import requests
 from django.db.models import Q
 from django.http import HttpResponse
@@ -60,15 +60,11 @@ def index(request):
     BusinessType.objects.create(name="sub-category")
     BusinessType.objects.create(name="device-class")
     BusinessType.objects.create(name="media-type")
-    ss='application-group'
-    print(BusinessType.objects.get(name=ss))
-    with open("/home/djoudi/PycharmProjects/PfFlowV2/DynamicQoS/QoSmanager/nbar_application.json", 'r') as jsonfile:
+    with open(str(MEDIA_ROOT[0]) + "/monitoring_conf/nbar_application.json", 'r') as jsonfile:
         ap = json.load(jsonfile)
         for app in ap['applications']:
-            s = app['business_type']
             BusinessApp(name=app['name'], match=app['match'],
-                        business_type=BusinessType.objects.get(name=str(s))).save()
-    # police = PolicyIn.objects.get(id=1)
+                        business_type=BusinessType.objects.get(name=app['business_type'])).save()
     #
     # apps = Application.objects.filter(policy_in=police)
     # print(apps)
