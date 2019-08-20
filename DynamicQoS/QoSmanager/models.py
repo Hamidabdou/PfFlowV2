@@ -202,6 +202,13 @@ class Application(models.Model):
             return "{}".format(self.business_app.name)
         if self.custom_name is not None:
             return self.custom_name
+    @property
+    def category(self):
+        if self.business_app is not None:
+            return "{}".format(self.business_type.name)
+        if self.custom_name is not None:
+            return "custom"
+
 
     @property
     def match(self):

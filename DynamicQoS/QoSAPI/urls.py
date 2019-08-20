@@ -1,5 +1,13 @@
-from django.urls import path 
+from django.urls import path, include
+from rest_framework import routers
+
 from .views import *
+
+router = routers.DefaultRouter()
+router.register(r'users', UserViewSet)
+router.register(r'groups', GroupViewSet)
+router.register(r'applications', ApplicationViewSet)
+
 
 urlpatterns = [
     path('add-device',AddDevice.as_view(), name = "add-device"),
@@ -16,6 +24,7 @@ urlpatterns = [
     path('flowtabletworates', FlowTableTwoRates.as_view(), name="flowtabletworates"),
     path('current-flows', FlowsInterface.as_view(), name="currentflows"),
     path('flow-charts', FlowCharts.as_view(), name="flow-charts"),
+    path('', include(router.urls)),
 
 
 ]
