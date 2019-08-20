@@ -128,7 +128,7 @@
 											</button>
 										</div>
 										<div class="modal-body">
-										 <form role="form">
+										 <form id="form1" role="form">
                         <div class="form-group">
                             <label for="app_priority"><span class="glyphicon glyphicon-pencil"></span> Application Priority</label>
                             <input type="text" class="form-control" id="app_priority" name="app_priority" placeholder="Enter Song"
@@ -288,7 +288,7 @@ let id = 0;
        id = data['id'];
 
 });
-        $('form').on('submit', function (e) {
+        $('#form1').on('submit', function (e) {
     e.preventDefault();
     let $this = $(this);
     let type = $('#type').val();
