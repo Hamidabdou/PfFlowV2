@@ -127,7 +127,7 @@ def applications(request, police_id):
     app_form = AddApplicationForm(request.POST)
     custom_form = AddCustomApplicationForm(request.POST)
     ctx = {'app_form': app_form, 'police_id': police_id, 'apps': apps, 'custom_form': custom_form}
-    return render(request, 'devices.html', context=ctx)
+    return render(request, 'devices2.html', context=ctx)
 
 
 # def add_policy(request):

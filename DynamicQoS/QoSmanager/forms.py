@@ -39,5 +39,8 @@ class AddPolicyForm(forms.ModelForm):
 class AddCustomApplicationForm(forms.ModelForm):
     class Meta:
         model = Application
+        # widgets = {
+        #     'custom_name': forms.TextInput(attrs={'style': "color:#646c9a;"}),
+        # }
         fields = ('custom_name', 'protocol_type', 'port_number', 'begin_time', 'end_time', 'source', 'destination',
                   'app_priority', 'drop_prob')
