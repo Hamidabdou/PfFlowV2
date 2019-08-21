@@ -93,3 +93,13 @@ class ApplicationSerializer(sr.HyperlinkedModelSerializer):
     class Meta:
         model = Application
         fields = ['id','app_name','app_category','app_priority','drop_prob','mark']
+
+    def update(self, instance, validated_data):
+        print(validated_data)
+        instance.mark = validated_data.get('mark', instance.mark)
+        print(instance.app_priority)
+        instance.group= Group.objects.get(priority=instance.app_priority, policy_id=instance.group.policy)
+        print(instance.group.id)
+        instance.save()
+
+        return instance
