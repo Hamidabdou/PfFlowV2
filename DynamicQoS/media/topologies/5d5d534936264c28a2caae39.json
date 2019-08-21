@@ -1,0 +1,10 @@
+{ "class": "go.GraphLinksModel",
+  "copiesArrays": true,
+  "copiesArrayObjects": true,
+  "linkFromPortIdProperty": "fromPort",
+  "linkToPortIdProperty": "toPort",
+  "nodeDataArray": [ 
+{"category":"Router", "name":"", "leftArray":[], "rightArray":[], "topArray":[], "bottomArray":[], "Address":"192.168.1.1", "Username":"admin", "Password":"admin", "Secret":"admin", "key":-3, "loc":"-247 -26.050003051757812"},
+{"category":"L3Switch", "name":"", "leftArray":[], "rightArray":[], "topArray":[], "bottomArray":[], "Address":"192.168.1.2", "Username":"admin", "Password":"admin", "Secret":"admin", "key":-4, "loc":"38 -12.050003051757812"}
+ ],
+  "linkDataArray": []}
