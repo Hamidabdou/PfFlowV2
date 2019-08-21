@@ -155,7 +155,7 @@ class RegroupementClass(models.Model):
     bandwidth = models.CharField(max_length=45)
 
     def __str__(self):
-        return self.name
+        return self.group.name
 
 
 class Dscp(models.Model):
@@ -213,8 +213,8 @@ class Application(models.Model):
     group = models.ForeignKey(Group, on_delete=models.CASCADE, null=True)
     source = models.CharField(max_length=45)
     destination = models.CharField(max_length=45)
-    begin_time = models.CharField(max_length=45)
-    end_time = models.CharField(max_length=45)
+    begin_time = models.CharField(max_length=45, default="00:00")
+    end_time = models.CharField(max_length=45,default="24:00")
     protocol_type = models.CharField(max_length=45, choices=PROTOCOL, default=IP)
     port_number = models.CharField(max_length=45)
     custom_name = models.CharField(max_length=45)
@@ -270,8 +270,8 @@ class Application(models.Model):
 
     @property
     def time_range(self):
-        if self.begin_time is not None:
-            if self.end_time is not None:
+        if self.begin_time != '':
+            if self.end_time != '':
                 return "{}_time_range".format(self.name)
         else:
             return None
@@ -294,10 +294,11 @@ class Application(models.Model):
         source_wild_card = ''
         destination = ''
         destination_wild_card = ''
-        if self.source != '':
+        if self.source != 'any':
             source = IPNetwork(self.source)
+            print(source)
             source_wild_card = source.hostmask.ipv4()
-        if self.destination != '':
+        if self.destination != 'any':
             destination = IPNetwork(self.destination)
             destination_wild_card = destination.hostmask.ipv4()
 
