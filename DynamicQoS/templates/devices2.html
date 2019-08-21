@@ -98,15 +98,29 @@
 										</div>
 										<div class="modal-body">
 										 <form id="form1" role="form">
+
                         <div class="form-group">
-                            <label for="app_priority"><span class="glyphicon glyphicon-pencil"></span> Application Priority</label>
-                            <input type="text" class="form-control" id="app_priority" name="app_priority" placeholder="Enter Song"
-                                   required="true">
-                        </div>
-                        <div class="form-group">
-                            <label for="drop_prob"><span class="glyphicon glyphicon-file"></span> Drop Probability</label>
-                            <input type="text" class="form-control" id="drop_prob" name="drop_prob"
-                                   placeholder="Enter Singer" required="true">
+                            <label for="mark"><span class="glyphicon glyphicon-file"></span> Mark</label>
+                            <select name="mark" required="" id="mark">
+  <option value="" selected="">---------</option>
+
+  <option value="EF">EF</option>
+
+  <option value="AF43">AF43</option>
+
+  <option value="AF42">AF42</option>
+
+  <option value="AF41">AF41</option>
+
+  <option value="AF33">AF33</option>
+
+  <option value="AF32">AF32</option>
+
+  <option value="AF23">AF23</option>
+
+  <option value="AF21">AF21</option>
+
+</select>
                         </div>
                         <input type="hidden" id="type" name="type" value="">
                         <button type="submit" class="btn btn-success btn-block" ><span
@@ -225,7 +239,7 @@
         { "data": "app_category"},
         { "data": "app_priority"},
         { "data": "drop_prob"},
-        { "data": "app_dscp"},
+        { "data": "mark"},
          {
             "data": null,
             "defaultContent": '<button type="button" class="btn btn-sm btn-info" data-toggle="modal" data-target="#kt_modal_4" >Edit</button>' + '&nbsp;&nbsp' +
@@ -244,8 +258,7 @@ let id = 0;
     let class_name = $(this).attr('class');
     if (class_name == 'btn btn-sm btn-info') {
         // EDIT button
-        $('#app_priority').val(data['app_priority']);
-        $('#drop_prob').val(data['drop_prob']);
+        $('#mark').val(data['mark']);
         $('#type').val('edit');
         $('#modal_title').text('EDIT');
         $("#myModal").modal();

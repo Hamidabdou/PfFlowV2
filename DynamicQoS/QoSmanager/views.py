@@ -87,16 +87,27 @@ def add_application(request, police_id):
     # app_form = AddApplicationForm(request.POST)
     app_id = request.POST['business_app']
     type_id = request.POST['business_type']
+    mark=request.POST['mark']
+    if mark == '':
+        mark=BusinessApp.objects.get(id=app_id).recommended_dscp
+
+
     # groupe = Group.objects.get(priority=request.POST['mark'], policy_id=police_id)
 
-    Application(policy_in_id=PolicyIn.objects.get(policy_ref_id=police_id).id,
-                mark=request.POST['mark'],
-                business_type=BusinessType.objects.get(id=type_id),
-                business_app=BusinessApp.objects.get(id=app_id),
-                source=request.POST['source'],
-                destination=request.POST['destination'],
-                begin_time=request.POST['begin_time'],
-                end_time=request.POST['end_time'], ).save()
+    app = Application(policy_in_id=PolicyIn.objects.get(policy_ref_id=police_id).id,
+                      mark=mark,
+                      business_type=BusinessType.objects.get(id=type_id),
+                      business_app=BusinessApp.objects.get(id=app_id),
+                      source=request.POST['source'],
+                      destination=request.POST['destination'],
+                      begin_time=request.POST['begin_time'],
+                      end_time=request.POST['end_time'], )
+    if app.mark.startswith("A"):
+        app.group = Group.objects.get(priority=app.app_priority, policy_id=police_id)
+        app.save()
+    else:
+        app.save()
+
     return redirect('applications', police_id=police_id)
 
 

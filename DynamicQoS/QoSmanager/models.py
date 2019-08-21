@@ -254,15 +254,19 @@ class Application(models.Model):
     def app_priority(self):
         if self.mark.startswith("A"):
             return self.mark[2]
-        else:
+        elif self.business_app is not None:
             return self.business_app.priority
+        else:
+            return None
 
     @property
     def drop_prob(self):
         if self.mark.startswith("A"):
             return self.mark[3]
+        elif self.business_app is not None:
+            return self.business_app.drop
         else:
-            return self.business_app.priority
+            return None
 
     @property
     def time_range(self):
