@@ -89,7 +89,7 @@ class GroupSerializer(sr.HyperlinkedModelSerializer):
 class ApplicationSerializer(sr.HyperlinkedModelSerializer):
     app_name = sr.ReadOnlyField(source='name')
     app_category=sr.ReadOnlyField(source='category')
-    app_dscp=sr.ReadOnlyField(source='dscp_value')
+
     class Meta:
         model = Application
-        fields = ['id','app_name','app_category','app_priority','drop_prob','app_dscp']
+        fields = ['id','app_name','app_category','app_priority','drop_prob','mark']

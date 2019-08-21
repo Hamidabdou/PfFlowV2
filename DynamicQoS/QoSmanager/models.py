@@ -3,7 +3,9 @@ from DynamicQoS.settings import MEDIA_ROOT
 from django.db import models
 # Create your models here.
 from jinja2 import Environment, FileSystemLoader
+from napalm import get_network_driver
 from netaddr import *
+from netmiko import ConnectHandler
 
 
 class Topology(models.Model):
@@ -25,6 +27,19 @@ class BusinessApp(models.Model):
     name = models.CharField(max_length=45)
     business_type = models.ForeignKey(BusinessType, on_delete=models.CASCADE, null=True)
     match = models.CharField(max_length=45)
+    recommended_dscp = models.CharField(max_length=45)
+    delay_ref = models.CharField(max_length=45)
+    loss_ref = models.CharField(max_length=45)
+
+    @property
+    def priority(self):
+        if self.recommended_dscp.startswith("a"):
+            return self.recommended_dscp[2]
+
+    @property
+    def drop(self):
+        if self.recommended_dscp.startswith("a"):
+            return self.recommended_dscp[3]
 
     @property
     def __str__(self):
@@ -157,19 +172,29 @@ class Dscp(models.Model):
 
 
 class Application(models.Model):
-    Low, Med, High = "1", "2", "3"
-    DROP = (
-        (Low, "1"),
-        (Med, "2"),
-        (High, "3")
-    )
-    Low, Med, High, Priority = "1", "2", "3", "4"
-    PRIORITY = (
-        (Low, "1"),
-        (Med, "2"),
-        (High, "3"),
-        (Priority, "4")
-    )
+    # Low, Med, High = "1", "2", "3"
+    # DROP = (
+    #     (Low, "1"),
+    #     (Med, "2"),
+    #     (High, "3")
+    # )
+    # Low, Med, High, Priority = "1", "2", "3", "4"
+    # PRIORITY = (
+    #     (Low, "1"),
+    #     (Med, "2"),
+    #     (High, "3"),
+    #     (Priority, "4")
+    # )
+    EF, AF43, AF42, AF41, AF33, AF32, AF23, AF21 = "EF", "AF43", "AF42", "AF41", "AF33", "AF32", "AF23", "AF21"
+    DSCP = ((EF, "EF"),
+            (AF43, "AF43"),
+            (AF42, "AF42"),
+            (AF41, "AF41"),
+            (AF33, "AF33"),
+            (AF32, "AF32"),
+            (AF23, "AF23"),
+            (AF21, "AF21"))
+
     IP, TCP, UDP, TCP_UDP = "ip", "tcp", "udp", "tcp/udp"
     PROTOCOL = (
         (IP, "ip"),
@@ -181,8 +206,9 @@ class Application(models.Model):
     business_type = models.ForeignKey(BusinessType, on_delete=models.CASCADE, null=True)
     business_app = models.ForeignKey(BusinessApp, on_delete=models.CASCADE, null=True)
     policy_in = models.ForeignKey(PolicyIn, on_delete=models.CASCADE, null=True)
-    app_priority = models.CharField(max_length=20, choices=PRIORITY)
-    drop_prob = models.CharField(max_length=20, choices=DROP)
+    # app_priority = models.CharField(max_length=20, choices=PRIORITY)
+    # drop_prob = models.CharField(max_length=20, choices=DROP)
+    mark = models.CharField(max_length=20, choices=DSCP)
     dscp = models.ForeignKey(Dscp, on_delete=models.CASCADE, null=True)
     group = models.ForeignKey(Group, on_delete=models.CASCADE, null=True)
     source = models.CharField(max_length=45)
@@ -202,13 +228,13 @@ class Application(models.Model):
             return "{}".format(self.business_app.name)
         if self.custom_name is not None:
             return self.custom_name
+
     @property
     def category(self):
         if self.business_app is not None:
             return "{}".format(self.business_type.name)
         if self.custom_name is not None:
             return "custom"
-
 
     @property
     def match(self):
@@ -219,7 +245,28 @@ class Application(models.Model):
 
     @property
     def dscp_value(self):
-        return "AF{}{}".format(self.app_priority, self.drop_prob)
+        if self.mark != '':
+            return self.mark
+        else:
+            return self.business_app.recommended_dscp
+
+    @property
+    def app_priority(self):
+        if self.mark.startswith("A"):
+            return self.mark[2]
+        elif self.business_app is not None:
+            return self.business_app.priority
+        else:
+            return None
+
+    @property
+    def drop_prob(self):
+        if self.mark.startswith("A"):
+            return self.mark[3]
+        elif self.business_app is not None:
+            return self.business_app.drop
+        else:
+            return None
 
     @property
     def time_range(self):
@@ -281,6 +328,71 @@ class Device(models.Model):
 
     def __str__(self):
         return self.hostname
+
+    def netmiko_connect(self):
+        return ConnectHandler(device_type="cisco_ios", ip=self.management.management_address,
+                              username=self.management.username, password=self.management.password)
+
+    def connect(self):
+        driver = get_network_driver("ios")
+        device = None
+        try:
+            device = driver(self.management.management_address, self.management.username,
+                            self.management.password)
+            device.open()
+        except Exception as e:
+            print(e)
+        return device
+
+    def enable_nbar(self):
+        interfaces = Interface.objects.filter(device_ref=self)
+        env = Environment(loader=FileSystemLoader(str(MEDIA_ROOT[0]) + "/monitoring_conf/"))
+        output = env.get_template("protocol_discovery.j2")
+        config_file = output.render(interfaces=interfaces)
+        connection = self.connect()
+        try:
+            connection.load_merge_candidate(config=config_file)
+            connection.commit_config()
+            connection.close()
+            return True
+        except Exception as e:
+            print(e)
+            connection.close()
+            return False
+
+    def discovery_application(self):
+        list_app = []
+        interfaces = Interface.objects.filter(device_ref=self)
+        connection = self.netmiko_connect()
+        print("opening......")
+        for interface in interfaces:
+            try:
+                cmd = "show ip nbar protocol-discovery interface " + interface.interface_name
+                print(cmd)
+                file = connection.send_command(
+                    "show ip nbar protocol-discovery interface " + interface.interface_name).splitlines()
+                print(file)
+
+                p = False
+                for line in file:
+                    if p or "-------------------" in line:
+                        p = True
+
+                        k = line.split()
+                        for a in k:
+                            if a.isdigit():
+                                break
+                            if "----" in a:
+                                break
+                            if "unknown" in a:
+                                break
+                            if "Total" in a:
+                                break
+                            else:
+                                list_app.append(a)
+            except Exception as e:
+                print(e)
+        return set(list_app)
 
     def ingress(self):
         interfaces = Interface.objects.filter(ingress=True, device=self)
