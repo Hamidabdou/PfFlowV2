@@ -9,6 +9,7 @@ class AddApplicationForm(forms.ModelForm):
             'business_type', 'business_app', 'mark', 'begin_time', 'end_time', 'source',
             'destination')
 
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["business_app"].queryset = BusinessApp.objects.none()

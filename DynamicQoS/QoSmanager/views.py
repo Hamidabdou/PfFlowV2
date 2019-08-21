@@ -15,7 +15,7 @@ def index(request):
     man = Access.objects.create(management_address="192.168.1.1", username="yassine", password="yassine")
     device = Device.objects.create(hostname="router1", topology_ref=topo, management=man)
     int1 = Interface.objects.create(interface_name="g0/0", device_ref=device, ingress=True)
-    int2 = Interface.objects.create(interface_name="g0/1", device_ref=device, ingress=True)
+    int2 = Interface.objects.create(interface_name="g0/1", device_ref=device, ingress=False)
     # print(device.discovery_application())
     # #
     # # url = "http://192.168.0.128:8080/qosapi/topologies"
@@ -87,10 +87,21 @@ def add_application(request, police_id):
     # app_form = AddApplicationForm(request.POST)
     app_id = request.POST['business_app']
     type_id = request.POST['business_type']
-    mark=request.POST['mark']
+    mark = request.POST['mark']
+    begin = request.POST['begin_time']
+    end = request.POST['end_time']
+    source = request.POST['source']
+    destination = request.POST['destination']
+    if begin == '':
+        begin = "00:00"
+    if end == '':
+        end = "24:00"
+    if source == '':
+        source = "any"
+    if destination == '':
+        destination = "any"
     if mark == '':
-        mark=BusinessApp.objects.get(id=app_id).recommended_dscp
-
+        mark = BusinessApp.objects.get(id=app_id).recommended_dscp
 
     # groupe = Group.objects.get(priority=request.POST['mark'], policy_id=police_id)
 
@@ -98,10 +109,10 @@ def add_application(request, police_id):
                       mark=mark,
                       business_type=BusinessType.objects.get(id=type_id),
                       business_app=BusinessApp.objects.get(id=app_id),
-                      source=request.POST['source'],
-                      destination=request.POST['destination'],
-                      begin_time=request.POST['begin_time'],
-                      end_time=request.POST['end_time'], )
+                      source=source,
+                      destination=destination,
+                      begin_time=begin,
+                      end_time=end, )
     if app.mark.startswith("A"):
         app.group = Group.objects.get(priority=app.app_priority, policy_id=police_id)
         app.save()
@@ -115,15 +126,18 @@ def add_custom_application(request, police_id):
     # app_form = AddApplicationForm(request.POST)
     # groupe = Group.objects.get(priority=request.POST['app_priority'], policy_id=police_id)
 
-    Application(policy_in_id=PolicyIn.objects.get(policy_ref_id=police_id).id,
-                mark=request.POST['mark'],
-                source=request.POST['source'],
-                destination=request.POST['destination'],
-                begin_time=request.POST['begin_time'],
-                end_time=request.POST['end_time'],
-                protocol_type=request.POST['protocol_type'],
-                port_number=request.POST['port_number'],
-                custom_name=request.POST['custom_name'], ).save()
+    app = Application(policy_in_id=PolicyIn.objects.get(policy_ref_id=police_id).id,
+                      mark=request.POST['mark'],
+                      source=request.POST['source'],
+                      destination=request.POST['destination'],
+                      begin_time=request.POST['begin_time'],
+                      end_time=request.POST['end_time'],
+                      protocol_type=request.POST['protocol_type'],
+                      port_number=request.POST['port_number'],
+                      custom_name=request.POST['custom_name'], )
+    if app.mark.startswith("A"):
+        app.group = Group.objects.get(priority=app.app_priority, policy_id=police_id)
+        app.save()
     return redirect('applications', police_id=police_id)
 
 
@@ -226,16 +240,19 @@ def policies(request):
             police_id = a.id
             PolicyIn.objects.create(policy_ref=a)
             interfaces = Interface.objects.filter(ingress=False)
+            print(interfaces)
             Group.objects.create(name="business", priority="4", policy=a)
             Group.objects.create(name="critical", priority="3", policy=a)
             Group.objects.create(name="non-business", priority="2", policy=a)
             Group.objects.create(name="non-business2", priority="1", policy=a)
+
             for interface in interfaces:
                 po = PolicyOut.objects.create(policy_ref=a)
                 interface.policy_out_ref = po
                 interface.save()
-                RegroupementClass.objects.create(group=Group.objects.get(priority="4", policy=a),
-                                                 policy_out=po)
+                print(interface)
+                print(RegroupementClass.objects.create(group=Group.objects.get(priority="4", policy=a),
+                                                       policy_out=po))
                 RegroupementClass.objects.create(group=Group.objects.get(priority="3", policy=a),
                                                  policy_out=po)
                 RegroupementClass.objects.create(group=Group.objects.get(priority="2", policy=a),
@@ -249,8 +266,33 @@ def policies(request):
 
         return render(request, 'policy.html', locals())
     else:
+        print(RegroupementClass.objects.all())
         policy_form = AddPolicyForm(request.POST)
         return render(request, 'policy.html', locals())
+
+
+def policy_deployment(request, police_id):
+    police = PolicyIn.objects.get(policy_ref_id=police_id)
+    print(police)
+    config_file = police.render_policy
+    applications = Application.objects.filter(policy_in=police)
+    for app in applications:
+        print(app.render_time_range)
+        print(app.acl_list)
+    print(config_file)
+    # driver = get_network_driver("ios")
+    # router = Device.objects.get(id=1)
+    # device = driver(router.management.management_address, router.management.username,
+    #                 router.management.password)
+    # try:
+    #     device.open()
+    #     device.load_merge_candidate(config=config_file)
+    #     device.commit_config()
+    #     device.close()
+    # except Exception as e:
+    #     print(e)
+
+    return HttpResponse("okay")
 
 
 def load_applications(request):
