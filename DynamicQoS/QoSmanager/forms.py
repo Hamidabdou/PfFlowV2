@@ -6,7 +6,7 @@ class AddApplicationForm(forms.ModelForm):
     class Meta:
         model = Application
         fields = (
-            'business_type', 'business_app', 'app_priority', 'drop_prob', 'begin_time', 'end_time', 'source',
+            'business_type', 'business_app', 'mark', 'begin_time', 'end_time', 'source',
             'destination')
 
     def __init__(self, *args, **kwargs):
@@ -43,4 +43,4 @@ class AddCustomApplicationForm(forms.ModelForm):
         #     'custom_name': forms.TextInput(attrs={'style': "color:#646c9a;"}),
         # }
         fields = ('custom_name', 'protocol_type', 'port_number', 'begin_time', 'end_time', 'source', 'destination',
-                  'app_priority', 'drop_prob')
+                  'mark')

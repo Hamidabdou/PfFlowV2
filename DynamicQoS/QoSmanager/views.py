@@ -11,13 +11,12 @@ from .models import *
 
 # Create your views here.
 def index(request):
-    #
-    # topo = Topology.objects.create(topology_name="test", topology_desc="test")
-    # device = Device.objects.create(hostname="router1", topology_ref=topo)
-    # int1 = Interface.objects.create(interface_name="g0/0", device_ref=device, ingress=True)
-    # int2 = Interface.objects.create(interface_name="g1/0", device_ref=device, ingress=True)
-    # int3 = Interface.objects.create(interface_name="g2/0", device_ref=device, ingress=False)
-    # int4 = Interface.objects.create(interface_name="g3/0", device_ref=device, ingress=False)
+    topo = Topology.objects.create(topology_name="test2", topology_desc="test2")
+    man = Access.objects.create(management_address="192.168.1.1", username="yassine", password="yassine")
+    device = Device.objects.create(hostname="router1", topology_ref=topo, management=man)
+    int1 = Interface.objects.create(interface_name="g0/0", device_ref=device, ingress=True)
+    int2 = Interface.objects.create(interface_name="g0/1", device_ref=device, ingress=True)
+    # print(device.discovery_application())
     # #
     # # url = "http://192.168.0.128:8080/qosapi/topologies"
     # # r = requests.get(url)
@@ -63,7 +62,7 @@ def index(request):
     with open(str(MEDIA_ROOT[0]) + "/monitoring_conf/nbar_application.json", 'r') as jsonfile:
         ap = json.load(jsonfile)
         for app in ap['applications']:
-            BusinessApp(name=app['name'], match=app['match'],
+            BusinessApp(name=app['name'], match=app['match'], recommended_dscp=app['recommended_dscp'],
                         business_type=BusinessType.objects.get(name=app['business_type'])).save()
     #
     # apps = Application.objects.filter(policy_in=police)
@@ -88,14 +87,12 @@ def add_application(request, police_id):
     # app_form = AddApplicationForm(request.POST)
     app_id = request.POST['business_app']
     type_id = request.POST['business_type']
-    groupe = Group.objects.get(priority=request.POST['app_priority'], policy_id=police_id)
+    # groupe = Group.objects.get(priority=request.POST['mark'], policy_id=police_id)
 
     Application(policy_in_id=PolicyIn.objects.get(policy_ref_id=police_id).id,
-                drop_prob=request.POST['drop_prob'],
-                app_priority=request.POST['app_priority'],
+                mark=request.POST['mark'],
                 business_type=BusinessType.objects.get(id=type_id),
                 business_app=BusinessApp.objects.get(id=app_id),
-                group=groupe,
                 source=request.POST['source'],
                 destination=request.POST['destination'],
                 begin_time=request.POST['begin_time'],
@@ -105,12 +102,10 @@ def add_application(request, police_id):
 
 def add_custom_application(request, police_id):
     # app_form = AddApplicationForm(request.POST)
-    groupe = Group.objects.get(priority=request.POST['app_priority'], policy_id=police_id)
+    # groupe = Group.objects.get(priority=request.POST['app_priority'], policy_id=police_id)
 
     Application(policy_in_id=PolicyIn.objects.get(policy_ref_id=police_id).id,
-                drop_prob=request.POST['drop_prob'],
-                app_priority=request.POST['app_priority'],
-                group=groupe,
+                mark=request.POST['mark'],
                 source=request.POST['source'],
                 destination=request.POST['destination'],
                 begin_time=request.POST['begin_time'],
@@ -251,6 +246,5 @@ def load_applications(request):
     business_type_id = request.GET.get('business_type')
     business_apps = BusinessApp.objects.filter(business_type_id=business_type_id).order_by('name')
     return render(request, 'application_dropdown_list_options.html', {'business_apps': business_apps})
-
 
 # Create your views here.
