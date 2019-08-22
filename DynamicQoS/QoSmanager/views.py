@@ -116,6 +116,9 @@ def add_application(request, police_id):
     if app.mark.startswith("A"):
         app.group = Group.objects.get(priority=app.app_priority, policy_id=police_id)
         app.save()
+    if app.mark == "EF":
+        app.group = Group.objects.get(priority="EF", policy_id=police_id)
+        app.save()
     else:
         app.save()
 
@@ -137,6 +140,9 @@ def add_custom_application(request, police_id):
                       custom_name=request.POST['custom_name'], )
     if app.mark.startswith("A"):
         app.group = Group.objects.get(priority=app.app_priority, policy_id=police_id)
+        app.save()
+    if app.mark == "EF":
+        app.group = Group.objects.get(priority="EF", policy_id=police_id)
         app.save()
     else:
         app.save()
@@ -242,7 +248,8 @@ def policies(request):
             police_id = a.id
             PolicyIn.objects.create(policy_ref=a)
             interfaces = Interface.objects.filter(ingress=False)
-            print(interfaces)
+            # print(interfaces)
+            Group.objects.create(name="real-time", priority="EF", policy=a)
             Group.objects.create(name="business", priority="4", policy=a)
             Group.objects.create(name="critical", priority="3", policy=a)
             Group.objects.create(name="non-business", priority="2", policy=a)
@@ -252,15 +259,55 @@ def policies(request):
                 po = PolicyOut.objects.create(policy_ref=a)
                 interface.policy_out_ref = po
                 interface.save()
-                print(interface)
-                print(RegroupementClass.objects.create(group=Group.objects.get(priority="4", policy=a),
-                                                       policy_out=po))
-                RegroupementClass.objects.create(group=Group.objects.get(priority="3", policy=a),
-                                                 policy_out=po)
-                RegroupementClass.objects.create(group=Group.objects.get(priority="2", policy=a),
-                                                 policy_out=po)
-                RegroupementClass.objects.create(group=Group.objects.get(priority="1", policy=a),
-                                                 policy_out=po)
+                # print(interface)
+
+                realtime = RegroupementClass.objects.create(priority="100", group=Group.objects.get(priority="EF", policy=a),
+                                                            policy_out=po)
+                Dscp.objects.create(dscp_value="EF", regroupement_class=realtime)
+                policing = Policing.objects.create(cir="10", pir="10", dscp_transmit="AF31")
+                shaping = Shaping.objects.create(peak="10", average="10")
+                high = RegroupementClass.objects.create(shaping=shaping, policing=policing, bandwidth="40",
+                                                        group=Group.objects.get(priority="4", policy=a),
+                                                        policy_out=po)
+                Dscp.objects.create(dscp_value="AF43", regroupement_class=high, drop_max="10", drop_min="5",
+                                    denominator="8")
+                Dscp.objects.create(dscp_value="AF42", regroupement_class=high, drop_max="10", drop_min="5",
+                                    denominator="8")
+                Dscp.objects.create(dscp_value="AF41", regroupement_class=high, drop_max="10", drop_min="5",
+                                    denominator="8")
+                policing = Policing.objects.create(cir="10", pir="10", dscp_transmit="AF31")
+                shaping = Shaping.objects.create(peak="10", average="10")
+                priority = RegroupementClass.objects.create(shaping=shaping, policing=policing, bandwidth="40",
+                                                            group=Group.objects.get(priority="3", policy=a),
+                                                            policy_out=po)
+                Dscp.objects.create(dscp_value="AF33", regroupement_class=priority, drop_max="10", drop_min="5",
+                                    denominator="8")
+                Dscp.objects.create(dscp_value="AF32", regroupement_class=priority, drop_max="10", drop_min="5",
+                                    denominator="8")
+                Dscp.objects.create(dscp_value="AF31", regroupement_class=priority, drop_max="10", drop_min="5",
+                                    denominator="8")
+                policing = Policing.objects.create(cir="10", pir="10", dscp_transmit="AF31")
+                shaping = Shaping.objects.create(peak="10", average="10")
+                med = RegroupementClass.objects.create(shaping=shaping, policing=policing, bandwidth="40",
+                                                       group=Group.objects.get(priority="2", policy=a),
+                                                       policy_out=po)
+                Dscp.objects.create(dscp_value="AF23", regroupement_class=med, drop_max="10", drop_min="5",
+                                    denominator="8")
+                Dscp.objects.create(dscp_value="AF22", regroupement_class=med, drop_max="10", drop_min="5",
+                                    denominator="8")
+                Dscp.objects.create(dscp_value="AF21", regroupement_class=med, drop_max="10", drop_min="5",
+                                    denominator="8")
+                policing = Policing.objects.create(cir="10", pir="10", dscp_transmit="AF31")
+                shaping = Shaping.objects.create(peak="10", average="10")
+                low = RegroupementClass.objects.create(shaping=shaping, policing=policing, bandwidth="40",
+                                                       group=Group.objects.get(priority="1", policy=a),
+                                                       policy_out=po)
+                Dscp.objects.create(dscp_value="AF13", regroupement_class=low, drop_max="10", drop_min="5",
+                                    denominator="8")
+                Dscp.objects.create(dscp_value="AF12", regroupement_class=low, drop_max="10", drop_min="5",
+                                    denominator="8")
+                Dscp.objects.create(dscp_value="AF11", regroupement_class=low, drop_max="10", drop_min="5",
+                                    denominator="8")
 
             return redirect('policies')
         else:
@@ -268,7 +315,7 @@ def policies(request):
 
         return render(request, 'policy.html', locals())
     else:
-        print(RegroupementClass.objects.all())
+        # print(RegroupementClass.objects.all())
         policy_form = AddPolicyForm(request.POST)
         return render(request, 'policy.html', locals())
 
@@ -276,13 +323,13 @@ def policies(request):
 def policy_deployment(request, police_id):
     police = PolicyIn.objects.get(policy_ref_id=police_id)
     # print(police)
-    config_file = police.render_policy
-    apps = Application.objects.filter(policy_in=police)
-    for app in apps:
-        print(app.render_time_range)
-        print(app.acl_list)
-    print(config_file)
-    po=PolicyOut.objects.filter(policy_ref_id=police_id)
+    # config_file = police.render_policy
+    # apps = Application.objects.filter(policy_in=police)
+    # for app in apps:
+    #     print(app.render_time_range)
+    #     print(app.acl_list)
+    # print(config_file)
+    po = PolicyOut.objects.filter(policy_ref_id=police_id)
     for p in po:
         print(p.render_policy)
     # driver = get_network_driver("ios")
