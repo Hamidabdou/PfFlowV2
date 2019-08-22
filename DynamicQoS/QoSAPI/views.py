@@ -424,7 +424,18 @@ class ApplicationViewSet(viewsets.ModelViewSet):
         """
         API endpoint that allows groups to be viewed or edited.
         """
-        queryset = Application.objects.all()
+
         serializer_class = ApplicationSerializer
+
+
+        def get_queryset(self):
+            """
+            This view should return a list of all the purchases
+            for the currently authenticated user.
+            """
+            policy = self.request.query_params.get('policy_id', None)
+            if policy ==None:
+                return Application.objects.all()
+            return Application.objects.filter(policy_in=policy)
 
 

@@ -221,7 +221,7 @@
     <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
     <script>
-        var url1 = 'http://localhost:8000/api/v1/applications';
+        var url1 = 'http://localhost:8000/api/v1/applications?policy_id={{ police_id }}';
         var periodUrl = '';
         var table;
         var periodTable;
@@ -248,7 +248,7 @@
     ]
             });
 
-            url1 = 'http://localhost:8000/api/v1/applications';
+            url1 = 'http://localhost:8000/api/v1/applications?policy_id={{ police_id }}';
             table.ajax.url(url1).load();
             reloadDataTable();
         });

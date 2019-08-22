@@ -98,7 +98,10 @@ class ApplicationSerializer(sr.HyperlinkedModelSerializer):
         print(validated_data)
         instance.mark = validated_data.get('mark', instance.mark)
         print(instance.app_priority)
-        instance.group= Group.objects.get(priority=instance.app_priority, policy_id=instance.group.policy)
+        if instance._mark=="EF":
+            instance.group = Group.objects.get(priority="EF", policy_id=instance.group.policy)
+        else:
+            instance.group= Group.objects.get(priority=instance.app_priority, policy_id=instance.group.policy)
         print(instance.group.id)
         instance.save()
 
