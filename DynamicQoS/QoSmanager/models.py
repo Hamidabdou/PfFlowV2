@@ -155,6 +155,10 @@ class RegroupementClass(models.Model):
     bandwidth = models.CharField(max_length=45)
 
     def __str__(self):
+        return self.name
+
+    @property
+    def name(self):
         return self.group.name
 
 
@@ -214,7 +218,7 @@ class Application(models.Model):
     source = models.CharField(max_length=45)
     destination = models.CharField(max_length=45)
     begin_time = models.CharField(max_length=45, default="00:00")
-    end_time = models.CharField(max_length=45,default="24:00")
+    end_time = models.CharField(max_length=45, default="24:00")
     protocol_type = models.CharField(max_length=45, choices=PROTOCOL, default=IP)
     port_number = models.CharField(max_length=45)
     custom_name = models.CharField(max_length=45)
@@ -428,8 +432,3 @@ class Interface(models.Model):
 
     def __str__(self):
         return self.interface_name
-
-
-from django.db import models
-
-# Create your models here.
