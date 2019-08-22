@@ -138,6 +138,8 @@ def add_custom_application(request, police_id):
     if app.mark.startswith("A"):
         app.group = Group.objects.get(priority=app.app_priority, policy_id=police_id)
         app.save()
+    else:
+        app.save()
     return redirect('applications', police_id=police_id)
 
 
@@ -273,13 +275,16 @@ def policies(request):
 
 def policy_deployment(request, police_id):
     police = PolicyIn.objects.get(policy_ref_id=police_id)
-    print(police)
+    # print(police)
     config_file = police.render_policy
-    applications = Application.objects.filter(policy_in=police)
-    for app in applications:
+    apps = Application.objects.filter(policy_in=police)
+    for app in apps:
         print(app.render_time_range)
         print(app.acl_list)
     print(config_file)
+    po=PolicyOut.objects.filter(policy_ref_id=police_id)
+    for p in po:
+        print(p.render_policy)
     # driver = get_network_driver("ios")
     # router = Device.objects.get(id=1)
     # device = driver(router.management.management_address, router.management.username,
