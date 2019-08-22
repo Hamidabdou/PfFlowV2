@@ -3,10 +3,8 @@ ip access-list extended {{a.acl_name}}
 {% if a.time_range is not none %}
 {% if a.source  != "any" and a.destination != "any" %}
 permit {{a.protocol_type}} {{source.ip}} {{source_wild_card}} {{destination.ip}} {{destination_wild_card}} time-range {{a.time_range}} eq {{ a.port_number }}
-
 {% elif a.source != "any" %}
 permit {{a.protocol_type}} {{source.ip}} {{source_wild_card}} any time-range {{a.time_range}} eq {{ a.port_number }}
-
 {% elif a.destination != "any" %}
 permit {{a.protocol_type}} any {{destination}} {{destination_wild_card}} time-range {{a.time_range}} eq {{ a.port_number }}
 {% else %}
@@ -15,10 +13,8 @@ permit {{a.protocol_type}} any any time-range {{a.time_range}} eq {{ a.port_numb
 {% else %}
 {% if a.source  != "any" and a.destination != "any" %}
 permit {{a.protocol_type}} {{source.ip}} {{source_wild_card}} {{destination}} {{destination_wild_card}} eq {{ a.port_number }}
-
 {% elif a.source != "any" and a.destination == "any" %}
 permit {{a.protocol_type}} {{source.ip}} {{source_wild_card}} any eq {{ a.port_number }}
-
 {% elif a.destination != "any" and a.source == "any "%}
 permit {{a.protocol_type}} any {{destination}} {{destination_wild_card}} eq {{ a.port_number }}
 {% else %}
@@ -29,10 +25,8 @@ permit {{a.protocol_type}} any any eq {{ a.port_number }}
 {% if a.time_range is not none %}
 {% if a.source !="any" and a.destination !="any"%}
 permit {{a.protocol_type}} {{source.ip}} {{source_wild_card}} {{destination.ip}} {{destination_wild_card}} time-range {{a.time_range}}
-
 {% elif a.source !="any" %}
 permit {{a.protocol_type}} {{source.ip}} {{source_wild_card}} any time-range {{a.time_range}}
-
 {% elif a.destination !="any" %}
 permit {{a.protocol_type}} any {{destination.ip}} {{destination_wild_card}} time-range {{a.time_range}}
 {% else %}
@@ -41,10 +35,8 @@ permit {{a.protocol_type}} any any time-range {{a.time_range}}
 {% else %}
 {% if a.source != "any" and a.destination != "any" %}
 permit {{a.protocol_type}} {{source.ip}} {{source_wild_card}} {{destination.ip}} {{destination_wild_card}}
-
 {% elif a.source != "any" and a.destination=="any"%}
 permit {{a.protocol_type}} {{source.ip}} {{source_wild_card}} any
-
 {% elif a.destination != "any" and a.source=="any" %}
 permit {{a.protocol_type}} any {{destination.ip}} {{destination_wild_card}}
 {% else %}

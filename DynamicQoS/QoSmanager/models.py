@@ -153,6 +153,7 @@ class RegroupementClass(models.Model):
     shaping = models.ForeignKey(Shaping, on_delete=models.CASCADE, null=True)
     policy_out = models.ForeignKey(PolicyOut, on_delete=models.CASCADE, null=True)
     bandwidth = models.CharField(max_length=45)
+    priority = models.CharField(max_length=45)
 
     def __str__(self):
         return self.name
@@ -163,16 +164,12 @@ class RegroupementClass(models.Model):
 
 
 class Dscp(models.Model):
+    dscp_value = models.CharField(max_length=45)
     regroupement_class = models.ForeignKey(RegroupementClass, on_delete=models.CASCADE, null=True)
-    priority = models.CharField(max_length=45)
-    drop_prob = models.CharField(max_length=45)
     drop_min = models.CharField(max_length=45)
     drop_max = models.CharField(max_length=45)
     denominator = models.CharField(max_length=45)
 
-    @property
-    def dscp_value(self):
-        return "AF{}{}".format(self.priority, self.drop_prob)
 
 
 class Application(models.Model):

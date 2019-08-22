@@ -1,8 +1,8 @@
 {% for class in classes %}
 class-map {{class.name}}
- {% if class.business_app is not none %}
+{% if class.business_app is not none %}
 {{class.match}}
- {% endif %}
+{% endif %}
 match access-group {{ class.acl_name }}
 exit
 {% endfor %}
