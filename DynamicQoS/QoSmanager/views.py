@@ -12,7 +12,7 @@ from .models import *
 # Create your views here.
 def index(request):
     topo = Topology.objects.create(topology_name="test2", topology_desc="test2")
-    man = Access.objects.create(management_address="192.168.1.1", username="yassine", password="yassine")
+    man = Access.objects.create(management_address="172.16.1.2", username="yassine", password="15")
     device = Device.objects.create(hostname="router1", topology_ref=topo, management=man)
     int1 = Interface.objects.create(interface_name="g0/0", device_ref=device, ingress=True)
     int2 = Interface.objects.create(interface_name="g0/1", device_ref=device, ingress=False)
@@ -323,15 +323,27 @@ def policies(request):
 def policy_deployment(request, police_id):
     police = PolicyIn.objects.get(policy_ref_id=police_id)
     # print(police)
-    # config_file = police.render_policy
-    # apps = Application.objects.filter(policy_in=police)
-    # for app in apps:
-    #     print(app.render_time_range)
-    #     print(app.acl_list)
-    # print(config_file)
+    config_file = police.render_policy
+    apps = Application.objects.filter(policy_in=police)
+    device = Device.objects.get(id=1)
     po = PolicyOut.objects.filter(policy_ref_id=police_id)
+    connection = device.connect()
     for p in po:
-        print(p.render_policy)
+        connection.load_merge_candidate(config=p.render_policy)
+        connection.commit_config()
+
+    # print(config_file)
+    #
+    # # # for app in apps:
+    # print(connection.load_merge_candidate(config=config_file))
+    #
+    # connection.commit_config()
+    #
+    connection.close()
+
+
+    # print(config_file)
+
     # driver = get_network_driver("ios")
     # router = Device.objects.get(id=1)
     # device = driver(router.management.management_address, router.management.username,
