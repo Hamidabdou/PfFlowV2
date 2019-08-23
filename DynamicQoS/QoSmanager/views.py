@@ -57,6 +57,7 @@ def index(request):
                                              wan=True)
 
             connection.close()
+            print('tttt')
 
     # # # print(type(topo))
     # # print(topo['topologies'])
