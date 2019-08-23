@@ -11,17 +11,53 @@ from .models import *
 
 # Create your views here.
 def index(request):
-    topo = Topology.objects.create(topology_name="test2", topology_desc="test2")
-    man = Access.objects.create(management_address="192.168.1.1", username="yassine", password="yassine")
-    device = Device.objects.create(hostname="router1", topology_ref=topo, management=man)
-    int1 = Interface.objects.create(interface_name="g0/0", device_ref=device, ingress=True)
-    int2 = Interface.objects.create(interface_name="g0/1", device_ref=device, ingress=False)
+    # topo = Topology.objects.create(topology_name="test2", topology_desc="test2")
+    # man = Access.objects.create(management_address="172.16.1.2", username="yassine", password="15")
+    # device = Device.objects.create(hostname="router1", topology_ref=topo, management=man)
+    # int1 = Interface.objects.create(interface_name="g0/0", device_ref=device, ingress=True)
+    # int2 = Interface.objects.create(interface_name="g0/1", device_ref=device, ingress=False)
     # print(device.discovery_application())
     # #
-    # # url = "http://192.168.0.128:8080/qosapi/topologies"
-    # # r = requests.get(url)
+    url = "http://127.0.0.1:8000/api/v1/topology"
+    r = requests.get(url)
     # #
-    # # topo = (r.json())
+    topologies = (r.json())
+    for topo in topologies['topologies']:
+        top = Topology.objects.create(topology_name=topo['topology_name'], topology_desc=topo['topology_desc'])
+        url = "http://127.0.0.1:8000/api/v1/topology?name=" + topo['topology_name']
+        r = requests.get(url)
+        devices = (r.json())
+        for device in devices['devices']:
+            man = device['management']
+            mana = Access.objects.create(management_interface=man['management_interface'],
+                                         management_address=man['management_address'],
+                                         username=man['username'],
+                                         password=man['password'])
+            dev = Device.objects.create(hostname=device['hostname'], topology_ref=top, management=mana)
+
+            interfaces = device['interfaces']
+            for interface in interfaces:
+                Interface.objects.create(device_ref=dev,
+                                         interface_name=interface['interface_name'],
+                                         ingress=interface['ingress'])
+        devices = Device.objects.filter(topology_ref=top)
+        for device in devices:
+            connection = device.connect()
+            interfaces = connection.get_interfaces()
+            for interface in interfaces:
+                print(interface)
+                print(interfaces[interface]['description'])
+                if interfaces[interface]['description'] == "#ingress":
+                    Interface.objects.create(device_ref=device,
+                                             interface_name=interface,
+                                             ingress=True)
+                if interfaces[interface]['description'] == "#wan":
+                    Interface.objects.create(device_ref=device,
+                                             interface_name=interface,
+                                             wan=True)
+
+            connection.close()
+
     # # # print(type(topo))
     # # print(topo['topologies'])
     # # for topolo in topo['topologies']:
@@ -53,17 +89,17 @@ def index(request):
     # # data = json.loads(json_url)
     # #
     # # print(data)
-    BusinessType.objects.create(name="Application")
-    BusinessType.objects.create(name="application-group")
-    BusinessType.objects.create(name="Category")
-    BusinessType.objects.create(name="sub-category")
-    BusinessType.objects.create(name="device-class")
-    BusinessType.objects.create(name="media-type")
-    with open(str(MEDIA_ROOT[0]) + "/monitoring_conf/nbar_application.json", 'r') as jsonfile:
-        ap = json.load(jsonfile)
-        for app in ap['applications']:
-            BusinessApp(name=app['name'], match=app['match'], recommended_dscp=app['recommended_dscp'],
-                        business_type=BusinessType.objects.get(name=app['business_type'])).save()
+    # BusinessType.objects.create(name="Application")
+    # BusinessType.objects.create(name="application-group")
+    # BusinessType.objects.create(name="Category")
+    # BusinessType.objects.create(name="sub-category")
+    # BusinessType.objects.create(name="device-class")
+    # BusinessType.objects.create(name="media-type")
+    # with open(str(MEDIA_ROOT[0]) + "/monitoring_conf/nbar_application.json", 'r') as jsonfile:
+    #     ap = json.load(jsonfile)
+    #     for app in ap['applications']:
+    #         BusinessApp(name=app['name'], match=app['match'], recommended_dscp=app['recommended_dscp'],
+    #                     business_type=BusinessType.objects.get(name=app['business_type'])).save()
     #
     # apps = Application.objects.filter(policy_in=police)
     # print(apps)
@@ -95,7 +131,7 @@ def add_application(request, police_id):
     if begin == '':
         begin = "00:00"
     if end == '':
-        end = "24:00"
+        end = "23:59"
     if source == '':
         source = "any"
     if destination == '':
@@ -261,12 +297,13 @@ def policies(request):
                 interface.save()
                 # print(interface)
 
-                realtime = RegroupementClass.objects.create(priority="100", group=Group.objects.get(priority="EF", policy=a),
+                realtime = RegroupementClass.objects.create(priority="100",
+                                                            group=Group.objects.get(priority="EF", policy=a),
                                                             policy_out=po)
                 Dscp.objects.create(dscp_value="EF", regroupement_class=realtime)
                 policing = Policing.objects.create(cir="10", pir="10", dscp_transmit="AF31")
                 shaping = Shaping.objects.create(peak="10", average="10")
-                high = RegroupementClass.objects.create(shaping=shaping, policing=policing, bandwidth="40",
+                high = RegroupementClass.objects.create(shaping=shaping, policing=policing, bandwidth="10",
                                                         group=Group.objects.get(priority="4", policy=a),
                                                         policy_out=po)
                 Dscp.objects.create(dscp_value="AF43", regroupement_class=high, drop_max="10", drop_min="5",
@@ -277,7 +314,7 @@ def policies(request):
                                     denominator="8")
                 policing = Policing.objects.create(cir="10", pir="10", dscp_transmit="AF31")
                 shaping = Shaping.objects.create(peak="10", average="10")
-                priority = RegroupementClass.objects.create(shaping=shaping, policing=policing, bandwidth="40",
+                priority = RegroupementClass.objects.create(shaping=shaping, policing=policing, bandwidth="10",
                                                             group=Group.objects.get(priority="3", policy=a),
                                                             policy_out=po)
                 Dscp.objects.create(dscp_value="AF33", regroupement_class=priority, drop_max="10", drop_min="5",
@@ -288,7 +325,7 @@ def policies(request):
                                     denominator="8")
                 policing = Policing.objects.create(cir="10", pir="10", dscp_transmit="AF31")
                 shaping = Shaping.objects.create(peak="10", average="10")
-                med = RegroupementClass.objects.create(shaping=shaping, policing=policing, bandwidth="40",
+                med = RegroupementClass.objects.create(shaping=shaping, policing=policing, bandwidth="10",
                                                        group=Group.objects.get(priority="2", policy=a),
                                                        policy_out=po)
                 Dscp.objects.create(dscp_value="AF23", regroupement_class=med, drop_max="10", drop_min="5",
@@ -299,7 +336,7 @@ def policies(request):
                                     denominator="8")
                 policing = Policing.objects.create(cir="10", pir="10", dscp_transmit="AF31")
                 shaping = Shaping.objects.create(peak="10", average="10")
-                low = RegroupementClass.objects.create(shaping=shaping, policing=policing, bandwidth="40",
+                low = RegroupementClass.objects.create(shaping=shaping, policing=policing, bandwidth="10",
                                                        group=Group.objects.get(priority="1", policy=a),
                                                        policy_out=po)
                 Dscp.objects.create(dscp_value="AF13", regroupement_class=low, drop_max="10", drop_min="5",
@@ -321,17 +358,34 @@ def policies(request):
 
 
 def policy_deployment(request, police_id):
-    police = PolicyIn.objects.get(policy_ref_id=police_id)
-    # print(police)
+    # police = PolicyIn.objects.get(policy_ref_id=police_id)
+    # # print(police)
     # config_file = police.render_policy
     # apps = Application.objects.filter(policy_in=police)
-    # for app in apps:
-    #     print(app.render_time_range)
-    #     print(app.acl_list)
+    # topo = Topology.objects.create(topology_name="test2", topology_desc="test2")
+    # man = Access.objects.create(management_address="172.16.1.2", username="yassine", password="15")
+    # device = Device.objects.create(hostname="router1", topology_ref=topo, management=man)
+    # int1 = Interface.objects.create(interface_name="g0/0", device_ref=device, ingress=True)
+    # int2 = Interface.objects.create(interface_name="g0/1", device_ref=device, ingress=False)
+    device = Device.objects.get(id=1)
+    # po = PolicyOut.objects.filter(policy_ref_id=police_id)
+    connection = device.connect()
+    print(connection.get_environment())
+    # for p in po:
+    # connection.load_merge_candidate(config=p.render_policy)
+    # connection.commit_config()
+
     # print(config_file)
-    po = PolicyOut.objects.filter(policy_ref_id=police_id)
-    for p in po:
-        print(p.render_policy)
+    #
+    # # # for app in apps:
+    # print(connection.load_merge_candidate(config=config_file))
+    #
+    # connection.commit_config()
+    #
+    connection.close()
+
+    # print(config_file)
+
     # driver = get_network_driver("ios")
     # router = Device.objects.get(id=1)
     # device = driver(router.management.management_address, router.management.username,

@@ -86,22 +86,23 @@ class GroupSerializer(sr.HyperlinkedModelSerializer):
         model = Group
         fields = ['url', 'name']
 
+
 class ApplicationSerializer(sr.HyperlinkedModelSerializer):
     app_name = sr.ReadOnlyField(source='name')
-    app_category=sr.ReadOnlyField(source='category')
+    app_category = sr.ReadOnlyField(source='category')
 
     class Meta:
         model = Application
-        fields = ['id','app_name','app_category','app_priority','drop_prob','mark']
+        fields = ['id', 'app_name', 'app_category', 'app_priority', 'drop_prob', 'mark']
 
     def update(self, instance, validated_data):
         print(validated_data)
         instance.mark = validated_data.get('mark', instance.mark)
         print(instance.app_priority)
-        if instance.mark=="EF":
+        if instance.mark == "EF":
             instance.group = Group.objects.get(priority="EF", policy_id=instance.group.policy)
         else:
-            instance.group= Group.objects.get(priority=instance.app_priority, policy_id=instance.group.policy)
+            instance.group = Group.objects.get(priority=instance.app_priority, policy_id=instance.group.policy)
         print(instance.group.id)
         instance.save()
 

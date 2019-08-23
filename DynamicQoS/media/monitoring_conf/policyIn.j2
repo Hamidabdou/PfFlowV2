@@ -3,10 +3,9 @@ class-map {{class.name}}
 {% if class.business_app is not none %}
 {{class.match}}
 {% endif %}
-match access-group {{ class.acl_name }}
+match access-group name {{ class.acl_name }}
 exit
 {% endfor %}
-exit
 policy-map {{a.name}}
 {% for class in classes %}
 class {{class.name}}
