@@ -171,7 +171,6 @@ class Dscp(models.Model):
     denominator = models.CharField(max_length=45)
 
 
-
 class Application(models.Model):
     # Low, Med, High = "1", "2", "3"
     # DROP = (
@@ -410,6 +409,13 @@ class Device(models.Model):
         else:
             return False
 
+    def wan(self):
+        interfaces = Interface.objects.filter(wan=True, device=self)
+        if interfaces is not None:
+            return True
+        else:
+            return False
+
     def service_policy(self):
         interfaces = Interface.objects.filter(device_ref=self)
         policy_in = PolicyIn.objects.get(policy_ref=self.policy_ref)
@@ -421,9 +427,10 @@ class Device(models.Model):
 
 class Interface(models.Model):
     interface_name = models.CharField(max_length=45)
-    ingress = models.BooleanField(default=True)
+    ingress = models.BooleanField(default=False)
     device_ref = models.ForeignKey(Device, on_delete=models.CASCADE, null=True)
     egress = models.BooleanField(default=False)
+    wan = models.BooleanField(default=False)
 
     policy_out_ref = models.ForeignKey(PolicyOut, on_delete=models.CASCADE, null=True)
 
