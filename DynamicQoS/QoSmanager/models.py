@@ -90,6 +90,27 @@ class PolicyIn(models.Model):
 
         return config_file
 
+    @property
+    def render_no_policy(self):
+        env = Environment(loader=FileSystemLoader(str(MEDIA_ROOT[0]) + "/monitoring_conf/"))
+        classes = Application.objects.filter(policy_in_id=self.id)
+        named = env.get_template("no_policyIn.j2")
+        config_file = named.render(classes=classes, a=self)
+        config = config_file.splitlines()
+        # driver = napalm.get_network_driver('ios')
+        # device = driver(hostname='192.168.5.1', username='admin',
+        #                 password='admin')
+        #
+        # print('Opening ...')
+        # device.open()
+        # print('Loading replacement candidate ...')
+        # device.load_merge_candidate(config=config_file)
+        # print('\nDiff:')
+        # print(device.compare_config())
+        # print('Committing ...')
+
+        return config_file
+
 
 class PolicyOut(models.Model):
     policy_ref = models.ForeignKey(Policy, on_delete=models.CASCADE, null=True)
@@ -119,6 +140,14 @@ class PolicyOut(models.Model):
         named = env.get_template("policyOut.j2")
         config_file = named.render(groups=groups, classes=classes, a=self, regroupement_classes=regroupement_classes,
                                    dscp_list=dscp_list)
+        return config_file
+
+    @property
+    def render_no_policy(self):
+        env = Environment(loader=FileSystemLoader(str(MEDIA_ROOT[0]) + "/monitoring_conf/"))
+        groups = Group.objects.filter(policy=self.policy_ref)
+        named = env.get_template("no_policyOut.j2")
+        config_file = named.render(groups=groups, a=self)
         return config_file
 
     @property
@@ -195,12 +224,11 @@ class Application(models.Model):
             (AF23, "AF23"),
             (AF21, "AF21"))
 
-    IP, TCP, UDP, TCP_UDP = "ip", "tcp", "udp", "tcp/udp"
+    IP, TCP, UDP = "ip", "tcp", "udp"
     PROTOCOL = (
         (IP, "ip"),
         (TCP, "tcp"),
         (UDP, "udp"),
-        (TCP_UDP, "tcp/udp")
     )
 
     business_type = models.ForeignKey(BusinessType, on_delete=models.CASCADE, null=True)
@@ -213,8 +241,8 @@ class Application(models.Model):
     group = models.ForeignKey(Group, on_delete=models.CASCADE, null=True)
     source = models.CharField(max_length=45)
     destination = models.CharField(max_length=45)
-    begin_time = models.CharField(max_length=45, default="00:00")
-    end_time = models.CharField(max_length=45, default="24:00")
+    begin_time = models.CharField(max_length=45)
+    end_time = models.CharField(max_length=45)
     protocol_type = models.CharField(max_length=45, choices=PROTOCOL, default=IP)
     port_number = models.CharField(max_length=45)
     custom_name = models.CharField(max_length=45)
@@ -289,6 +317,14 @@ class Application(models.Model):
         return config_file
 
     @property
+    def render_no_acl(self):
+        env = Environment(loader=FileSystemLoader(str(MEDIA_ROOT[0]) + "/monitoring_conf/"))
+        output = env.get_template("no_acl.j2")
+        config_file = output.render(a=self)
+
+        return config_file
+
+    @property
     def acl_list(self):
         source = ''
         source_wild_card = ''
@@ -296,7 +332,6 @@ class Application(models.Model):
         destination_wild_card = ''
         if self.source != 'any':
             source = IPNetwork(self.source)
-            print(source)
             source_wild_card = source.hostmask.ipv4()
         if self.destination != 'any':
             destination = IPNetwork(self.destination)
@@ -421,6 +456,14 @@ class Device(models.Model):
         policy_in = PolicyIn.objects.get(policy_ref=self.policy_ref)
         env = Environment(loader=FileSystemLoader(str(MEDIA_ROOT[0]) + "/monitoring_conf/"))
         output = env.get_template("service_policy.j2")
+        config_file = output.render(interfaces=interfaces, policy_in=policy_in)
+        return config_file
+
+    def no_service_policy(self):
+        interfaces = Interface.objects.filter(device_ref=self)
+        policy_in = PolicyIn.objects.get(policy_ref=self.policy_ref)
+        env = Environment(loader=FileSystemLoader(str(MEDIA_ROOT[0]) + "/monitoring_conf/"))
+        output = env.get_template("no_service_policy.j2")
         config_file = output.render(interfaces=interfaces, policy_in=policy_in)
         return config_file
 

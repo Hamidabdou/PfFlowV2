@@ -11,53 +11,53 @@ from .models import *
 
 # Create your views here.
 def index(request):
-    # topo = Topology.objects.create(topology_name="test2", topology_desc="test2")
-    # man = Access.objects.create(management_address="172.16.1.2", username="yassine", password="15")
-    # device = Device.objects.create(hostname="router1", topology_ref=topo, management=man)
-    # int1 = Interface.objects.create(interface_name="g0/0", device_ref=device, ingress=True)
-    # int2 = Interface.objects.create(interface_name="g0/1", device_ref=device, ingress=False)
+    topo = Topology.objects.create(topology_name="test2", topology_desc="test2")
+    man = Access.objects.create(management_address="172.16.1.2", username="yassine", password="15")
+    device = Device.objects.create(hostname="router1", topology_ref=topo, management=man)
+    int1 = Interface.objects.create(interface_name="g0/0", device_ref=device, ingress=True)
+    int2 = Interface.objects.create(interface_name="g0/1", device_ref=device, ingress=False)
     # print(device.discovery_application())
-    # #
-    url = "http://127.0.0.1:8000/api/v1/topology"
-    r = requests.get(url)
-    # #
-    topologies = (r.json())
-    for topo in topologies['topologies']:
-        top = Topology.objects.create(topology_name=topo['topology_name'], topology_desc=topo['topology_desc'])
-        url = "http://127.0.0.1:8000/api/v1/topology?name=" + topo['topology_name']
-        r = requests.get(url)
-        devices = (r.json())
-        for device in devices['devices']:
-            man = device['management']
-            mana = Access.objects.create(management_interface=man['management_interface'],
-                                         management_address=man['management_address'],
-                                         username=man['username'],
-                                         password=man['password'])
-            dev = Device.objects.create(hostname=device['hostname'], topology_ref=top, management=mana)
-
-            interfaces = device['interfaces']
-            for interface in interfaces:
-                Interface.objects.create(device_ref=dev,
-                                         interface_name=interface['interface_name'],
-                                         ingress=interface['ingress'])
-        devices = Device.objects.filter(topology_ref=top)
-        for device in devices:
-            connection = device.connect()
-            interfaces = connection.get_interfaces()
-            for interface in interfaces:
-                print(interface)
-                print(interfaces[interface]['description'])
-                if interfaces[interface]['description'] == "#ingress":
-                    Interface.objects.create(device_ref=device,
-                                             interface_name=interface,
-                                             ingress=True)
-                if interfaces[interface]['description'] == "#wan":
-                    Interface.objects.create(device_ref=device,
-                                             interface_name=interface,
-                                             wan=True)
-
-            connection.close()
-            print('tttt')
+    # ################################################################################"
+    # url = "http://127.0.0.1:8000/api/v1/topology"
+    # r = requests.get(url)
+    # # #
+    # topologies = (r.json())
+    # for topo in topologies['topologies']:
+    #     top = Topology.objects.create(topology_name=topo['topology_name'], topology_desc=topo['topology_desc'])
+    #     url = "http://127.0.0.1:8000/api/v1/topology?name=" + topo['topology_name']
+    #     r = requests.get(url)
+    #     devices = (r.json())
+    #     for device in devices['devices']:
+    #         man = device['management']
+    #         mana = Access.objects.create(management_interface=man['management_interface'],
+    #                                      management_address=man['management_address'],
+    #                                      username=man['username'],
+    #                                      password=man['password'])
+    #         dev = Device.objects.create(hostname=device['hostname'], topology_ref=top, management=mana)
+    #
+    #         interfaces = device['interfaces']
+    #         for interface in interfaces:
+    #             Interface.objects.create(device_ref=dev,
+    #                                      interface_name=interface['interface_name'],
+    #                                      ingress=interface['ingress'])
+    #     devices = Device.objects.filter(topology_ref=top)
+    #     for device in devices:
+    #         connection = device.connect()
+    #         interfaces = connection.get_interfaces()
+    #         for interface in interfaces:
+    #             print(interface)
+    #             print(interfaces[interface]['description'])
+    #             if interfaces[interface]['description'] == "#ingress":
+    #                 Interface.objects.create(device_ref=device,
+    #                                          interface_name=interface,
+    #                                          ingress=True)
+    #             if interfaces[interface]['description'] == "#wan":
+    #                 Interface.objects.create(device_ref=device,
+    #                                          interface_name=interface,
+    #                                          wan=True)
+    #
+    #         connection.close()
+    #         print('tttt')
 
     # # # print(type(topo))
     # # print(topo['topologies'])
@@ -90,17 +90,17 @@ def index(request):
     # # data = json.loads(json_url)
     # #
     # # print(data)
-    # BusinessType.objects.create(name="Application")
-    # BusinessType.objects.create(name="application-group")
-    # BusinessType.objects.create(name="Category")
-    # BusinessType.objects.create(name="sub-category")
-    # BusinessType.objects.create(name="device-class")
-    # BusinessType.objects.create(name="media-type")
-    # with open(str(MEDIA_ROOT[0]) + "/monitoring_conf/nbar_application.json", 'r') as jsonfile:
-    #     ap = json.load(jsonfile)
-    #     for app in ap['applications']:
-    #         BusinessApp(name=app['name'], match=app['match'], recommended_dscp=app['recommended_dscp'],
-    #                     business_type=BusinessType.objects.get(name=app['business_type'])).save()
+    BusinessType.objects.create(name="Application")
+    BusinessType.objects.create(name="application-group")
+    BusinessType.objects.create(name="Category")
+    BusinessType.objects.create(name="sub-category")
+    BusinessType.objects.create(name="device-class")
+    BusinessType.objects.create(name="media-type")
+    with open(str(MEDIA_ROOT[0]) + "/monitoring_conf/nbar_application.json", 'r') as jsonfile:
+        ap = json.load(jsonfile)
+        for app in ap['applications']:
+            BusinessApp(name=app['name'], match=app['match'], recommended_dscp=app['recommended_dscp'],
+                        business_type=BusinessType.objects.get(name=app['business_type'])).save()
     #
     # apps = Application.objects.filter(policy_in=police)
     # print(apps)
@@ -359,7 +359,23 @@ def policies(request):
 
 
 def policy_deployment(request, police_id):
-    # police = PolicyIn.objects.get(policy_ref_id=police_id)
+    policeIn = PolicyIn.objects.get(policy_ref_id=police_id)
+    policiesOUt = PolicyOut.objects.filter(policy_ref_id=police_id)
+    devices = Device.objects.all()
+    apps = Application.objects.filter(policy_in=policeIn)
+    for app in apps:
+        print(app.render_time_range)
+        print(app.acl_list)
+
+    # for device in devices:
+    #     print(device.no_service_policy())
+    # print(policeIn.render_no_policy)
+    # for app in apps:
+    #     # print(app.render_time_range)
+    #     print(app.render_no_acl)
+    # for p in policiesOUt:
+    #     print(p.render_no_policy)
+    #     print(p.render_policy)
     # # print(police)
     # config_file = police.render_policy
     # apps = Application.objects.filter(policy_in=police)
@@ -368,10 +384,10 @@ def policy_deployment(request, police_id):
     # device = Device.objects.create(hostname="router1", topology_ref=topo, management=man)
     # int1 = Interface.objects.create(interface_name="g0/0", device_ref=device, ingress=True)
     # int2 = Interface.objects.create(interface_name="g0/1", device_ref=device, ingress=False)
-    device = Device.objects.get(id=1)
+    # device = Device.objects.get(id=1)
     # po = PolicyOut.objects.filter(policy_ref_id=police_id)
-    connection = device.connect()
-    print(connection.get_environment())
+    # connection = device.connect()
+    # print(connection.get_environment())
     # for p in po:
     # connection.load_merge_candidate(config=p.render_policy)
     # connection.commit_config()
@@ -383,7 +399,7 @@ def policy_deployment(request, police_id):
     #
     # connection.commit_config()
     #
-    connection.close()
+    # connection.close()
 
     # print(config_file)
 

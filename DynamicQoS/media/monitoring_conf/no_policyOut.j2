@@ -1,0 +1,5 @@
+no policy-map {{a.name}}
+{% for group in groups %}
+no class-map {{group.name}}
+{% endfor %}
+
