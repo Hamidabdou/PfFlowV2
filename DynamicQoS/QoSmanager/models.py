@@ -28,8 +28,8 @@ class BusinessApp(models.Model):
     business_type = models.ForeignKey(BusinessType, on_delete=models.CASCADE, null=True)
     match = models.CharField(max_length=45)
     recommended_dscp = models.CharField(max_length=45)
-    delay_ref = models.CharField(max_length=45)
-    loss_ref = models.CharField(max_length=45)
+    delay_ref = models.IntegerField()
+    loss_ref = models.IntegerField()
 
     @property
     def priority(self):
@@ -90,6 +90,27 @@ class PolicyIn(models.Model):
 
         return config_file
 
+    @property
+    def render_no_policy(self):
+        env = Environment(loader=FileSystemLoader(str(MEDIA_ROOT[0]) + "/monitoring_conf/"))
+        classes = Application.objects.filter(policy_in_id=self.id)
+        named = env.get_template("no_policyIn.j2")
+        config_file = named.render(classes=classes, a=self)
+        config = config_file.splitlines()
+        # driver = napalm.get_network_driver('ios')
+        # device = driver(hostname='192.168.5.1', username='admin',
+        #                 password='admin')
+        #
+        # print('Opening ...')
+        # device.open()
+        # print('Loading replacement candidate ...')
+        # device.load_merge_candidate(config=config_file)
+        # print('\nDiff:')
+        # print(device.compare_config())
+        # print('Committing ...')
+
+        return config_file
+
 
 class PolicyOut(models.Model):
     policy_ref = models.ForeignKey(Policy, on_delete=models.CASCADE, null=True)
@@ -119,6 +140,14 @@ class PolicyOut(models.Model):
         named = env.get_template("policyOut.j2")
         config_file = named.render(groups=groups, classes=classes, a=self, regroupement_classes=regroupement_classes,
                                    dscp_list=dscp_list)
+        return config_file
+
+    @property
+    def render_no_policy(self):
+        env = Environment(loader=FileSystemLoader(str(MEDIA_ROOT[0]) + "/monitoring_conf/"))
+        groups = Group.objects.filter(policy=self.policy_ref)
+        named = env.get_template("no_policyOut.j2")
+        config_file = named.render(groups=groups, a=self)
         return config_file
 
     @property
@@ -162,6 +191,31 @@ class RegroupementClass(models.Model):
     def name(self):
         return self.group.name
 
+    @property
+    def oppressed_tos(self):
+        oppressed = None
+        v = 0
+        dscps = Dscp.objects.filter(regroupement_class=self)
+        for tos in dscps:
+            if tos.delay_ratio >= 2 or tos.delay_ratio >= 2:
+                if tos.c_ratio > v:
+                    v = tos.c_ratio
+                    oppressed = tos
+
+        return oppressed
+
+    @property
+    def excessive_tos(self):
+        excessive = None
+        v = 0
+        dscps = Dscp.objects.filter(regroupement_class=self)
+        for tos in dscps:
+            if tos.ratio >= v:
+                v = tos.ratio
+                excessive = tos
+
+        return excessive
+
 
 class Dscp(models.Model):
     dscp_value = models.CharField(max_length=45)
@@ -169,6 +223,47 @@ class Dscp(models.Model):
     drop_min = models.CharField(max_length=45)
     drop_max = models.CharField(max_length=45)
     denominator = models.CharField(max_length=45)
+    delay = models.IntegerField(null=True, default=400)
+    loss = models.IntegerField(null=True, default=20)
+    ratio = models.IntegerField(null=True, default=40)
+
+    @property
+    def delay_ref(self):
+        apps = Application.objects.filter(mark=self.dscp_value)
+        delays = []
+        for app in apps:
+            delays.append(app.business_app.delay_ref)
+        if len(delays) == 0:
+            return self.delay
+        else:
+            return min(delays)
+
+    @property
+    def loss_ref(self):
+        apps = Application.objects.filter(mark=self.dscp_value)
+        delays = []
+        for app in apps:
+            delays.append(app.business_app.loss_ref)
+        if len(delays) == 0:
+            return self.loss
+        else:
+            return min(delays)
+
+    @property
+    def delay_ratio(self):
+        return round(self.delay / self.delay_ref)
+
+    @property
+    def loss_ratio(self):
+        return round(self.loss / self.loss_ref)
+
+    @property
+    def c_ratio(self):
+        if self.dscp_value != "EF":
+            c = int(self.dscp_value[3])
+            return c * max(self.delay_ratio, self.loss_ratio)
+        else:
+            return 0
 
 
 class Application(models.Model):
@@ -195,12 +290,11 @@ class Application(models.Model):
             (AF23, "AF23"),
             (AF21, "AF21"))
 
-    IP, TCP, UDP, TCP_UDP = "ip", "tcp", "udp", "tcp/udp"
+    IP, TCP, UDP = "ip", "tcp", "udp"
     PROTOCOL = (
         (IP, "ip"),
         (TCP, "tcp"),
         (UDP, "udp"),
-        (TCP_UDP, "tcp/udp")
     )
 
     business_type = models.ForeignKey(BusinessType, on_delete=models.CASCADE, null=True)
@@ -213,8 +307,8 @@ class Application(models.Model):
     group = models.ForeignKey(Group, on_delete=models.CASCADE, null=True)
     source = models.CharField(max_length=45)
     destination = models.CharField(max_length=45)
-    begin_time = models.CharField(max_length=45, default="00:00")
-    end_time = models.CharField(max_length=45, default="24:00")
+    begin_time = models.CharField(max_length=45)
+    end_time = models.CharField(max_length=45)
     protocol_type = models.CharField(max_length=45, choices=PROTOCOL, default=IP)
     port_number = models.CharField(max_length=45)
     custom_name = models.CharField(max_length=45)
@@ -289,6 +383,14 @@ class Application(models.Model):
         return config_file
 
     @property
+    def render_no_acl(self):
+        env = Environment(loader=FileSystemLoader(str(MEDIA_ROOT[0]) + "/monitoring_conf/"))
+        output = env.get_template("no_acl.j2")
+        config_file = output.render(a=self)
+
+        return config_file
+
+    @property
     def acl_list(self):
         source = ''
         source_wild_card = ''
@@ -296,7 +398,6 @@ class Application(models.Model):
         destination_wild_card = ''
         if self.source != 'any':
             source = IPNetwork(self.source)
-            print(source)
             source_wild_card = source.hostmask.ipv4()
         if self.destination != 'any':
             destination = IPNetwork(self.destination)
@@ -424,6 +525,14 @@ class Device(models.Model):
         config_file = output.render(interfaces=interfaces, policy_in=policy_in)
         return config_file
 
+    def no_service_policy(self):
+        interfaces = Interface.objects.filter(device_ref=self)
+        policy_in = PolicyIn.objects.get(policy_ref=self.policy_ref)
+        env = Environment(loader=FileSystemLoader(str(MEDIA_ROOT[0]) + "/monitoring_conf/"))
+        output = env.get_template("no_service_policy.j2")
+        config_file = output.render(interfaces=interfaces, policy_in=policy_in)
+        return config_file
+
 
 class Interface(models.Model):
     interface_name = models.CharField(max_length=45)
@@ -436,3 +545,34 @@ class Interface(models.Model):
 
     def __str__(self):
         return self.interface_name
+
+    def tuning_selection(self):
+        classes = RegroupementClass.objects.filter(policy_out=self.policy_out_ref, group__priority__in=["4", "3"])
+        e = 0
+        queue = None
+        for classe in classes:
+            if classe.oppressed_tos is not None and classe.excessive_tos is not None:
+                c = classe.oppressed_tos.c_ratio * int(classe.group.priority)
+                if c > e:
+                    e = c
+                    queue = classe
+
+        return queue
+
+    def tuning(self):
+        queue = self.tuning_selection()
+        if queue is not None:
+            min = queue.oppressed_tos.drop_min
+            max = queue.oppressed_tos.drop_max
+            # queue.oppressed_tos.drop_min = queue.excessive_tos.drop_min
+            # queue.oppressed_tos.drop_max = queue.excessive_tos.drop_max
+            # queue.excessive_tos.drop_min = min
+            # queue.excessive_tos.drop_max = max
+            a = self.policy_out_ref
+            env = Environment(loader=FileSystemLoader(str(MEDIA_ROOT[0]) + "/monitoring_conf/"))
+            named = env.get_template("tuning.j2")
+            config_file = named.render(a=a, queue=queue, oppressed_tos=queue.oppressed_tos,
+                                       excessive_tos=queue.excessive_tos)
+            return config_file
+        else:
+            print("noting to do ")
