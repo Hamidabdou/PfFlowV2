@@ -99,7 +99,8 @@ def index(request):
     with open(str(MEDIA_ROOT[0]) + "/monitoring_conf/nbar_application.json", 'r') as jsonfile:
         ap = json.load(jsonfile)
         for app in ap['applications']:
-            BusinessApp(name=app['name'], match=app['match'], recommended_dscp=app['recommended_dscp'],
+            BusinessApp(delay_ref=app['delay_ref'], loss_ref=app['loss_ref'], name=app['name'], match=app['match'],
+                        recommended_dscp=app['recommended_dscp'],
                         business_type=BusinessType.objects.get(name=app['business_type'])).save()
     #
     # apps = Application.objects.filter(policy_in=police)
@@ -150,6 +151,7 @@ def add_application(request, police_id):
                       destination=destination,
                       begin_time=begin,
                       end_time=end, )
+    # dscp=Dscp.objects.get(dscp_value=app.mark,)
     if app.mark.startswith("A"):
         app.group = Group.objects.get(priority=app.app_priority, policy_id=police_id)
         app.save()
@@ -359,13 +361,38 @@ def policies(request):
 
 
 def policy_deployment(request, police_id):
-    policeIn = PolicyIn.objects.get(policy_ref_id=police_id)
+    # policeIn = PolicyIn.objects.get(policy_ref_id=police_id)
     policiesOUt = PolicyOut.objects.filter(policy_ref_id=police_id)
-    devices = Device.objects.all()
-    apps = Application.objects.filter(policy_in=policeIn)
-    for app in apps:
-        print(app.render_time_range)
-        print(app.acl_list)
+    # dscps = Dscp.objects.all()
+    # for d in dscps:
+    #     print(d.dscp_value+":" + str(d.delay_ref))
+    #     print(d.dscp_value + ":" + str(d.delay))
+    #     print("delay ratio" + ":" + str(d.delay_ratio))
+    #     print("loss ratio" + ":" + str(d.loss_ratio))
+    #     print(d.dscp_value + ":" + str(d.c_ratio))
+    #     print(d.dscp_value + ":" + str(d.ratio))
+
+    for po in policiesOUt:
+        interface = Interface.objects.get(policy_out_ref=po)
+        print(interface.tuning())
+        regs = RegroupementClass.objects.filter(policy_out=po)
+        for reg in regs:
+            if reg.priority == "100":
+                print ('ef')
+            else:
+                print("------------------" )
+                if reg.oppressed_tos is not None:
+                    print(reg.oppressed_tos.dscp_value)
+                if reg.excessive_tos is not None:
+                    print(reg.excessive_tos.dscp_value)
+    # devices = Device.objects.all()
+    # apps = Application.objects.filter(policy_in=policeIn)
+    # for app in apps:
+    #     print(app.render_time_range)
+    #     print(app.acl_list)
+    # h= Dscp.objects.all()
+    # for i in h:
+    #     print(i.delay_ref)
 
     # for device in devices:
     #     print(device.no_service_policy())

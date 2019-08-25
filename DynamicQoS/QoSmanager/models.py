@@ -28,8 +28,8 @@ class BusinessApp(models.Model):
     business_type = models.ForeignKey(BusinessType, on_delete=models.CASCADE, null=True)
     match = models.CharField(max_length=45)
     recommended_dscp = models.CharField(max_length=45)
-    delay_ref = models.CharField(max_length=45)
-    loss_ref = models.CharField(max_length=45)
+    delay_ref = models.IntegerField()
+    loss_ref = models.IntegerField()
 
     @property
     def priority(self):
@@ -191,6 +191,31 @@ class RegroupementClass(models.Model):
     def name(self):
         return self.group.name
 
+    @property
+    def oppressed_tos(self):
+        oppressed = None
+        v = 0
+        dscps = Dscp.objects.filter(regroupement_class=self)
+        for tos in dscps:
+            if tos.delay_ratio >= 2 or tos.delay_ratio >= 2:
+                if tos.c_ratio > v:
+                    v = tos.c_ratio
+                    oppressed = tos
+
+        return oppressed
+
+    @property
+    def excessive_tos(self):
+        excessive = None
+        v = 0
+        dscps = Dscp.objects.filter(regroupement_class=self)
+        for tos in dscps:
+            if tos.ratio >= v:
+                v = tos.ratio
+                excessive = tos
+
+        return excessive
+
 
 class Dscp(models.Model):
     dscp_value = models.CharField(max_length=45)
@@ -198,6 +223,47 @@ class Dscp(models.Model):
     drop_min = models.CharField(max_length=45)
     drop_max = models.CharField(max_length=45)
     denominator = models.CharField(max_length=45)
+    delay = models.IntegerField(null=True, default=400)
+    loss = models.IntegerField(null=True, default=20)
+    ratio = models.IntegerField(null=True, default=40)
+
+    @property
+    def delay_ref(self):
+        apps = Application.objects.filter(mark=self.dscp_value)
+        delays = []
+        for app in apps:
+            delays.append(app.business_app.delay_ref)
+        if len(delays) == 0:
+            return self.delay
+        else:
+            return min(delays)
+
+    @property
+    def loss_ref(self):
+        apps = Application.objects.filter(mark=self.dscp_value)
+        delays = []
+        for app in apps:
+            delays.append(app.business_app.loss_ref)
+        if len(delays) == 0:
+            return self.loss
+        else:
+            return min(delays)
+
+    @property
+    def delay_ratio(self):
+        return round(self.delay / self.delay_ref)
+
+    @property
+    def loss_ratio(self):
+        return round(self.loss / self.loss_ref)
+
+    @property
+    def c_ratio(self):
+        if self.dscp_value != "EF":
+            c = int(self.dscp_value[3])
+            return c * max(self.delay_ratio, self.loss_ratio)
+        else:
+            return 0
 
 
 class Application(models.Model):
@@ -479,3 +545,34 @@ class Interface(models.Model):
 
     def __str__(self):
         return self.interface_name
+
+    def tuning_selection(self):
+        classes = RegroupementClass.objects.filter(policy_out=self.policy_out_ref, group__priority__in=["4", "3"])
+        e = 0
+        queue = None
+        for classe in classes:
+            if classe.oppressed_tos is not None and classe.excessive_tos is not None:
+                c = classe.oppressed_tos.c_ratio * int(classe.group.priority)
+                if c > e:
+                    e = c
+                    queue = classe
+
+        return queue
+
+    def tuning(self):
+        queue = self.tuning_selection()
+        if queue is not None:
+            min = queue.oppressed_tos.drop_min
+            max = queue.oppressed_tos.drop_max
+            # queue.oppressed_tos.drop_min = queue.excessive_tos.drop_min
+            # queue.oppressed_tos.drop_max = queue.excessive_tos.drop_max
+            # queue.excessive_tos.drop_min = min
+            # queue.excessive_tos.drop_max = max
+            a = self.policy_out_ref
+            env = Environment(loader=FileSystemLoader(str(MEDIA_ROOT[0]) + "/monitoring_conf/"))
+            named = env.get_template("tuning.j2")
+            config_file = named.render(a=a, queue=queue, oppressed_tos=queue.oppressed_tos,
+                                       excessive_tos=queue.excessive_tos)
+            return config_file
+        else:
+            print("noting to do ")
