@@ -11,52 +11,52 @@ from .models import *
 
 # Create your views here.
 def index(request):
-    topo = Topology.objects.create(topology_name="test2", topology_desc="test2")
-    man = Access.objects.create(management_address="172.16.1.2", username="yassine", password="15")
-    device = Device.objects.create(hostname="router1", topology_ref=topo, management=man)
-    int1 = Interface.objects.create(interface_name="g0/0", device_ref=device, ingress=True)
-    int2 = Interface.objects.create(interface_name="g0/1", device_ref=device, ingress=False)
+    # topo = Topology.objects.create(topology_name="test2", topology_desc="test2")
+    # man = Access.objects.create(management_address="172.16.1.2", username="yassine", password="15")
+    # device = Device.objects.create(hostname="router1", topology_ref=topo, management=man)
+    # int1 = Interface.objects.create(interface_name="g0/0", device_ref=device, ingress=True)
+    # int2 = Interface.objects.create(interface_name="g0/1", device_ref=device, ingress=False)
     # print(device.discovery_application())
     # ################################################################################"
-    # url = "http://127.0.0.1:8000/api/v1/topology"
-    # r = requests.get(url)
+    url = "http://127.0.0.1:8000/api/v1/topology"
+    r = requests.get(url)
     # # #
-    # topologies = (r.json())
-    # for topo in topologies['topologies']:
-    #     top = Topology.objects.create(topology_name=topo['topology_name'], topology_desc=topo['topology_desc'])
-    #     url = "http://127.0.0.1:8000/api/v1/topology?name=" + topo['topology_name']
-    #     r = requests.get(url)
-    #     devices = (r.json())
-    #     for device in devices['devices']:
-    #         man = device['management']
-    #         mana = Access.objects.create(management_interface=man['management_interface'],
-    #                                      management_address=man['management_address'],
-    #                                      username=man['username'],
-    #                                      password=man['password'])
-    #         dev = Device.objects.create(hostname=device['hostname'], topology_ref=top, management=mana)
-    #
-    #         interfaces = device['interfaces']
-    #         for interface in interfaces:
-    #             Interface.objects.create(device_ref=dev,
-    #                                      interface_name=interface['interface_name'],
-    #                                      ingress=interface['ingress'])
-    #     devices = Device.objects.filter(topology_ref=top)
-    #     for device in devices:
-    #         connection = device.connect()
-    #         interfaces = connection.get_interfaces()
-    #         for interface in interfaces:
-    #             print(interface)
-    #             print(interfaces[interface]['description'])
-    #             if interfaces[interface]['description'] == "#ingress":
-    #                 Interface.objects.create(device_ref=device,
-    #                                          interface_name=interface,
-    #                                          ingress=True)
-    #             if interfaces[interface]['description'] == "#wan":
-    #                 Interface.objects.create(device_ref=device,
-    #                                          interface_name=interface,
-    #                                          wan=True)
-    #
-    #         connection.close()
+    topologies = (r.json())
+    for topo in topologies['topologies']:
+        top = Topology.objects.create(topology_name=topo['topology_name'], topology_desc=topo['topology_desc'])
+        url = "http://127.0.0.1:8000/api/v1/topology?name=" + topo['topology_name']
+        r = requests.get(url)
+        devices = (r.json())
+        for device in devices['devices']:
+            man = device['management']
+            mana = Access.objects.create(management_interface=man['management_interface'],
+                                         management_address=man['management_address'],
+                                         username=man['username'],
+                                         password=man['password'])
+            dev = Device.objects.create(hostname=device['hostname'], topology_ref=top, management=mana)
+
+            interfaces = device['interfaces']
+            for interface in interfaces:
+                Interface.objects.create(device_ref=dev,
+                                         interface_name=interface['interface_name'],
+                                         egress=True)
+        devices = Device.objects.filter(topology_ref=top)
+        for device in devices:
+            connection = device.connect()
+            interfaces = connection.get_interfaces()
+            for interface in interfaces:
+                print(interface)
+                print(interfaces[interface]['description'])
+                if interfaces[interface]['description'] == "#ingress":
+                    Interface.objects.create(device_ref=device,
+                                             interface_name=interface,
+                                             ingress=True)
+                if interfaces[interface]['description'] == "#wan":
+                    Interface.objects.create(device_ref=device,
+                                             interface_name=interface,
+                                             wan=True)
+
+            connection.close()
     #         print('tttt')
 
     # # # print(type(topo))
@@ -381,6 +381,7 @@ def policy_deployment(request, police_id):
                 print ('ef')
             else:
                 print("------------------" )
+                print("test commit")
                 if reg.oppressed_tos is not None:
                     print(reg.oppressed_tos.dscp_value)
                 if reg.excessive_tos is not None:
