@@ -381,6 +381,7 @@ def policy_deployment(request, police_id):
                 print ('ef')
             else:
                 print("------------------" )
+                print("test commit")
                 if reg.oppressed_tos is not None:
                     print(reg.oppressed_tos.dscp_value)
                 if reg.excessive_tos is not None:
