@@ -1,4 +1,6 @@
 from background_task import background
+import requests
+
 from .utils import *
 from .models import *
 from datetime import datetime
@@ -54,3 +56,15 @@ def Initialize_mqtt_client():
     
     my_client.loop_forever()
     return None
+
+
+@background(queue='q1')
+def add_device_api_call1(topology_name,management_interface,management_address,username,password):
+    json_data={"management": {"management_interface": management_interface,"management_address": management_address,"username": username,"password": password},"topology_name":topology_name}
+    print(topology_name,management_address,management_interface,username,password)
+    api_url="http://localhost:8000/api/v1/add-device"
+    response=requests.post(url=api_url,json=json_data)
+    print(response.status_code)
+    print(response.content)
+
+    return response.content

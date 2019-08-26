@@ -25,6 +25,10 @@ from QoSmonitor.tasks import *
 
 from QoSmonitor.models import access
 
+from QoSmonitor.tasks import add_device_api_call
+
+from QoSmonitor.tasks import add_device_api_call1
+
 
 @login_required(login_url='/login/')
 def home(request):
@@ -99,13 +103,6 @@ def save_json_topology(request,topo_id):
         topology_ins=topology.objects.get(id=topo_id)
 
         devices_list=[]
-        
-        try:
-            topo.configure_ntp()
-            topo.configure_scp()
-            topo.configure_snmp()
-        except Exception as e:
-            print(e)
         for device_str in data['nodeDataArray']:
             """
                getting nodes data
@@ -138,16 +135,8 @@ def save_json_topology(request,topo_id):
                 creating the devices
                 """
                 print(address+' '+location+' '+username+' '+password+' '+secret)
-                new_management=access(management_interface=address,username=username,password=password)
-                new_dv=device(management=new_management)
-                new_dv.get_fqdn()
-                new_dv.save()
-                devices_list.append(new_dv)
+                add_device_api_call1(topology_name=topology_ins.topology_name,management_interface="lo0",management_address=address,username=username,password=password)
 
-        topology_ins.update(set__devices=devices_list)
-        topology_ins.get_networks()
-        topology_ins=topology.objects(topo_id)
-        topology_ins.create_links()
 
 
 
