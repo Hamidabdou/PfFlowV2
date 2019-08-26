@@ -11,6 +11,8 @@ from django.urls import reverse
 from mongoengine import *
 from django.shortcuts import render, redirect
 from QoSmonitor.models import *
+from threading import Thread
+import requests
 # Create your views here.
 
 from QoSGui.forms import *
@@ -25,7 +27,7 @@ from QoSmonitor.tasks import *
 
 from QoSmonitor.models import access
 
-from QoSmonitor.tasks import add_device_api_call
+
 
 from QoSmonitor.tasks import add_device_api_call1
 
@@ -88,7 +90,15 @@ def topologies(request):
 #                 "linkDataArray": []}"""})
 #     ctx = {'json':JsonFile,'id':topo_id}
 #     return render(request,'dragndrop.html',context=ctx)
+def add_device_api_call(topology_name,management_interface,management_address,username,password):
+    json_data={"management": {"management_interface": management_interface,"management_address": management_address,"username": username,"password": password},"topology_name":topology_name}
+    print(topology_name,management_address,management_interface,username,password)
+    api_url="http://localhost:8000/api/v1/add-device"
+    response=requests.post(url=api_url,json=json_data)
+    print(response.status_code)
+    print(response.content)
 
+    return response.content
 
 def save_json_topology(request,topo_id):
     JsonFile = GetJsonFile(request.POST)
@@ -101,7 +111,7 @@ def save_json_topology(request,topo_id):
             myfile.write(request.POST['Text'])
 
         topology_ins=topology.objects.get(id=topo_id)
-
+        threads = []
         devices_list=[]
         for device_str in data['nodeDataArray']:
             """
@@ -135,9 +145,13 @@ def save_json_topology(request,topo_id):
                 creating the devices
                 """
                 print(address+' '+location+' '+username+' '+password+' '+secret)
-                add_device_api_call1(topology_name=topology_ins.topology_name,management_interface="lo0",management_address=address,username=username,password=password)
-
-
+                add_device_api_call(topology_name=topology_ins.topology_name,management_interface="lo0",management_address=address,username=username,password=password)
+                threads.append(Thread(target=add_device_api_call,args=(topology_ins.topology_name,"lo0",address,username,password)))
+        for th in threads:
+            th.start()
+        for th in threads:
+            th.join()
+        
 
 
 

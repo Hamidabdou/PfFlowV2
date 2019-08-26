@@ -5,6 +5,7 @@ from scapy.layers.netflow import NetflowSession
 from functools import partial
 from .models import * 
 from ntplib import *
+import requests
 
 def calculate_time(sysUptime, collection_time,time):
     return (collection_time - (sysUptime/1000)) + time/1000
