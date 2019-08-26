@@ -295,6 +295,7 @@ class topology(DynamicDocument):
                                             if (interface.interface_name == neighbor["interfaces"]["to"]):
                                                     interfacet = interface
                                 except Exception as e :
+                                    print(e)
                                     print("Unable to connect device in phb behavior or cisco device from another entity")
                                 if(len(self.links) == 0):
                                     link_ins = link(from_device = devicef , from_interface = interfacef , to_device = devicet,to_interface = interfacet)

@@ -497,21 +497,21 @@ class Device(models.Model):
         return set(list_app)
 
     def ingress(self):
-        interfaces = Interface.objects.filter(ingress=True, device=self)
+        interfaces = Interface.objects.filter(ingress=True, device_ref=self)
         if interfaces is not None:
             return True
         else:
             return False
 
     def egress(self):
-        interfaces = Interface.objects.filter(egress=True, device=self)
+        interfaces = Interface.objects.filter(egress=True, device_ref=self)
         if interfaces is not None:
             return True
         else:
             return False
 
     def wan(self):
-        interfaces = Interface.objects.filter(wan=True, device=self)
+        interfaces = Interface.objects.filter(wan=True, device_ref=self)
         if interfaces is not None:
             return True
         else:
