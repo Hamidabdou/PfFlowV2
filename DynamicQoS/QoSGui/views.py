@@ -145,10 +145,12 @@ def save_json_topology(request,topo_id):
                 creating the devices
                 """
                 print(address+' '+location+' '+username+' '+password+' '+secret)
-                add_device_api_call(topology_name=topology_ins.topology_name,management_interface="lo0",management_address=address,username=username,password=password)
+                # add_device_api_call(topology_name=topology_ins.topology_name,management_interface="lo0",management_address=address,username=username,password=password)
                 threads.append(Thread(target=add_device_api_call,args=(topology_ins.topology_name,"lo0",address,username,password)))
         for th in threads:
+            print("start thread")
             th.start()
+
         for th in threads:
             th.join()
 
