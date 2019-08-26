@@ -37,9 +37,10 @@ def index(request):
 
             interfaces = device['interfaces']
             for interface in interfaces:
-                Interface.objects.create(device_ref=dev,
-                                         interface_name=interface['interface_name'],
-                                         egress=True)
+                if interface['interface_name'] != "Loopback0":
+                    Interface.objects.create(device_ref=dev,
+                                             interface_name=interface['interface_name'],
+                                             egress=True)
         devices = Device.objects.filter(topology_ref=top)
         for device in devices:
             connection = device.connect()
@@ -48,13 +49,27 @@ def index(request):
                 print(interface)
                 print(interfaces[interface]['description'])
                 if interfaces[interface]['description'] == "#ingress":
-                    Interface.objects.create(device_ref=device,
-                                             interface_name=interface,
-                                             ingress=True)
+                    inter = Interface.objects.filter(device_ref=device, interface_name=interface)
+                    if len(inter) != 0:
+                        i = Interface.objects.get(device_ref=device, interface_name=interface)
+                        i.ingress = True
+                        i.egress = False
+                        i.save()
+                    else:
+                        Interface.objects.create(device_ref=device,
+                                                 interface_name=interface,
+                                                 ingress=True)
                 if interfaces[interface]['description'] == "#wan":
-                    Interface.objects.create(device_ref=device,
-                                             interface_name=interface,
-                                             wan=True)
+                    inter = Interface.objects.filter(device_ref=device, interface_name=interface)
+                    if len(inter) != 0:
+                        i = Interface.objects.get(device_ref=device, interface_name=interface)
+                        i.wan = True
+                        i.egress = False
+                        i.save()
+                    else:
+                        Interface.objects.create(device_ref=device,
+                                                 interface_name=interface,
+                                                 wan=True)
 
             connection.close()
     #         print('tttt')
@@ -102,7 +117,7 @@ def index(request):
             BusinessApp(delay_ref=app['delay_ref'], loss_ref=app['loss_ref'], name=app['name'], match=app['match'],
                         recommended_dscp=app['recommended_dscp'],
                         business_type=BusinessType.objects.get(name=app['business_type'])).save()
-    #
+
     # apps = Application.objects.filter(policy_in=police)
     # print(apps)
     # for ap in apps:
@@ -361,8 +376,39 @@ def policies(request):
 
 
 def policy_deployment(request, police_id):
-    # policeIn = PolicyIn.objects.get(policy_ref_id=police_id)
+    policeIn = PolicyIn.objects.get(policy_ref_id=police_id)
+    devices = Device.objects.all()
+    apps = Application.objects.filter(policy_in=policeIn)
+    # for device in devices:
+    #     if device.wan() or device.ingress():
+    #         connection = device.connect()
+    #         for app in apps:
+    #             time_config = app.render_time_range
+    #             connection.load_merge_candidate(config=time_config)
+    #             connection.commit_config()
+    #             app_config = app.acl_list
+    #             connection.load_merge_candidate(config=app_config)
+    #             connection.commit_config()
+    #         config_file = policeIn.render_policy
+    #         connection.load_merge_candidate(config=config_file)
+    #         connection.commit_config()
+    #         connection.close()
     policiesOUt = PolicyOut.objects.filter(policy_ref_id=police_id)
+    # for device in devices:
+    #     if device.egress():
+    #         connection = device.connect()
+    #         for policy in policiesOUt:
+    #             config_file = policy.render_policy
+    #             connection.load_merge_candidate(config=config_file)
+    #             connection.commit_config()
+    #         connection.close()
+    for device in devices:
+        connection = device.connect()
+        config_file = device.service_policy()
+        connection.load_merge_candidate(config=config_file)
+        connection.commit_config()
+        connection.close()
+
     # dscps = Dscp.objects.all()
     # for d in dscps:
     #     print(d.dscp_value+":" + str(d.delay_ref))
@@ -372,22 +418,21 @@ def policy_deployment(request, police_id):
     #     print(d.dscp_value + ":" + str(d.c_ratio))
     #     print(d.dscp_value + ":" + str(d.ratio))
 
-    for po in policiesOUt:
-        interface = Interface.objects.get(policy_out_ref=po)
-        print(interface.tuning())
-        regs = RegroupementClass.objects.filter(policy_out=po)
-        for reg in regs:
-            if reg.priority == "100":
-                print ('ef')
-            else:
-                print("------------------" )
-                print("test commit")
-                if reg.oppressed_tos is not None:
-                    print(reg.oppressed_tos.dscp_value)
-                if reg.excessive_tos is not None:
-                    print(reg.excessive_tos.dscp_value)
-    # devices = Device.objects.all()
-    # apps = Application.objects.filter(policy_in=policeIn)
+    # for po in policiesOUt:
+    #     interface = Interface.objects.get(policy_out_ref=po)
+    #     print(interface.tuning())
+    #     regs = RegroupementClass.objects.filter(policy_out=po)
+    #     for reg in regs:
+    #         if reg.priority == "100":
+    #             print('ef')
+    #         else:
+    #             print("------------------")
+    #             print("test commit")
+    #             if reg.oppressed_tos is not None:
+    #                 print(reg.oppressed_tos.dscp_value)
+    #             if reg.excessive_tos is not None:
+    #                 print(reg.excessive_tos.dscp_value)
+
     # for app in apps:
     #     print(app.render_time_range)
     #     print(app.acl_list)
@@ -444,6 +489,45 @@ def policy_deployment(request, police_id):
     #     print(e)
 
     return HttpResponse("okay")
+
+
+def policy_remove(request, police_id):
+    devices = Device.objects.all()
+    # for device in devices:
+    #     connection = device.connect()
+    #     config_file = device.no_service_policy()
+    #     connection.load_merge_candidate(config=config_file)
+    #     connection.commit_config()
+    #     connection.close()
+    policiesOUt = PolicyOut.objects.filter(policy_ref_id=police_id)
+    # for device in devices:
+    #     if device.egress():
+    #         connection = device.connect()
+    #         for policy in policiesOUt:
+    #             config_file = policy.render_no_policy
+    #             connection.load_merge_candidate(config=config_file)
+    #             connection.commit_config()
+    #         connection.close()
+    policeIn = PolicyIn.objects.get(policy_ref_id=police_id)
+    # for device in devices:
+    #     if device.ingress() or device.wan():
+    #         connection = device.connect()
+    #         config_file = policeIn.render_no_policy
+    #         connection.load_merge_candidate(config=config_file)
+    #         connection.commit_config()
+    #         connection.close()
+    apps = Application.objects.filter(policy_in=policeIn)
+    env = Environment(loader=FileSystemLoader(str(MEDIA_ROOT[0]) + "/monitoring_conf/"))
+    output = env.get_template("remove_applications.j2")
+    config_file = output.render(applications=apps)
+    for device in devices:
+        if device.ingress() or device.wan():
+            connection = device.connect()
+            connection.load_merge_candidate(config=config_file)
+            connection.commit_config()
+            connection.close()
+
+    return HttpResponse("removed seccuss")
 
 
 def load_applications(request):

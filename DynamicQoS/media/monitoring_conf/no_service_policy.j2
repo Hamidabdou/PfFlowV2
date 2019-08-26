@@ -2,7 +2,10 @@
 interface {{ interface.interface_name }}
 {% if interface.ingress == True %}
 no service-policy input {{ policy_in.name }}
-{% else %}
+{% elif  interface.egress == True %}
+no service-policy output {{ interface.policy_out_ref.name }}
+{% elif  interface.wan == True %}
+no service-policy input {{ policy_in.name }}
 no service-policy output {{ interface.policy_out_ref.name }}
 {% endif %}
 {% endfor %}
