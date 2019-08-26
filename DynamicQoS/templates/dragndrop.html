@@ -999,13 +999,17 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-secondary btn-md">Yes</button>
+                        <button id="yesbutton" type="submit" class="btn btn-secondary btn-md">Yes</button>
 
                         <script>
-                        function myFunction() {
-                          $('#exampleModalCenter').modal('hide');
-                        return false;
-}
+                            $( "#yesbutton" ).click(function() {
+                                $(".modal-footer").remove();
+                                $(".modal-body").append("<div class=\"cls-spinner\">\n" +
+                                    " <div class=\"cls-circle cls-spin\"></div>\n" +
+                                    "</div>")
+
+                            });
+
                         </script>
 
                     </div>
