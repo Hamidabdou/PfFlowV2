@@ -129,6 +129,6 @@ def add_device_api_call(topology_name,management_interface,management_address,us
     api_url="http://localhost:8000/api/v1/add-device"
     response=requests.post(url=api_url,json=json_data)
     print(response.status_code)
-    print(response.content)
+    # print(response.content)
 
     return response.content

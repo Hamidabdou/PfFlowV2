@@ -38,9 +38,6 @@ class AddDevice(generics.CreateAPIView):
     serializer_class = deviceSerializer
 
     def perform_create(self, serializer):
-        print("request data")
-        print(self.request.data)
-        print(self.request.data.get("management")['username'])
 
         if self.request.data.get("management")==None:
             addr = self.request.data.get("management.management_address")
@@ -56,9 +53,7 @@ class AddDevice(generics.CreateAPIView):
         if len(topology_qs) == 0:
             raise sr.ValidationError("topology doesn't exists")
         else:
-            print("------")
-            print(addr,user,passwd)
-            print("------")
+
             device_connection = driver(addr, user, passwd, timeout=5)
             fqdn = None
             device_list = topology_qs[0].devices

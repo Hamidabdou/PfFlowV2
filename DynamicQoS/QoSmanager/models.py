@@ -223,6 +223,12 @@ class Dscp(models.Model):
     drop_min = models.CharField(max_length=45)
     drop_max = models.CharField(max_length=45)
     denominator = models.CharField(max_length=45)
+    drop_min_old = models.CharField(max_length=45)
+    drop_max_old = models.CharField(max_length=45)
+    denominator_old = models.CharField(max_length=45)
+    drop_min_new = models.CharField(max_length=45)
+    drop_max_new = models.CharField(max_length=45)
+    denominator_new = models.CharField(max_length=45)
     delay = models.IntegerField(null=True, default=400)
     loss = models.IntegerField(null=True, default=20)
     ratio = models.IntegerField(null=True, default=40)
@@ -576,3 +582,12 @@ class Interface(models.Model):
             return config_file
         else:
             print("noting to do ")
+# class TuningHistory(models.Model):
+#     tos = models.ForeignKey(Dscp, on_delete=models.CASCADE, null=True)
+#
+#     @property
+#     def tos_interface(self):
+#
+#         return self.tos.
+
+
