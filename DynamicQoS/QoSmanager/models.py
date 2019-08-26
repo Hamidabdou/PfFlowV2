@@ -225,10 +225,8 @@ class Dscp(models.Model):
     denominator = models.CharField(max_length=45)
     drop_min_old = models.CharField(max_length=45)
     drop_max_old = models.CharField(max_length=45)
-    denominator_old = models.CharField(max_length=45)
     drop_min_new = models.CharField(max_length=45)
     drop_max_new = models.CharField(max_length=45)
-    denominator_new = models.CharField(max_length=45)
     delay = models.IntegerField(null=True, default=400)
     loss = models.IntegerField(null=True, default=20)
     ratio = models.IntegerField(null=True, default=40)
@@ -582,12 +580,32 @@ class Interface(models.Model):
             return config_file
         else:
             print("noting to do ")
-# class TuningHistory(models.Model):
-#     tos = models.ForeignKey(Dscp, on_delete=models.CASCADE, null=True)
-#
-#     @property
-#     def tos_interface(self):
-#
-#         return self.tos.
 
 
+class TuningHistory(models.Model):
+    tos = models.ForeignKey(Dscp, on_delete=models.CASCADE, null=True)
+
+    @property
+    def tos_interface(self):
+        interface = Interface.objects.get(policy_out_ref=self.tos.regroupement_class.policy_out)
+        return interface.interface_name
+
+    @property
+    def dscp_value(self):
+        return self.tos.dscp_value
+
+    @property
+    def drop_min_old(self):
+        return self.tos.drop_min_old
+
+    @property
+    def drop_max_old(self):
+        return self.tos.drop_max_old
+
+    @property
+    def drop_min_new(self):
+        return self.tos.drop_max_new
+
+    @property
+    def drop_max_new(self):
+        return self.tos.drop_max_new
