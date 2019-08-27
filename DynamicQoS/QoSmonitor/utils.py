@@ -28,16 +28,26 @@ def dbcollect(phb_behavior:topology,pkt):
                     netflow_fields_ins.first_switched = datetime.datetime.utcfromtimestamp(calculate_time(sysUptime,collection_time,record.FIRST_SWITCHED))
                     netflow_fields_ins.last_switched = datetime.datetime.utcfromtimestamp(calculate_time(sysUptime,collection_time,record.LAST_SWITCHED))
                     time = (record.LAST_SWITCHED - record.FIRST_SWITCHED) / 100
+                    if (time==0):
+                        time=0.0001
                     netflow_fields_ins.bandwidth = int.from_bytes(record.IN_BYTES,'big') * 8 / time  #bps 
                     input_interface = monitor.get_interface_by_index(int.from_bytes(record.INPUT_SNMP,'big'))
                     netflow_fields_ins.input_int = input_interface
                     output_interface = monitor.get_interface_by_index(int.from_bytes(record.OUTPUT_SNMP,'big'))
                     netflow_fields_ins.output_int = output_interface
                     netflow_fields_ins.collection_time = datetime.datetime.utcfromtimestamp(collection_time)
+                    print("-------------")
+                    print(record.IPV4_DST_ADDR)
+                    print(record.L4_DST_PORT)
+                    print("-------------")
                     flow_input = "{}:{}->{}:{}|{}|{}|{}".format(str(record.IPV4_SRC_ADDR),str(record.L4_SRC_PORT),str(record.IPV4_DST_ADDR) , str(record.L4_SRC_PORT) ,str(record.TOS) , str(int.from_bytes(record.APPLICATION_ID,'big')),str(record.PROTOCOL))
                     flow_hash = hashlib.md5(flow_input.encode())
+                    print("-----bidayet el  khra------")
                     src_device , dst_device = phb_behavior.get_ip_sla_devices(record)
+
+                    print("-----wast el  khra------")
                     print(src_device.hostname, dst_device.hostname)
+                    print("-----nihayat el khra --------")
                     flow_exist = None
                     try:
                         flow_exist = flow.objects(flow_id= flow_hash.hexdigest())[0]

@@ -1,4 +1,12 @@
 {"applications":[
+  {"name":"http","business_type":"Application","match":"match protocol http", "recommended_dscp": "EF","delay_ref": 100,"loss_ref": 1},
+  {"name":"eigrp","business_type":"Application","match":"match protocol eigrp", "recommended_dscp": "EF","delay_ref": 100,"loss_ref": 1},
+  {"name":"ssh","business_type":"Application","match":"match protocol ssh", "recommended_dscp": "EF","delay_ref": 100,"loss_ref": 1},
+  {"name":"icmp","business_type":"Application","match":"match protocol icmp", "recommended_dscp": "EF","delay_ref": 100,"loss_ref": 1},
+  {"name":"skype","business_type":"Application","match":"match protocol skype", "recommended_dscp": "EF","delay_ref": 100,"loss_ref": 1},
+  {"name":"snmp","business_type":"Application","match":"match protocol snmp", "recommended_dscp": "EF","delay_ref": 100,"loss_ref": 1},
+  {"name":"smtp","business_type":"Application","match":"match protocol smtp", "recommended_dscp": "EF","delay_ref": 100,"loss_ref": 1},
+  {"name":"secure-http","business_type":"Application","match":"match protocol secure-http", "recommended_dscp": "EF","delay_ref": 100,"loss_ref": 1},
   {"name":"ip-camera","business_type":"Application","match":"match application ip-camera", "recommended_dscp": "EF","delay_ref": 100,"loss_ref": 1},
   {"name":"rtp","business_type":"Application","match":"match application rtp", "recommended_dscp": "EF","delay_ref": 100,"loss_ref": 1},
   {"name":"rtsp","business_type":"Application","match":"match application rtsp", "recommended_dscp": "EF","delay_ref": 100,"loss_ref": 1},
