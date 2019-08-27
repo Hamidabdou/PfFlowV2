@@ -12,7 +12,6 @@ policy-map {{a.name}}
 {% if class.group.priority=="EF" %}
 class {{class.name}}
 priority {{ class.priority }}
-compress header ip rtp
 {% else %}
 class {{class.name}}
 bandwidth percent {{class.bandwidth}}

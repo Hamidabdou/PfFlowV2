@@ -1,4 +1,6 @@
 import json
+from threading import Thread
+
 from DynamicQoS.settings import MEDIA_ROOT
 import requests
 from django.db.models import Q
@@ -376,9 +378,17 @@ def policies(request):
 
 
 def policy_deployment(request, police_id):
-    policeIn = PolicyIn.objects.get(policy_ref_id=police_id)
+    # policeIn = PolicyIn.objects.get(policy_ref_id=police_id)
     devices = Device.objects.all()
-    apps = Application.objects.filter(policy_in=policeIn)
+    threads = []
+    for device in devices:
+        threads.append(Thread(target=device.deploy_policy, args=police_id))
+    for th in threads:
+        print("start thread")
+        th.start()
+    for th in threads:
+        th.join()
+    # apps = Application.objects.filter(policy_in=policeIn)
     # for device in devices:
     #     if device.wan() or device.ingress():
     #         connection = device.connect()
@@ -393,7 +403,7 @@ def policy_deployment(request, police_id):
     #         connection.load_merge_candidate(config=config_file)
     #         connection.commit_config()
     #         connection.close()
-    policiesOUt = PolicyOut.objects.filter(policy_ref_id=police_id)
+    # policiesOUt = PolicyOut.objects.filter(policy_ref_id=police_id)
     # for device in devices:
     #     if device.egress():
     #         connection = device.connect()
@@ -402,12 +412,13 @@ def policy_deployment(request, police_id):
     #             connection.load_merge_candidate(config=config_file)
     #             connection.commit_config()
     #         connection.close()
-    for device in devices:
-        connection = device.connect()
-        config_file = device.service_policy()
-        connection.load_merge_candidate(config=config_file)
-        connection.commit_config()
-        connection.close()
+    # for device in devices:
+    #     device.deploy_policy(police_id)
+        # connection = device.connect()
+        # config_file = device.service_policy()
+        # connection.load_merge_candidate(config=config_file)
+        # connection.commit_config()
+        # connection.close()
 
     # dscps = Dscp.objects.all()
     # for d in dscps:
@@ -493,13 +504,21 @@ def policy_deployment(request, police_id):
 
 def policy_remove(request, police_id):
     devices = Device.objects.all()
+    threads = []
+    for device in devices:
+        threads.append(Thread(target=device.remove_policy, args=police_id))
+    for th in threads:
+        print("start thread")
+        th.start()
+    for th in threads:
+        th.join()
     # for device in devices:
     #     connection = device.connect()
     #     config_file = device.no_service_policy()
     #     connection.load_merge_candidate(config=config_file)
     #     connection.commit_config()
     #     connection.close()
-    policiesOUt = PolicyOut.objects.filter(policy_ref_id=police_id)
+    # policiesOUt = PolicyOut.objects.filter(policy_ref_id=police_id)
     # for device in devices:
     #     if device.egress():
     #         connection = device.connect()
@@ -508,7 +527,7 @@ def policy_remove(request, police_id):
     #             connection.load_merge_candidate(config=config_file)
     #             connection.commit_config()
     #         connection.close()
-    policeIn = PolicyIn.objects.get(policy_ref_id=police_id)
+    # policeIn = PolicyIn.objects.get(policy_ref_id=police_id)
     # for device in devices:
     #     if device.ingress() or device.wan():
     #         connection = device.connect()
@@ -516,16 +535,16 @@ def policy_remove(request, police_id):
     #         connection.load_merge_candidate(config=config_file)
     #         connection.commit_config()
     #         connection.close()
-    apps = Application.objects.filter(policy_in=policeIn)
-    env = Environment(loader=FileSystemLoader(str(MEDIA_ROOT[0]) + "/monitoring_conf/"))
-    output = env.get_template("remove_applications.j2")
-    config_file = output.render(applications=apps)
-    for device in devices:
-        if device.ingress() or device.wan():
-            connection = device.connect()
-            connection.load_merge_candidate(config=config_file)
-            connection.commit_config()
-            connection.close()
+    # apps = Application.objects.filter(policy_in=policeIn)
+    # env = Environment(loader=FileSystemLoader(str(MEDIA_ROOT[0]) + "/monitoring_conf/"))
+    # output = env.get_template("remove_applications.j2")
+    # config_file = output.render(applications=apps)
+    # for device in devices:
+    #     if device.ingress() or device.wan():
+    #         connection = device.connect()
+    #         connection.load_merge_candidate(config=config_file)
+    #         connection.commit_config()
+    #         connection.close()
 
     return HttpResponse("removed seccuss")
 
@@ -535,4 +554,4 @@ def load_applications(request):
     business_apps = BusinessApp.objects.filter(business_type_id=business_type_id).order_by('name')
     return render(request, 'application_dropdown_list_options.html', {'business_apps': business_apps})
 
-# Create your views here.
+

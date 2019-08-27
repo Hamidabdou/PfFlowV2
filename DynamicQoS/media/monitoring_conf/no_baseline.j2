@@ -1,0 +1,10 @@
+{{device.no_service_policy()}}
+{% if device.wan() or device.ingress() %}
+{{police_in.render_no_policy}}
+{{police_in.remove_applications}}
+{% endif %}
+{% if device.egress() %}
+{% for policy in policies %}
+{{policy.render_no_policy}}
+{% endfor %}
+{% endif %}
