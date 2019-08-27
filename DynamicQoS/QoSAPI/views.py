@@ -56,13 +56,14 @@ class AddDevice(generics.CreateAPIView):
 
             device_connection = driver(addr, user, passwd, timeout=5)
             fqdn = None
-            device_list = topology_qs[0].devices
+
             device_connection.open()
             fqdn = device_connection.get_facts()['fqdn']
             device_connection.close()
             device_serializer = serializer.save(hostname=fqdn)
             new_device = device.objects.get(id=device_serializer.id)
             other_list = [new_device]
+            device_list = topology_qs[0].devices
             for device_cursor in device_list:
                 other_list.append(device.objects.get(id=device_cursor.id))
             topology_qs[0].update(set__devices=other_list)

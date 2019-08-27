@@ -76,18 +76,6 @@ class PolicyIn(models.Model):
         named = env.get_template("policyIn.j2")
         config_file = named.render(classes=classes, a=self)
         config = config_file.splitlines()
-        # driver = napalm.get_network_driver('ios')
-        # device = driver(hostname='192.168.5.1', username='admin',
-        #                 password='admin')
-        #
-        # print('Opening ...')
-        # device.open()
-        # print('Loading replacement candidate ...')
-        # device.load_merge_candidate(config=config_file)
-        # print('\nDiff:')
-        # print(device.compare_config())
-        # print('Committing ...')
-
         return config_file
 
     @property
@@ -109,6 +97,22 @@ class PolicyIn(models.Model):
         # print(device.compare_config())
         # print('Committing ...')
 
+        return config_file
+
+    @property
+    def remove_applications(self):
+        apps = Application.objects.filter(policy_in=self)
+        env = Environment(loader=FileSystemLoader(str(MEDIA_ROOT[0]) + "/monitoring_conf/"))
+        output = env.get_template("remove_applications.j2")
+        config_file = output.render(applications=apps)
+        return config_file
+
+    @property
+    def add_applications(self):
+        apps = Application.objects.filter(policy_in=self)
+        env = Environment(loader=FileSystemLoader(str(MEDIA_ROOT[0]) + "/monitoring_conf/"))
+        output = env.get_template("add_applications.j2")
+        config_file = output.render(applications=apps)
         return config_file
 
 
@@ -271,19 +275,6 @@ class Dscp(models.Model):
 
 
 class Application(models.Model):
-    # Low, Med, High = "1", "2", "3"
-    # DROP = (
-    #     (Low, "1"),
-    #     (Med, "2"),
-    #     (High, "3")
-    # )
-    # Low, Med, High, Priority = "1", "2", "3", "4"
-    # PRIORITY = (
-    #     (Low, "1"),
-    #     (Med, "2"),
-    #     (High, "3"),
-    #     (Priority, "4")
-    # )
     EF, AF43, AF42, AF41, AF33, AF32, AF23, AF21 = "EF", "AF43", "AF42", "AF41", "AF33", "AF32", "AF23", "AF21"
     DSCP = ((EF, "EF"),
             (AF43, "AF43"),
@@ -304,8 +295,6 @@ class Application(models.Model):
     business_type = models.ForeignKey(BusinessType, on_delete=models.CASCADE, null=True)
     business_app = models.ForeignKey(BusinessApp, on_delete=models.CASCADE, null=True)
     policy_in = models.ForeignKey(PolicyIn, on_delete=models.CASCADE, null=True)
-    # app_priority = models.CharField(max_length=20, choices=PRIORITY)
-    # drop_prob = models.CharField(max_length=20, choices=DROP)
     mark = models.CharField(max_length=20, choices=DSCP)
     dscp = models.ForeignKey(Dscp, on_delete=models.CASCADE, null=True)
     group = models.ForeignKey(Group, on_delete=models.CASCADE, null=True)
@@ -536,6 +525,86 @@ class Device(models.Model):
         output = env.get_template("no_service_policy.j2")
         config_file = output.render(interfaces=interfaces, policy_in=policy_in)
         return config_file
+
+    def deploy_policy(self, policy_id):
+        police_in = PolicyIn.objects.get(policy_ref_id=policy_id)
+        interfaces = Interface.objects.filter(device_ref=self, egress=True)
+        interfaces2 = Interface.objects.filter(device_ref=self, wan=True)
+        policies_out = []
+        for interface in interfaces:
+            policies_out.append(interface.policy_out_ref)
+        for interface in interfaces2:
+            policies_out.append(interface.policy_out_ref)
+        env = Environment(loader=FileSystemLoader(str(MEDIA_ROOT[0]) + "/monitoring_conf/"))
+        output = env.get_template("baseline.j2")
+        config_file = output.render(policies=policies_out, device=self, police_in=police_in)
+        connection = self.connect()
+        print(connection)
+        connection.load_merge_candidate(config=config_file)
+        print(connection.compare_config())
+        connection.commit_config()
+        connection.close()
+        # if self.wan() or self.ingress():
+        #     config_file = police_in.add_applications
+        #     connection.load_merge_candidate(config=config_file)
+        #     connection.commit_config()
+        #     config_policy = police_in.render_policy
+        #     connection.load_merge_candidate(config=config_policy)
+        #     connection.commit_config()
+        # if self.egress():
+        #     env = Environment(loader=FileSystemLoader(str(MEDIA_ROOT[0]) + "/monitoring_conf/"))
+        #     output = env.get_template("all_policies.j2")
+        #     config_file = output.render(policies=policies_out)
+        #     connection.load_merge_candidate(config=config_file)
+        #     connection.commit_config()
+        # conf = self.service_policy()
+        # connection.load_merge_candidate(config=conf)
+        # connection.commit_config()
+        # connection.close()
+
+        return self.hostname + "this device Done"
+
+    def remove_policy(self, policy_id):
+        police_in = PolicyIn.objects.get(policy_ref_id=policy_id)
+        interfaces = Interface.objects.filter(device_ref=self, egress=True)
+        interfaces2 = Interface.objects.filter(device_ref=self, wan=True)
+        policies_out = []
+        for interface in interfaces:
+            policies_out.append(interface.policy_out_ref)
+        for interface in interfaces2:
+            policies_out.append(interface.policy_out_ref)
+        env = Environment(loader=FileSystemLoader(str(MEDIA_ROOT[0]) + "/monitoring_conf/"))
+        output = env.get_template("no_baseline.j2")
+        config_file = output.render(policies=policies_out, device=self, police_in=police_in)
+        connection = self.connect()
+        print(connection)
+        connection.load_merge_candidate(config=config_file)
+        print(connection.compare_config())
+        connection.commit_config()
+        connection.close()
+        # police_in = PolicyIn.objects.get(policy_ref_id=policy_id)
+        # policies_out = PolicyOut.objects.filter(policy_ref_id=policy_id)
+        # connection = self.connect()
+        # config_file = self.no_service_policy()
+        # connection.load_merge_candidate(config=config_file)
+        # connection.commit_config()
+        # if self.wan() or self.ingress():
+        #     config_policy = police_in.render_no_policy
+        #     connection.load_merge_candidate(config=config_policy)
+        #     connection.commit_config()
+        #     config_file = police_in.remove_applications
+        #     connection.load_merge_candidate(config=config_file)
+        #     connection.commit_config()
+
+        # if self.egress():
+        #     env = Environment(loader=FileSystemLoader(str(MEDIA_ROOT[0]) + "/monitoring_conf/"))
+        #     output = env.get_template("remove_policies.j2")
+        #     config_file = output.render(policies=policies_out)
+        #     connection.load_merge_candidate(config=config_file)
+        #     connection.commit_config()
+        # connection.close()
+
+        return self.hostname + "this device Done"
 
 
 class Interface(models.Model):

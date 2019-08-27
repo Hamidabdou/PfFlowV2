@@ -967,7 +967,7 @@
     </div>
 </div>
 </div>
-<form method="POST" action="{% url 'SaveTopology' id %}">
+<form id="myform" method="POST" action="{% url 'SaveTopology' id %}">
     {% csrf_token %}
     <div style="opacity: 0.0">
         {{json.Text}}
@@ -1664,6 +1664,7 @@
                                     '  <span class="sr-only">Loading...</span>\n' +
                                     '</div></div>')
                                 console.log("hjhjkhkjhljh");
+                                $("#myform").submit();
 
 
                             });
