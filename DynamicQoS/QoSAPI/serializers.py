@@ -107,3 +107,14 @@ class ApplicationSerializer(sr.HyperlinkedModelSerializer):
         instance.save()
 
         return instance
+
+
+class DeviceSerializer(sr.HyperlinkedModelSerializer):
+    device_address = sr.ReadOnlyField(source='address')
+    device_username = sr.ReadOnlyField(source='username')
+    device_password = sr.ReadOnlyField(source='password')
+    device_enable = sr.ReadOnlyField(source='enable')
+
+    class Meta:
+        model = Device
+        fields = ['id', 'hostname', 'device_address', 'device_username', 'device_password', 'device_enable']

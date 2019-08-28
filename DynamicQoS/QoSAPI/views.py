@@ -445,3 +445,19 @@ class ApplicationViewSet(viewsets.ModelViewSet):
         if policy == None:
             return Application.objects.all()
         return Application.objects.filter(policy_in=policy)
+class DeviceViewSet(viewsets.ModelViewSet):
+    """
+        API endpoint that allows groups to be viewed or edited.
+        """
+
+    serializer_class = DeviceSerializer
+
+    def get_queryset(self):
+        """
+            This view should return a list of all the purchases
+            for the currently authenticated user.
+            """
+        topology = self.request.query_params.get('topology_id', None)
+        if topology == None:
+            return Device.objects.all()
+        return Device.objects.filter(topology_ref=topology)

@@ -7,6 +7,7 @@ router = routers.DefaultRouter()
 router.register(r'users', UserViewSet)
 router.register(r'groups', GroupViewSet)
 router.register(r'applications', ApplicationViewSet,basename='application')
+router.register(r'devices', DeviceViewSet,basename='devices')
 
 
 urlpatterns = [
