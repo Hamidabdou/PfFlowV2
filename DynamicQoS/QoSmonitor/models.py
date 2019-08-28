@@ -236,12 +236,12 @@ class topology(DynamicDocument):
 
                 if dst_device == None:
                     for device_cursor in self.devices:
-                        if device_cursor.hostname == "R1.cisco":
+                        if device_cursor.hostname == "Wan.cisco":
                             dst_device = device_cursor
 
                 if src_device == None:
                     for device_cursor in self.devices:
-                        if device_cursor.hostname == "Data.cisco":
+                        if device_cursor.hostname == "Wan.cisco":
                             src_device = device_cursor
 
 

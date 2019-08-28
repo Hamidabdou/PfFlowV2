@@ -39,7 +39,7 @@ class AddDevice(generics.CreateAPIView):
 
     def perform_create(self, serializer):
 
-        if self.request.data.get("management")==None:
+        if self.request.data.get("management") == None:
             addr = self.request.data.get("management.management_address")
             user = self.request.data.get("management.username")
             passwd = self.request.data.get("management.password")
@@ -428,22 +428,20 @@ class GroupViewSet(viewsets.ModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
 
+
 class ApplicationViewSet(viewsets.ModelViewSet):
-        """
+    """
         API endpoint that allows groups to be viewed or edited.
         """
 
-        serializer_class = ApplicationSerializer
+    serializer_class = ApplicationSerializer
 
-
-        def get_queryset(self):
-            """
+    def get_queryset(self):
+        """
             This view should return a list of all the purchases
             for the currently authenticated user.
             """
-            policy = self.request.query_params.get('policy_id', None)
-            if policy ==None:
-                return Application.objects.all()
-            return Application.objects.filter(policy_in=policy)
-
-
+        policy = self.request.query_params.get('policy_id', None)
+        if policy == None:
+            return Application.objects.all()
+        return Application.objects.filter(policy_in=policy)
