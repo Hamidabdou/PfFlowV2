@@ -9,7 +9,6 @@ class AddApplicationForm(forms.ModelForm):
             'business_type', 'business_app', 'mark', 'begin_time', 'end_time', 'source',
             'destination')
 
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["business_app"].queryset = BusinessApp.objects.none()
@@ -28,13 +27,14 @@ class AddApplicationForm(forms.ModelForm):
 class AddPolicyForm(forms.ModelForm):
     class Meta:
         model = Policy
-        fields = '__all__'
+        fields = ('name','description')
 
     # topologies = forms.ChoiceField(choices=[(Topology.id, Topology.name) for Topology in Topology.objects.all()])
     name = forms.CharField(max_length=45, widget=forms.TextInput(
         attrs={'class': 'form-control', 'placeholder': 'Enter the policy name', 'type': 'text'}))
     description = forms.CharField(max_length=150, widget=forms.Textarea(
         attrs={'class': 'form-control', 'placeholder': 'describe you policy here ...', 'rows': '2'}))
+    topologies = forms.ModelChoiceField(queryset=Topology.objects.all())
 
 
 class AddCustomApplicationForm(forms.ModelForm):
@@ -45,3 +45,5 @@ class AddCustomApplicationForm(forms.ModelForm):
         # }
         fields = ('custom_name', 'protocol_type', 'port_number', 'begin_time', 'end_time', 'source', 'destination',
                   'mark')
+
+

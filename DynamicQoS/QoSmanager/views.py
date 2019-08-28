@@ -297,7 +297,9 @@ def policies(request):
         if policy_form.is_valid():
             a = policy_form.save()
             error = ''
-            devices = Device.objects.all()
+            topo = request.POST['topologies']
+            print(topo)
+            devices = Device.objects.filter(topology_ref_id=topo)
             for device in devices:
                 device.policy_ref = a
                 device.save()
