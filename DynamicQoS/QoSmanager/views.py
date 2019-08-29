@@ -509,6 +509,33 @@ def devices(request, topology_id):
     return render(request, 'devices_template.html', locals())
 
 
+def nbar_discover(request, topology_id):
+    devices = Device.objects.filter(topology_ref=topology_id)
+    threads = []
+    for device in devices:
+        threads.append(Thread(target=device.enable_nbar))
+    for th in threads:
+        print("start thread")
+        th.start()
+    for th in threads:
+        th.join()
+    return HttpResponse("nbar activated")
+
+
+def nbar_discover_applications(request, topology_id):
+    devices = Device.objects.filter(topology_ref=topology_id)
+    application = []
+    apps = BusinessApp.objects.all()
+    for device in devices:
+        application.extend(device.discovery_application())
+    for app in set(application):
+        b = BusinessApp.objects.filter(name=app)
+        if len(b) != 0:
+            print(app)
+
+    return HttpResponse("discover done!!!!")
+
+
 def policy_remove(request, police_id):
     devices = Device.objects.all()
     threads = []

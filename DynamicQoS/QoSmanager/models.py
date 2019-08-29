@@ -24,7 +24,7 @@ class BusinessType(models.Model):
 
 
 class BusinessApp(models.Model):
-    name = models.CharField(max_length=45)
+    name = models.CharField(max_length=45,unique=True)
     business_type = models.ForeignKey(BusinessType, on_delete=models.CASCADE, null=True)
     match = models.CharField(max_length=45)
     recommended_dscp = models.CharField(max_length=45)
@@ -475,10 +475,9 @@ class Device(models.Model):
         for interface in interfaces:
             try:
                 cmd = "show ip nbar protocol-discovery interface " + interface.interface_name
-                print(cmd)
+
                 file = connection.send_command(
                     "show ip nbar protocol-discovery interface " + interface.interface_name).splitlines()
-                print(file)
 
                 p = False
                 for line in file:
@@ -499,7 +498,7 @@ class Device(models.Model):
                                 list_app.append(a)
             except Exception as e:
                 print(e)
-        return set(list_app)
+        return list_app
 
     def ingress(self):
         interfaces = Interface.objects.filter(ingress=True, device_ref=self)
