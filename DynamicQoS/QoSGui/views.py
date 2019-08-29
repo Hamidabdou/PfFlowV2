@@ -27,8 +27,6 @@ from QoSmonitor.tasks import *
 
 from QoSmonitor.models import access
 
-
-
 from QoSmonitor.tasks import add_device_api_call1
 
 
@@ -36,10 +34,10 @@ from QoSmonitor.tasks import add_device_api_call1
 def home(request):
     publish(topic="LimitBreach/J", payload="Jitter Limit breach", qos=1, retain=False)
     ctx = {}
-    return render(request,'home.html',context=ctx)
+    return render(request, 'home.html', context=ctx)
 
 
-def drag_drop(request,topo_id):
+def drag_drop(request, topo_id):
     if os.path.isfile(str(MEDIA_ROOT[0]) + "/topologies/" + str(topo_id) + ".json"):
         with open(str(MEDIA_ROOT[0]) + "/topologies/" + str(topo_id) + ".json", 'r') as file:
             data = file.read().replace('\n', '')
@@ -66,11 +64,13 @@ def add_topology(request):
         tp.save()
     return HttpResponseRedirect(reverse('Topologies', kwargs={}))
 
+
 def topologies(request):
     TopoForm = AddTopologyForm()
     topologies = topology.objects
-    ctx = {'topology':TopoForm,'topologies':topologies}
-    return render(request,'draw.html',context = ctx)
+    ctx = {'topology': TopoForm, 'topologies': topologies}
+    return render(request, 'draw.html', context=ctx)
+
 
 # def DrawTopology(request,topo_id):
 #     print(os.path.isfile(str(MEDIA_ROOT[0]) + "/topologies/" + str(topo_id) + ".json"))
@@ -90,34 +90,36 @@ def topologies(request):
 #                 "linkDataArray": []}"""})
 #     ctx = {'json':JsonFile,'id':topo_id}
 #     return render(request,'dragndrop.html',context=ctx)
-def add_device_api_call(topology_name,management_interface,management_address,username,password):
-    json_data={"management": {"management_interface": management_interface,"management_address": management_address,"username": username,"password": password},"topology_name":topology_name}
-    print(topology_name,management_address,management_interface,username,password)
-    api_url="http://localhost:8000/api/v1/add-device"
-    response=requests.post(url=api_url,json=json_data)
+def add_device_api_call(topology_name, management_interface, management_address, username, password):
+    json_data = {"management": {"management_interface": management_interface, "management_address": management_address,
+                                "username": username, "password": password}, "topology_name": topology_name}
+    print(topology_name, management_address, management_interface, username, password)
+    api_url = "http://localhost:8000/api/v1/add-device"
+    response = requests.post(url=api_url, json=json_data)
     print(response.status_code)
     print(response.content)
 
     return response.content
 
-def save_json_topology(request,topo_id):
+
+def save_json_topology(request, topo_id):
     JsonFile = GetJsonFile(request.POST)
     if JsonFile.is_valid:
-        topology_json=request.POST['Text']
+        topology_json = request.POST['Text']
         data = json.loads(topology_json)
         file_url = (str(MEDIA_ROOT[0]) + "/topologies/" + str(topo_id) + ".json")
         with open(file_url, "w") as f:
             myfile = File(f)
             myfile.write(request.POST['Text'])
 
-        topology_ins=topology.objects.get(id=topo_id)
+        topology_ins = topology.objects.get(id=topo_id)
         threads = []
-        devices_list=[]
+        devices_list = []
         for device_str in data['nodeDataArray']:
             """
                getting nodes data
             """
-            if not (device_str['category'] == 'cloud') and not (device_str['category']=='L3Switch'):
+            if not (device_str['category'] == 'cloud') and not (device_str['category'] == 'L3Switch'):
 
                 try:
                     location = device_str['Location']
@@ -144,9 +146,10 @@ def save_json_topology(request,topo_id):
                 """
                 creating the devices
                 """
-                print(address+' '+location+' '+username+' '+password+' '+secret)
+                print(address + ' ' + location + ' ' + username + ' ' + password + ' ' + secret)
                 # add_device_api_call(topology_name=topology_ins.topology_name,management_interface="lo0",management_address=address,username=username,password=password)
-                threads.append(Thread(target=add_device_api_call,args=(topology_ins.topology_name,"lo0",address,username,password)))
+                threads.append(Thread(target=add_device_api_call,
+                                      args=(topology_ins.topology_name, "lo0", address, username, password)))
         for th in threads:
             print("start thread")
             th.start()
@@ -154,29 +157,22 @@ def save_json_topology(request,topo_id):
         for th in threads:
             th.join()
 
-
-
-
-
     return HttpResponseRedirect(reverse('Topologies', kwargs={}))
 
+
 def flow_table_view(request):
-
-
-
     ctx = {}
-    return render(request,'flowtable.html',context = ctx)
+    return render(request, 'flowtable.html', context=ctx)
 
 
-def charts_test(request,topo_id):
-
+def charts_test(request, topo_id):
     ctx = {}
-    return render(request,'charts.html',context = ctx)
+    return render(request, 'charts.html', context=ctx)
 
-def charts_view(request,topo_id):
 
+def charts_view(request, topo_id):
     ctx = {}
-    return render(request,'ChartsPage.html',context = ctx)
+    return render(request, 'ChartsPage.html', context=ctx)
 
 
 def test_background(request):
@@ -185,8 +181,9 @@ def test_background(request):
 
     return HttpResponse("Started")
 
-def discover_topology(request,topo_name):
-    topo=topology.objects(topology_name=topo_name)
+
+def discover_topology(request, topo_name):
+    topo = topology.objects(topology_name=topo_name)
     try:
         topo.get_networks()
         topo.create_links()
@@ -196,7 +193,8 @@ def discover_topology(request,topo_name):
 
     return HttpResponseRedirect(reverse('Topologies', kwargs={}))
 
-def prepare_environement(request,topo_name):
+
+def prepare_environement(request, topo_name):
     topo = topology.objects(topology_name=topo_name)
     try:
         topo.configure_ntp()
@@ -207,17 +205,18 @@ def prepare_environement(request,topo_name):
     return HttpResponseRedirect(reverse('Topologies', kwargs={}))
 
 
-def configure_monitoring(request,topo_name,collector):
+def configure_monitoring(request, topo_name, collector):
     topo = topology.objects(topology_name=topo_name)
     for dv in topo.devices:
         try:
-             dv.configure_netflow(destination=collector)
+            dv.configure_netflow(destination=collector)
         except Exception as e:
-             print(e)
+            print(e)
 
     return HttpResponseRedirect(reverse('Topologies', kwargs={}))
 
-def start_monitoring(request,topo_name):
+
+def start_monitoring(request, topo_name):
     sniff_back(topo_name)
 
     return HttpResponseRedirect(reverse('Topologies', kwargs={}))

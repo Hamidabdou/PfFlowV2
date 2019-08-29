@@ -9,6 +9,7 @@ from django.shortcuts import render, redirect
 
 from .forms import *
 from .models import *
+from QoSmonitor.models import *
 
 
 # Create your views here.
@@ -416,11 +417,11 @@ def policy_deployment(request, police_id):
     #         connection.close()
     # for device in devices:
     #     device.deploy_policy(police_id)
-        # connection = device.connect()
-        # config_file = device.service_policy()
-        # connection.load_merge_candidate(config=config_file)
-        # connection.commit_config()
-        # connection.close()
+    # connection = device.connect()
+    # config_file = device.service_policy()
+    # connection.load_merge_candidate(config=config_file)
+    # connection.commit_config()
+    # connection.close()
 
     # dscps = Dscp.objects.all()
     # for d in dscps:
@@ -504,6 +505,10 @@ def policy_deployment(request, police_id):
     return HttpResponse("okay")
 
 
+def devices(request, topology_id):
+    return render(request, 'devices_template.html', locals())
+
+
 def policy_remove(request, police_id):
     devices = Device.objects.all()
     threads = []
@@ -555,5 +560,3 @@ def load_applications(request):
     business_type_id = request.GET.get('business_type')
     business_apps = BusinessApp.objects.filter(business_type_id=business_type_id).order_by('name')
     return render(request, 'application_dropdown_list_options.html', {'business_apps': business_apps})
-
-

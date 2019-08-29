@@ -445,6 +445,8 @@ class ApplicationViewSet(viewsets.ModelViewSet):
         if policy == None:
             return Application.objects.all()
         return Application.objects.filter(policy_in=policy)
+
+
 class DeviceViewSet(viewsets.ModelViewSet):
     """
         API endpoint that allows groups to be viewed or edited.
@@ -459,5 +461,7 @@ class DeviceViewSet(viewsets.ModelViewSet):
             """
         topology = self.request.query_params.get('topology_id', None)
         if topology == None:
+
+
             return Device.objects.all()
         return Device.objects.filter(topology_ref=topology)
