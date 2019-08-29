@@ -424,6 +424,18 @@ class Device(models.Model):
     def __str__(self):
         return self.hostname
 
+    def username(self):
+        return self.management.username
+
+    def password(self):
+        return self.management.password
+
+    def address(self):
+        return self.management.management_address
+
+    def enable(self):
+        return self.management.enable_secret
+
     def netmiko_connect(self):
         return ConnectHandler(device_type="cisco_ios", ip=self.management.management_address,
                               username=self.management.username, password=self.management.password)
