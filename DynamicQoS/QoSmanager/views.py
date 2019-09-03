@@ -3,6 +3,7 @@ from threading import Thread
 
 from DynamicQoS.settings import MEDIA_ROOT
 import requests
+from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
@@ -114,6 +115,7 @@ def index(request):
     BusinessType.objects.create(name="sub-category")
     BusinessType.objects.create(name="device-class")
     BusinessType.objects.create(name="media-type")
+    BusinessType.objects.create(name="protocol")
     with open(str(MEDIA_ROOT[0]) + "/monitoring_conf/nbar_application.json", 'r') as jsonfile:
         ap = json.load(jsonfile)
         for app in ap['applications']:
@@ -176,6 +178,12 @@ def add_application(request, police_id):
     if app.mark == "EF":
         app.group = Group.objects.get(priority="EF", policy_id=police_id)
         app.save()
+    elif app.mark == "DEFAULT":
+        app.group = Group.objects.get(priority="DEFAULT", policy_id=police_id)
+        app.save()
+    elif app.mark.startswith("C"):
+        app.group = Group.objects.get(priority="SELECTOR", policy_id=police_id)
+        app.save()
     else:
         app.save()
 
@@ -200,6 +208,12 @@ def add_custom_application(request, police_id):
         app.save()
     if app.mark == "EF":
         app.group = Group.objects.get(priority="EF", policy_id=police_id)
+        app.save()
+    elif app.mark == "DEFAULT":
+        app.group = Group.objects.get(priority="DEFAULT", policy_id=police_id)
+        app.save()
+    elif app.mark.startswith("C"):
+        app.group = Group.objects.get(priority="SELECTOR", policy_id=police_id)
         app.save()
     else:
         app.save()
@@ -289,6 +303,7 @@ def policy_off(request, police_id):
     return HttpResponse("off")
 
 
+@login_required(login_url='/login/')
 def policies(request):
     policies = Policy.objects.all()
 
@@ -313,6 +328,8 @@ def policies(request):
             Group.objects.create(name="critical", priority="3", policy=a)
             Group.objects.create(name="non-business", priority="2", policy=a)
             Group.objects.create(name="non-business2", priority="1", policy=a)
+            Group.objects.create(name="DEFAULT", priority="DEFAULT", policy=a)
+            Group.objects.create(name="SELECTOR", priority="SELECTOR", policy=a)
 
             for interface in interfaces:
                 po = PolicyOut.objects.create(policy_ref=a)
@@ -380,6 +397,7 @@ def policies(request):
         return render(request, 'policy.html', locals())
 
 
+@login_required(login_url='/login/')
 def policy_deployment(request, police_id):
     # policeIn = PolicyIn.objects.get(policy_ref_id=police_id)
     devices = Device.objects.all()
@@ -509,8 +527,8 @@ def devices(request, topology_id):
     return render(request, 'devices_template.html', locals())
 
 
-def nbar_discover(request, topology_id):
-    devices = Device.objects.filter(topology_ref=topology_id)
+def nbar_discover(request, policy_id):
+    devices = Device.objects.filter(policy_ref_id=policy_id)
     threads = []
     for device in devices:
         threads.append(Thread(target=device.enable_nbar))
@@ -522,20 +540,43 @@ def nbar_discover(request, topology_id):
     return HttpResponse("nbar activated")
 
 
-def nbar_discover_applications(request, topology_id):
-    devices = Device.objects.filter(topology_ref=topology_id)
+@login_required(login_url='/login/')
+def nbar_discover_applications(request, policy_id):
+    devices = Device.objects.filter(policy_ref_id=policy_id)
     application = []
+    nbar_apps = Application.objects.all()
     apps = BusinessApp.objects.all()
     for device in devices:
         application.extend(device.discovery_application())
     for app in set(application):
+        c = False
         b = BusinessApp.objects.filter(name=app)
-        if len(b) != 0:
-            print(app)
+        for a in b:
+            b_id = a.id
+            if len(Application.objects.filter(business_app=a, policy_in=PolicyIn.objects.get(policy_ref=policy_id))):
+                c = True
+        # c =
+        if len(b) != 0 and not c:
+            ap = Application.objects.create(business_app=BusinessApp.objects.get(id=b_id),
+                                            business_type=BusinessApp.objects.get(id=b_id).business_type,
+                                            policy_in=PolicyIn.objects.get(policy_ref_id=policy_id),
+                                            mark=BusinessApp.objects.get(id=b_id).recommended_dscp)
+            if ap.mark.startswith("A"):
+                ap.group = Group.objects.get(priority=app.app_priority, policy_id=policy_id)
+                ap.save()
+            elif ap.mark == "EF":
+                ap.group = Group.objects.get(priority="EF", policy_id=policy_id)
+                ap.save()
+            elif ap.mark == "DEFAULT":
+                ap.group = Group.objects.get(priority="DEFAULT", policy_id=policy_id)
+                ap.save()
+            else:
+                ap.save()
 
     return HttpResponse("discover done!!!!")
 
 
+@login_required(login_url='/login/')
 def policy_remove(request, police_id):
     devices = Device.objects.all()
     threads = []

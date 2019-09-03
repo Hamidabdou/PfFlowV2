@@ -65,6 +65,7 @@ def add_topology(request):
     return HttpResponseRedirect(reverse('Topologies', kwargs={}))
 
 
+@login_required(login_url='/login/')
 def topologies(request):
     TopoForm = AddTopologyForm()
     topologies = topology.objects
@@ -101,7 +102,7 @@ def add_device_api_call(topology_name, management_interface, management_address,
 
     return response.content
 
-
+@login_required(login_url='/login/')
 def save_json_topology(request, topo_id):
     JsonFile = GetJsonFile(request.POST)
     if JsonFile.is_valid:
@@ -164,12 +165,12 @@ def flow_table_view(request):
     ctx = {}
     return render(request, 'flowtable.html', context=ctx)
 
-
+@login_required(login_url='/login/')
 def charts_test(request, topo_id):
     ctx = {}
     return render(request, 'charts.html', context=ctx)
 
-
+@login_required(login_url='/login/')
 def charts_view(request, topo_id):
     ctx = {}
     return render(request, 'ChartsPage.html', context=ctx)

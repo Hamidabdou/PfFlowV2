@@ -27,4 +27,7 @@ random-detect dscp  {{ dscp.dscp_value}} {{ dscp.drop_min}} {{ dscp.drop_max}} {
 {% endfor %}
 {% endif %}
 {% endfor %}
+class class-default
+fair-queue
+random-detect dscp-based
 
