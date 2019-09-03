@@ -1,6 +1,6 @@
 {% extends 'base2.html'%}
 {% block content%}
-
+{% load staticfiles %}
     <ol class="breadcrumb">
         <li class="breadcrumb-item">
           <a href="#">Policy Details</a>
@@ -35,7 +35,7 @@
                                     {% endif %}
 
 
-                                    <a class="mr-3 d-inline-block pull-right" href="{% url 'applications' policy.id%} " ><i class="fa fa-stream"></i></a>
+                                    <a class="mr-3 d-inline-block pull-right" href="{% url 'policy_dashboard' policy.id%} " ><i class="fa fa-stream"></i></a>
                                 </span>
                             </div>
                     </li>
