@@ -21,4 +21,5 @@ urlpatterns = [
     path('', include('QoSGui.urls')),
     path('api/v1/', include('QoSAPI.urls','APIv1')),
     path('manager/', include('QoSmanager.urls')),
+    path('accounts/', include('django.contrib.auth.urls')),
 ]

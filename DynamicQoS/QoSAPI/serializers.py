@@ -98,9 +98,16 @@ class ApplicationSerializer(sr.HyperlinkedModelSerializer):
     def update(self, instance, validated_data):
         print(validated_data)
         instance.mark = validated_data.get('mark', instance.mark)
-        print(instance.app_priority)
+        print("khraaaaa")
+        print(instance.mark)
         if instance.mark == "EF":
             instance.group = Group.objects.get(priority="EF", policy_id=instance.group.policy)
+        elif instance.mark == "DEFAULT":
+            instance.group = Group.objects.get(priority="DEFAULT", policy_id=instance.group.policy)
+
+        elif str(instance.mark).startswith("C"):
+            instance.group = Group.objects.get(priority="SELECTOR", policy_id=instance.group.policy)
+
         else:
             instance.group = Group.objects.get(priority=instance.app_priority, policy_id=instance.group.policy)
         print(instance.group.id)

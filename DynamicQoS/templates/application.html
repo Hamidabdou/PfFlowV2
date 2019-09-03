@@ -3,7 +3,7 @@
 
   <h2>Application Form</h2>
 
-  <form method="post" id="app_form" action="{% url 'add_application' police_id %}"data-application-url="{% url 'ajax_load_applications' %}" novalidate >
+  <form method="post" id="app_form" action="{% url 'add_application' police_id %}" data-application-url="{% url 'ajax_load_applications' %}" novalidate >
     {% csrf_token %}
     <table>
       {{ app_form.as_table }}

@@ -27,7 +27,7 @@ class AddApplicationForm(forms.ModelForm):
 class AddPolicyForm(forms.ModelForm):
     class Meta:
         model = Policy
-        fields = ('name','description')
+        fields = ('name', 'description')
 
     # topologies = forms.ChoiceField(choices=[(Topology.id, Topology.name) for Topology in Topology.objects.all()])
     name = forms.CharField(max_length=45, widget=forms.TextInput(
@@ -45,5 +45,3 @@ class AddCustomApplicationForm(forms.ModelForm):
         # }
         fields = ('custom_name', 'protocol_type', 'port_number', 'begin_time', 'end_time', 'source', 'destination',
                   'mark')
-
-
