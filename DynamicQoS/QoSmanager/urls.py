@@ -14,8 +14,9 @@ urlpatterns = [
     path('policy_off/<police_id>', views.policy_off, name='policy_off'),
     path('policy_deployment/<police_id>', views.policy_deployment, name='policy_deployment'),
     path('policy_remove/<police_id>', views.policy_remove, name='policy_remove'),
-    path('devices/<topology_id>', views.devices, name='devices'),
+    path('devices/<policy_id>', views.devices, name='devices'),
     path('nbar_discover/<policy_id>', views.nbar_discover, name='nbar_discover'),
     path('nbar_discover_applications/<policy_id>', views.nbar_discover_applications, name='nbar_discover_applications'),
+    path('policy_dashboard/<policy_id>', views.policy_dashboard, name='policy_dashboard'),
 
 ]

@@ -458,9 +458,9 @@ class DeviceViewSet(viewsets.ModelViewSet):
             This view should return a list of all the purchases
             for the currently authenticated user.
             """
-        topology = self.request.query_params.get('topology_id', None)
-        if topology == None:
+        policy = self.request.query_params.get('policy_id', None)
+        if policy == None:
 
 
             return Device.objects.all()
-        return Device.objects.filter(topology_ref=topology)
+        return Device.objects.filter(policy_ref=policy)
