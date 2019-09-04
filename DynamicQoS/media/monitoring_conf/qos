@@ -1,0 +1,215 @@
+--------------------------ACL-----------------------------
+
+time-range backup
+periodic daily 00:00 to 06:59
+access-list 102 permit ip any any time-range backup
+
+
+
+access-list 104 permit ip 192.168.1.0 0.0.0.255 any
+
+--------------------------Création de Classe map(sous-classe)-----------------------------
+
+class-map match-any voice
+match protocol packet length min 64 max 200
+match protocol rtp
+
+class-map match-any database
+match protocol attribute category database
+
+class-map match-any mail
+match protocol attribute category email
+
+class-map match-any web
+match protocol http
+match protocol secure-http
+
+class-map match-any media
+match protocol attribute category social-networking
+match protocol video-over-http
+
+class-map match-any file-transfer
+match protocol attribute sub-category file-transfer
+
+class-map match-all backup
+match protocol attribute category backup-and-storage
+match access-group 102
+
+
+class-map match-any social
+match protocol skype
+match protocol viber
+match protocol whatsapp
+
+class-map match-all social-media
+match access-group 104
+match class-map social
+
+class-map match-any management
+match protocol attribute sub-category network-management
+
+
+class-map match-any routing-prtocols
+match protocol attribute sub-category routing-protocol
+
+
+class-map match-any software-updates
+match protocol attribute category software-updates
+
+class-map match-any undiserable
+match protocol attribute p2p-technology p2p-tech-yes
+match protocol attribute sub-category  p2p-networking
+match protocol attribute sub-category  p2p-file-transfer
+match protocol attribute category  gaming
+
+class-map match-any undiserable2
+match protocol tor
+match protocol attribute category anonymizers
+match protocol attribute tunnel tunnel-yes
+----------------------------------Créer policy map de rentrer (IN) -------------------------
+policy-map LAB-IN
+
+class voice
+set dscp ef
+
+class database
+set dscp af41
+
+class mail
+set dscp af31
+
+class backup
+set dscp af43
+
+class web
+set dscp af42
+
+class social-media
+set dscp af33
+
+class file-transfer
+set dscp af32
+
+class media
+set dscp af23
+
+class software-updates
+set dscp af22
+
+
+class undiserable
+set dscp af12
+
+class undiserable2
+set dscp af13
+
+class routing-prtocols
+set dscp cs7
+
+class management
+set dscp cs6
+
+class class-default
+set dscp default
+
+int g0/0
+service-policy input LAB-IN
+
+int g0/1
+service-policy input LAB-IN
+
+
+------------------------------------------ REGROUPING-------------------------------------
+
+class-map BUSINESS
+match dscp af43
+match dscp af42
+match dscp af41
+
+class-map WORK
+match dscp af33
+match dscp af32
+match dscp af31
+
+
+class-map SOFTUNEL
+match dscp af23
+match dscp af22
+match dscp af21
+
+class-map UNUSED
+match dscp af13
+match dscp af12
+match dscp af11
+
+----------------------------------Créer policy map de Sortie(OUT) -------------------------
+
+policy-map LAB-OUT
+class voice
+priority 100
+compress header ip rtp
+
+
+class BUSINESS
+bandwidth percent 40
+police cir 850000 pir 1200000
+conform-action transmit
+exceed-action set-dscp-transmit af21
+violate-action drop
+compress header ip tcp
+random-detect dscp-based
+random-detect ecn
+
+class WORK
+bandwidth percent 30
+police cir 650000 pir 900000
+conform-action transmit
+exceed-action set-dscp-transmit af11
+violate-action drop
+random-detect dscp-based
+random-detect ecn
+
+class SOFTUNEL
+bandwidth percent 15
+shape peak 350000
+shape average 10000
+
+class UNUSED
+police 220000
+
+int s0/0/1
+service-policy output LAB-OUT
+
+
+----------------------------------congestion avoidance --------------------------------
+
+policy-map LAB-OUT
+
+class BUSINESS
+random-detect dscp-based
+random-detect dscp af41 90 100 10
+random-detect dscp af42 80 95 15
+random-detect dscp af43 70 85 20
+
+class WORK
+random-detect dscp-based
+random-detect dscp af31 55 65 35
+random-detect dscp af32 40 50 40
+random-detect dscp af33 35 45 45
+
+
+class SOFTUNEL
+random-detect dscp-based
+random-detect dscp af21 35 45 50
+random-detect dscp af22 30 40 55
+random-detect dscp af23 25 35 60
+
+class UNUSED
+random-detect dscp-based
+random-detect dscp af11 20 30 65
+random-detect dscp af12 15 25 70
+random-detect dscp af13 10 20 80
+
+class class-default
+fair-queue
+random-detect dscp-based

@@ -1,0 +1,10 @@
+{ "class": "go.GraphLinksModel",
+  "copiesArrays": true,
+  "copiesArrayObjects": true,
+  "linkFromPortIdProperty": "fromPort",
+  "linkToPortIdProperty": "toPort",
+  "nodeDataArray": [ 
+{"category":"Router", "name":"", "leftArray":[], "rightArray":[], "topArray":[], "bottomArray":[], "Address":"3.3.3.3", "Username":"yassine", "Password":"15", "Secret":"15", "key":-3, "loc":"-190 -36.5"},
+{"category":"Router", "name":"", "leftArray":[], "rightArray":[], "topArray":[], "bottomArray":[], "Address":"2.2.2.2", "Username":"yassine", "Password":"15", "Secret":"15", "key":-2, "loc":"-20 -47.5"}
+ ],
+  "linkDataArray": []}
