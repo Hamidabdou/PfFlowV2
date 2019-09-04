@@ -68,3 +68,47 @@ def add_device_api_call1(topology_name,management_interface,management_address,u
     print(response.content)
 
     return response.content
+
+def prepare_env_api_call(topology_name):
+    json_data={"topology_name":topology_name}
+
+    api_url="http://localhost:8000/api/v1/preapare-env"
+    response=requests.post(url=api_url,json=json_data)
+    print(response.status_code)
+    print(response.content)
+
+    return response.content
+
+
+def discover_network_api_call(topology_name):
+    json_data = {"topology_name": topology_name}
+
+    api_url = "http://localhost:8000/api/v1/discover-network"
+    response = requests.post(url=api_url, json=json_data)
+    print(response.status_code)
+    print(response.content)
+
+    return response.content
+
+def configure_monitoring_api_call(topology_name):
+    json_data = {"topology_name": topology_name}
+
+    api_url = "http://localhost:8000/api/v1/configure-monitoring"
+    response = requests.post(url=api_url, json=json_data)
+    print(response.status_code)
+    print(response.content)
+
+    return response.content
+
+def start_monitoring_api_call(topology_name):
+    json_data = {"topology_name": topology_name}
+
+    api_url = "http://localhost:8000/api/v1/start-monitoring"
+    response = requests.post(url=api_url, json=json_data)
+    print(response.status_code)
+    print(response.content)
+
+    return response.content
+
+
+
