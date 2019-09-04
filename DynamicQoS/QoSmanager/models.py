@@ -179,6 +179,16 @@ class Group(models.Model):
     policy = models.ForeignKey(Policy, on_delete=models.CASCADE, null=True)
     priority = models.CharField(max_length=45)
 
+    @property
+    def all_applications(self):
+        return len(Application.objects.filter(group=self))
+
+    @property
+    def list_applications(self):
+        return Application.objects.filter(group=self)
+
+
+
 
 class RegroupementClass(models.Model):
     group = models.ForeignKey(Group, on_delete=models.CASCADE, null=True)

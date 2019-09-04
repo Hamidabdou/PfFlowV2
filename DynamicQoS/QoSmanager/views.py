@@ -542,6 +542,10 @@ def devices(request, policy_id):
     applications = Application.objects.filter(policy_in=PolicyIn.objects.get(policy_ref_id=policy_id))
     applications_len = len(applications)
     today = date.today()
+    groups = Group.objects.filter(policy_id=policy_id)
+    for group in groups:
+        print(group.all_applications)
+
     return render(request, 'devices_template.html', locals())
 
 
