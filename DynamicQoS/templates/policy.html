@@ -21,7 +21,7 @@
                                 </i> <h5 style="display: inline-block">{{ policy.name }}</h5>
 
                                 <span class="pull-right">
-                                     <a class="mr-3 d-inline-block pull-right" data-id="{{ policy.id }}" href="#" ><i class="fa fa-trash" data-toggle="modal" data-target="#kt_modal_3" ></i></a>
+                                     <a class="mr-3 d-inline-block pull-right" id="{{ policy.id }}" data-id="delete"  ><i class="fa fa-trash"  ></i></a>
                                     {% if policy.enable  %}
                                     <a class="mr-3 d-inline-block pull-right activated-policy" onclick="activePolicy('{{ policy.id }}')" id="{{ policy.id }}" >
 
@@ -103,7 +103,7 @@
 											</div>
 										<div class="modal-footer">
 											<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-											<button type="button" class="btn btn-danger">Delete</button>
+											<button id="delete" type="button" class="btn btn-danger">Delete</button>
 										</div>
 									</div>
 								</div>
@@ -114,8 +114,28 @@
 {%endblock%}
 {% block scripts %}
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 
     <script>
+
+    $( "a[data-id='delete']" ).click(function() {
+         main_id = $(this).attr('id');
+
+        // EDIT button
+         console.log(main_id);
+        $("#kt_modal_3").modal('show');
+
+});
+     $('#kt_modal_3').on('click', '#delete', function (e) {
+    $.ajax({
+        url: '/manager/policy_delete/'+main_id,
+        method: 'GET',
+        success: function(data, textStatus, jqXHR) {
+            location.reload();
+
+    }
+    })
+});
 
     $('.activated-policy .policy-off').css('display' , 'none');
     $('.disactivated-policy .policy-on').css('display' , 'none');

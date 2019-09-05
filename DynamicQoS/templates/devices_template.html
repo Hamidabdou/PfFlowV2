@@ -3,12 +3,21 @@
     {% load staticfiles %}
     <div class="kt-subheader   kt-grid__item" id="kt_subheader">
 							<div class="kt-subheader__main">
-                                <a href="{% url 'policy_deployment' policy_id %}" class="btn btn-label-success btn-bold">
+                                {% if policy.deploy  %}
+                                <a  href="{% url 'policy_deployment' policy_id %}" class="btn btn-label-success btn-bold disabled">
 									Deploy
 								</a>
 								<a href="{% url 'policy_remove' policy_id %}" class="btn btn-label-danger btn-bold">
 									Remove
 								</a>
+                                {% else %}
+                                    <a  href="{% url 'policy_deployment' policy_id %}" class="btn btn-label-success btn-bold">
+									Deploy
+								</a>
+								<a  href="{% url 'policy_remove' policy_id %}" class="btn btn-label-danger btn-bold disabled">
+									Remove
+								</a>
+                                {% endif %}
 
 								<div class="kt-input-icon kt-input-icon--right kt-subheader__search">
 									<input type="text" class="form-control" placeholder="Search order..." id="generalSearch">
@@ -82,8 +91,8 @@
 													Profit Share between customers
 												</span>
 											</div>
-											<div class="kt-widget14__content">
-												<div class="kt-widget14__legends">
+											<div class="kt-widget14__content ">
+												<div class="kt-widget14__legends d-flex d-flex h4 justify-content-between ">
                                                     <div class="kt-widget14__legend">
 														<span class="kt-widget14__bullet kt-bg-success"></span>
 														<span class="kt-widget14__stats">{{ applications_len }} Applications</span>
