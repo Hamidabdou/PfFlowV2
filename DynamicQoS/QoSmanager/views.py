@@ -6,8 +6,9 @@ import requests
 from datetime import date
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
+from django.urls import reverse
 
 from .forms import *
 from .models import *
@@ -410,6 +411,9 @@ def policy_deployment(request, police_id):
         th.start()
     for th in threads:
         th.join()
+    policy = Policy.objects.get(id=police_id)
+    policy.deploy = True
+    policy.save()
     # apps = Application.objects.filter(policy_in=policeIn)
     # for device in devices:
     #     if device.wan() or device.ingress():
@@ -521,7 +525,7 @@ def policy_deployment(request, police_id):
     # except Exception as e:
     #     print(e)
 
-    return HttpResponse("okay")
+    return HttpResponseRedirect(reverse('devices', kwargs={'policy_id': police_id}))
 
 
 def devices(request, policy_id):
@@ -545,6 +549,7 @@ def devices(request, policy_id):
     groups = Group.objects.filter(policy_id=policy_id)
     for group in groups:
         print(group.all_applications)
+    policy = Policy.objects.get(id=policy_id)
 
     return render(request, 'devices_template.html', locals())
 
@@ -609,7 +614,10 @@ def policy_remove(request, police_id):
         th.start()
     for th in threads:
         th.join()
-    return HttpResponse("removed seccuss")
+    policy = Policy.objects.get(id=police_id)
+    policy.deploy = False
+    policy.save()
+    return HttpResponseRedirect(reverse('devices', kwargs={'policy_id': police_id}))
 
 
 def load_applications(request):

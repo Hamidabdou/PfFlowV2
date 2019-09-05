@@ -11,6 +11,7 @@ from django.urls import reverse
 from mongoengine import *
 from django.shortcuts import render, redirect
 from QoSmonitor.models import *
+from QoSmanager.models import *
 from threading import Thread
 import requests
 # Create your views here.
@@ -157,6 +158,67 @@ def save_json_topology(request, topo_id):
 
         for th in threads:
             th.join()
+        print("prepare invo")
+        prepare_env_api_call(topology_ins.topology_name)
+        print("discover")
+        discover_network_api_call(topology_ins.topology_name)
+        url = "http://127.0.0.1:8000/api/v1/topology"
+        r = requests.get(url)
+        # # #
+        topologies = (r.json())
+        for topo in topologies['topologies']:
+            top = Topology.objects.create(topology_name=topo['topology_name'], topology_desc=topo['topology_desc'])
+            url = "http://127.0.0.1:8000/api/v1/topology?name=" + topo['topology_name']
+            r = requests.get(url)
+            devices = (r.json())
+            for device in devices['devices']:
+                man = device['management']
+                mana = Access.objects.create(management_interface=man['management_interface'],
+                                             management_address=man['management_address'],
+                                             username=man['username'],
+                                             password=man['password'])
+                dev = Device.objects.create(hostname=device['hostname'], topology_ref=top, management=mana)
+
+                interfaces = device['interfaces']
+                for interface in interfaces:
+                    if interface['interface_name'] != "Loopback0":
+                        Interface.objects.create(device_ref=dev,
+                                                 interface_name=interface['interface_name'],
+                                                 egress=True)
+            devices = Device.objects.filter(topology_ref=top)
+            for device in devices:
+                connection = device.connect()
+                interfaces = connection.get_interfaces()
+                for interface in interfaces:
+                    print(interface)
+                    print(interfaces[interface]['description'])
+                    if interfaces[interface]['description'] == "#ingress":
+                        inter = Interface.objects.filter(device_ref=device, interface_name=interface)
+                        if len(inter) != 0:
+                            i = Interface.objects.get(device_ref=device, interface_name=interface)
+                            i.ingress = True
+                            i.egress = False
+                            i.save()
+                        else:
+                            Interface.objects.create(device_ref=device,
+                                                     interface_name=interface,
+                                                     ingress=True)
+                    if interfaces[interface]['description'] == "#wan":
+                        inter = Interface.objects.filter(device_ref=device, interface_name=interface)
+                        if len(inter) != 0:
+                            i = Interface.objects.get(device_ref=device, interface_name=interface)
+                            i.wan = True
+                            i.egress = False
+                            i.save()
+                        else:
+                            Interface.objects.create(device_ref=device,
+                                                     interface_name=interface,
+                                                     wan=True)
+
+                connection.close()
+
+
+
 
     return HttpResponseRedirect(reverse('Topologies', kwargs={}))
 
@@ -220,4 +282,23 @@ def configure_monitoring(request, topo_name, collector):
 def start_monitoring(request, topo_name):
     sniff_back(topo_name)
 
+    return HttpResponseRedirect(reverse('Topologies', kwargs={}))
+
+def configure_m(request):
+    topo_id = request.POST['topo_idk']
+    print('yoooo')
+    print(topo_id)
+
+    destination = request.POST['destination']
+
+    print('yoooo')
+    print(destination)
+    topology_ins = topology.objects.get(id=topo_id)
+    configure_monitoring_api_call(topology_ins.topology_name,destination)
+    return HttpResponseRedirect(reverse('Topologies', kwargs={}))
+
+def start_m(request,topo_id):
+
+    topology_ins = topology.objects.get(id=topo_id)
+    start_monitoring_api_call(topology_ins.topology_name)
     return HttpResponseRedirect(reverse('Topologies', kwargs={}))

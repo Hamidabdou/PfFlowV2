@@ -17,5 +17,7 @@ urlpatterns = [
     path('perepare_environment/<topo_name>',views.prepare_environement, name="prepare_environement"),
     path('configure_monitoring/<topo_name>/<collector>',views.configure_monitoring, name="configure_monitoring"),
     path('start_monitoring/<topo_name>', views.start_monitoring, name="start_monitoring"),
+    path('configure_m', views.configure_m, name="configure_m"),
+    path('start_m/<topo_id>', views.start_m, name="start_m"),
 ]
 
