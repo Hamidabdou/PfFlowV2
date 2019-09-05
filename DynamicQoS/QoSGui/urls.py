@@ -19,5 +19,6 @@ urlpatterns = [
     path('start_monitoring/<topo_name>', views.start_monitoring, name="start_monitoring"),
     path('configure_m', views.configure_m, name="configure_m"),
     path('start_m/<topo_id>', views.start_m, name="start_m"),
+    path('delete_topology/<topo_id>', views.delete_topology, name="delete_topology"),
 ]
 

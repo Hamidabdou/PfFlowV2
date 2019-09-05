@@ -103,6 +103,7 @@ def add_device_api_call(topology_name, management_interface, management_address,
 
     return response.content
 
+
 @login_required(login_url='/login/')
 def save_json_topology(request, topo_id):
     JsonFile = GetJsonFile(request.POST)
@@ -217,9 +218,6 @@ def save_json_topology(request, topo_id):
 
                 connection.close()
 
-
-
-
     return HttpResponseRedirect(reverse('Topologies', kwargs={}))
 
 
@@ -227,10 +225,12 @@ def flow_table_view(request):
     ctx = {}
     return render(request, 'flowtable.html', context=ctx)
 
+
 @login_required(login_url='/login/')
 def charts_test(request, topo_id):
     ctx = {}
     return render(request, 'charts.html', context=ctx)
+
 
 @login_required(login_url='/login/')
 def charts_view(request, topo_id):
@@ -284,6 +284,7 @@ def start_monitoring(request, topo_name):
 
     return HttpResponseRedirect(reverse('Topologies', kwargs={}))
 
+
 def configure_m(request):
     topo_id = request.POST['topo_idk']
     print('yoooo')
@@ -294,11 +295,27 @@ def configure_m(request):
     print('yoooo')
     print(destination)
     topology_ins = topology.objects.get(id=topo_id)
-    configure_monitoring_api_call(topology_ins.topology_name,destination)
+    configure_monitoring_api_call(topology_ins.topology_name, destination)
     return HttpResponseRedirect(reverse('Topologies', kwargs={}))
 
-def start_m(request,topo_id):
 
+def start_m(request, topo_id):
     topology_ins = topology.objects.get(id=topo_id)
     start_monitoring_api_call(topology_ins.topology_name)
+    return HttpResponseRedirect(reverse('Topologies', kwargs={}))
+
+
+def delete_topology(request, topo_id):
+    topology_ins = topology.objects.get(id=topo_id)
+    topology_manager = Topology.objects.filter(topology_name=topology_ins.topology_name)
+    if len(topology_manager) != 0:
+        for topo in topology_manager:
+            topo.delete()
+    for device in topology_ins.devices:
+        for interface in device.interfaces:
+            interface.delete()
+        device.delete()
+    for link in topology_ins.links:
+        link.delete()
+    topology_ins.delete()
     return HttpResponseRedirect(reverse('Topologies', kwargs={}))

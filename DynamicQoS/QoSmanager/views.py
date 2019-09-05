@@ -298,6 +298,12 @@ def policy_on(request, police_id):
     return HttpResponse("test")
 
 
+def policy_delete(request, policy_id):
+    obj = Policy.objects.get(id=policy_id)
+    obj.delete()
+    return HttpResponseRedirect(reverse('policies', kwargs={}))
+
+
 def policy_off(request, police_id):
     obj = Policy.objects.get(id=police_id)
     obj.enable = False
