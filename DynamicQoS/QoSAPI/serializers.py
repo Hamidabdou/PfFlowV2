@@ -129,7 +129,7 @@ class DeviceSerializer(sr.HyperlinkedModelSerializer):
     def update(self, instance, validated_data):
         print(validated_data)
         instance.hostname = validated_data.get('hostname', instance.hostname)
-        #print(instance.app_priority)
+        # print(instance.app_priority)
         # if instance.mark == "EF":
         #     instance.group = Group.objects.get(priority="EF", policy_id=instance.group.policy)
         # else:
@@ -138,3 +138,16 @@ class DeviceSerializer(sr.HyperlinkedModelSerializer):
         instance.save()
 
         return instance
+
+
+class TuningSerializer(sr.HyperlinkedModelSerializer):
+    tos_dscp = sr.ReadOnlyField(source='dscp_value')
+    interface_tos = sr.ReadOnlyField(source='tos_interface')
+    tos_min_old = sr.ReadOnlyField(source='drop_min_old')
+    tos_max_old = sr.ReadOnlyField(source='drop_max_old')
+    tos_min_new = sr.ReadOnlyField(source='drop_min_new')
+    tos_max_new = sr.ReadOnlyField(source='drop_max_new')
+
+    class Meta:
+        model = TuningHistory
+        fields = ['id', 'interface_tos', 'tos_dscp', 'tos_min_old', 'tos_max_old', 'tos_min_new', 'tos_max_new']

@@ -446,7 +446,7 @@ class Device(models.Model):
     hostname = models.CharField(max_length=45)
     management = models.ForeignKey(Access, on_delete=models.CASCADE, null=True)
     topology_ref = models.ForeignKey(Topology, on_delete=models.CASCADE, null=True)
-    policy_ref = models.ForeignKey(Policy, on_delete=models.CASCADE, null=True)
+    policy_ref = models.ForeignKey(Policy, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         return self.hostname
@@ -652,7 +652,7 @@ class Interface(models.Model):
     egress = models.BooleanField(default=False)
     wan = models.BooleanField(default=False)
 
-    policy_out_ref = models.ForeignKey(PolicyOut, on_delete=models.CASCADE, null=True)
+    policy_out_ref = models.ForeignKey(PolicyOut, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         return self.interface_name
@@ -691,11 +691,15 @@ class Interface(models.Model):
 
 class TuningHistory(models.Model):
     tos = models.ForeignKey(Dscp, on_delete=models.CASCADE, null=True)
+    policy_ref = models.ForeignKey(Policy, on_delete=models.CASCADE, null=True)
 
     @property
     def tos_interface(self):
+        t = None
         interface = Interface.objects.get(policy_out_ref=self.tos.regroupement_class.policy_out)
-        return interface.interface_name
+
+        t= interface.interface_name
+        return str(t)
 
     @property
     def dscp_value(self):

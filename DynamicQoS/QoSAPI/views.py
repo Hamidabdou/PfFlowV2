@@ -460,7 +460,23 @@ class DeviceViewSet(viewsets.ModelViewSet):
             """
         policy = self.request.query_params.get('policy_id', None)
         if policy == None:
-
-
             return Device.objects.all()
         return Device.objects.filter(policy_ref=policy)
+
+
+class TuningViewSet(viewsets.ModelViewSet):
+    """
+        API endpoint that allows groups to be viewed or edited.
+        """
+
+    serializer_class = TuningSerializer
+
+    def get_queryset(self):
+        """
+            This view should return a list of all the purchases
+            for the currently authenticated user.
+            """
+        policy = self.request.query_params.get('policy_id', None)
+        if policy == None:
+            return TuningHistory.objects.all()
+        return TuningHistory.objects.filter(policy_ref=policy)
