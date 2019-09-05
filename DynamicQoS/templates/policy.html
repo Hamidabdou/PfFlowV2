@@ -21,16 +21,16 @@
                                 </i> <h5 style="display: inline-block">{{ policy.name }}</h5>
 
                                 <span class="pull-right">
-                                     <a class="mr-3 d-inline-block pull-right" data-id="{{ policy.id }}" href="#" ><i class="fa fa-trash" data-toggle="modal" data-target="#kt_modal_3" ></i></a>
+                                     <a class="mr-3 d-inline-block pull-right" name="{{ policy.deploy }}"id="{{ policy.id }}" data-id="delete"  ><i class="fa fa-trash"  ></i></a>
                                     {% if policy.enable  %}
-                                    <a class="mr-3 d-inline-block pull-right activated-policy" onclick="activePolicy('{{ policy.id }}')" id="{{ policy.id }}" >
+                                    <a class="mr-3 d-inline-block pull-right "  href="{% url 'policy_off' policy.id%} " >
 
-                                        <i class="fa fa-toggle-on policy-on"></i> <i class="fa fa-toggle-off policy-off"></i>
+                                        <i class="fa fa-toggle-on "></i>
                                     </a>
                                     {% else %}
-                                    <a class="mr-3 d-inline-block pull-right disactivated-policy" onclick="activePolicy('{{ policy.id }}')" id="{{ policy.id }}">
+                                    <a class="mr-3 d-inline-block pull-right " href="{% url 'policy_on' policy.id%} ">
 
-                                        <i class="fa fa-toggle-off policy-off"></i> <i class="fa fa-toggle-on policy-on"></i>
+                                        <i class="fa fa-toggle-off "></i>
                                     </a>
                                     {% endif %}
 
@@ -103,7 +103,7 @@
 											</div>
 										<div class="modal-footer">
 											<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-											<button type="button" class="btn btn-danger">Delete</button>
+											<button id="delete" type="button" class="btn btn-danger">Delete</button>
 										</div>
 									</div>
 								</div>
@@ -114,23 +114,33 @@
 {%endblock%}
 {% block scripts %}
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 
     <script>
+var name_p;
+    $( "a[data-id='delete']" ).click(function() {
+         main_id = $(this).attr('id');
+         name_p = $(this).attr('name');
 
-    $('.activated-policy .policy-off').css('display' , 'none');
-    $('.disactivated-policy .policy-on').css('display' , 'none');
-    function activePolicy(idPolicy) {
-        console.log('activing policy ....');
-        $.get('/policy_on/' + idPolicy , function (result, status) {
-            console.log(result , status);
-                console.log($('#' + idPolicy + ' .policy-off'));
-                $('.policy-off').css('display' , 'block');
-                $('.policy-on').css('display' , 'none');
-                $('#' + idPolicy + ' .policy-off').css('display' , 'none');
-                $('#' + idPolicy + ' .policy-on').css('display' , 'block');
+        // EDIT button
+         console.log(name_p);
+        $("#kt_modal_3").modal('show');
 
-        })
+});
+     $('#kt_modal_3').on('click', '#delete', function (e) {
+    $.ajax({
+        url: '/manager/policy_delete/'+main_id,
+        method: 'GET',
+        success: function(data, textStatus, jqXHR) {
+                location.reload();
+
+
+
     }
+    })
+});
+
+
 
 
     </script>

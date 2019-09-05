@@ -6,8 +6,9 @@ import requests
 from datetime import date
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
+from django.urls import reverse
 
 from .forms import *
 from .models import *
@@ -16,67 +17,67 @@ from QoSmonitor.models import *
 
 # Create your views here.
 def index(request):
-    # topo = Topology.objects.create(topology_name="test2", topology_desc="test2")
-    # man = Access.objects.create(management_address="172.16.1.2", username="yassine", password="15")
-    # device = Device.objects.create(hostname="router1", topology_ref=topo, management=man)
-    # int1 = Interface.objects.create(interface_name="g0/0", device_ref=device, ingress=True)
-    # int2 = Interface.objects.create(interface_name="g0/1", device_ref=device, ingress=False)
+    topo = Topology.objects.create(topology_name="test2", topology_desc="test2")
+    man = Access.objects.create(management_address="172.16.1.2", username="yassine", password="15")
+    device = Device.objects.create(hostname="router1", topology_ref=topo, management=man)
+    int1 = Interface.objects.create(interface_name="g0/0", device_ref=device, ingress=True)
+    int2 = Interface.objects.create(interface_name="g0/1", device_ref=device, egress=True)
     # print(device.discovery_application())
     # ################################################################################"
-    url = "http://127.0.0.1:8000/api/v1/topology"
-    r = requests.get(url)
-    # # #
-    topologies = (r.json())
-    for topo in topologies['topologies']:
-        top = Topology.objects.create(topology_name=topo['topology_name'], topology_desc=topo['topology_desc'])
-        url = "http://127.0.0.1:8000/api/v1/topology?name=" + topo['topology_name']
-        r = requests.get(url)
-        devices = (r.json())
-        for device in devices['devices']:
-            man = device['management']
-            mana = Access.objects.create(management_interface=man['management_interface'],
-                                         management_address=man['management_address'],
-                                         username=man['username'],
-                                         password=man['password'])
-            dev = Device.objects.create(hostname=device['hostname'], topology_ref=top, management=mana)
-
-            interfaces = device['interfaces']
-            for interface in interfaces:
-                if interface['interface_name'] != "Loopback0":
-                    Interface.objects.create(device_ref=dev,
-                                             interface_name=interface['interface_name'],
-                                             egress=True)
-        devices = Device.objects.filter(topology_ref=top)
-        for device in devices:
-            connection = device.connect()
-            interfaces = connection.get_interfaces()
-            for interface in interfaces:
-                print(interface)
-                print(interfaces[interface]['description'])
-                if interfaces[interface]['description'] == "#ingress":
-                    inter = Interface.objects.filter(device_ref=device, interface_name=interface)
-                    if len(inter) != 0:
-                        i = Interface.objects.get(device_ref=device, interface_name=interface)
-                        i.ingress = True
-                        i.egress = False
-                        i.save()
-                    else:
-                        Interface.objects.create(device_ref=device,
-                                                 interface_name=interface,
-                                                 ingress=True)
-                if interfaces[interface]['description'] == "#wan":
-                    inter = Interface.objects.filter(device_ref=device, interface_name=interface)
-                    if len(inter) != 0:
-                        i = Interface.objects.get(device_ref=device, interface_name=interface)
-                        i.wan = True
-                        i.egress = False
-                        i.save()
-                    else:
-                        Interface.objects.create(device_ref=device,
-                                                 interface_name=interface,
-                                                 wan=True)
-
-            connection.close()
+    # url = "http://127.0.0.1:8000/api/v1/topology"
+    # r = requests.get(url)
+    # # # #
+    # topologies = (r.json())
+    # for topo in topologies['topologies']:
+    #     top = Topology.objects.create(topology_name=topo['topology_name'], topology_desc=topo['topology_desc'])
+    #     url = "http://127.0.0.1:8000/api/v1/topology?name=" + topo['topology_name']
+    #     r = requests.get(url)
+    #     devices = (r.json())
+    #     for device in devices['devices']:
+    #         man = device['management']
+    #         mana = Access.objects.create(management_interface=man['management_interface'],
+    #                                      management_address=man['management_address'],
+    #                                      username=man['username'],
+    #                                      password=man['password'])
+    #         dev = Device.objects.create(hostname=device['hostname'], topology_ref=top, management=mana)
+    #
+    #         interfaces = device['interfaces']
+    #         for interface in interfaces:
+    #             if interface['interface_name'] != "Loopback0":
+    #                 Interface.objects.create(device_ref=dev,
+    #                                          interface_name=interface['interface_name'],
+    #                                          egress=True)
+    #     devices = Device.objects.filter(topology_ref=top)
+    #     for device in devices:
+    #         connection = device.connect()
+    #         interfaces = connection.get_interfaces()
+    #         for interface in interfaces:
+    #             print(interface)
+    #             print(interfaces[interface]['description'])
+    #             if interfaces[interface]['description'] == "#ingress":
+    #                 inter = Interface.objects.filter(device_ref=device, interface_name=interface)
+    #                 if len(inter) != 0:
+    #                     i = Interface.objects.get(device_ref=device, interface_name=interface)
+    #                     i.ingress = True
+    #                     i.egress = False
+    #                     i.save()
+    #                 else:
+    #                     Interface.objects.create(device_ref=device,
+    #                                              interface_name=interface,
+    #                                              ingress=True)
+    #             if interfaces[interface]['description'] == "#wan":
+    #                 inter = Interface.objects.filter(device_ref=device, interface_name=interface)
+    #                 if len(inter) != 0:
+    #                     i = Interface.objects.get(device_ref=device, interface_name=interface)
+    #                     i.wan = True
+    #                     i.egress = False
+    #                     i.save()
+    #                 else:
+    #                     Interface.objects.create(device_ref=device,
+    #                                              interface_name=interface,
+    #                                              wan=True)
+    #
+    #         connection.close()
     #         print('tttt')
 
     # # # print(type(topo))
@@ -230,78 +231,29 @@ def applications(request, police_id):
     return render(request, 'devices2.html', context=ctx)
 
 
-# def add_policy(request):
-#     policy_form = AddPolicyForm(request.POST or None)
-#     error = ''
-#     if policy_form.is_valid():
-#         a = policy_form.save()
-#
-#         # a = Policy(name=request.POST['name'], description=request.POST['description'])
-#
-#         # a.save()
-#         devices = Device.objects.all()
-#         for device in devices:
-#             device.policy_ref = a
-#             device.save()
-#         police_id = a.id
-#         PolicyIn.objects.create(policy_ref=a)
-#         interfaces = Interface.objects.filter(ingress=False)
-#         Group.objects.create(name="business", priority="4", policy=a)
-#         Group.objects.create(name="critical", priority="3", policy=a)
-#         Group.objects.create(name="non-business", priority="2", policy=a)
-#         Group.objects.create(name="non-business2", priority="1", policy=a)
-#         for interface in interfaces:
-#             po = PolicyOut.objects.create(policy_ref=a)
-#             interface.policy_out_ref = po
-#             interface.save()
-#             RegroupementClass.objects.create(group=Group.objects.get(priority="4", policy=a),
-#                                              policy_out=po)
-#             RegroupementClass.objects.create(group=Group.objects.get(priority="3", policy=a),
-#                                              policy_out=po)
-#             RegroupementClass.objects.create(group=Group.objects.get(priority="2", policy=a),
-#                                              policy_out=po)
-#             RegroupementClass.objects.create(group=Group.objects.get(priority="1", policy=a),
-#                                              policy_out=po)
-#         else:
-#             error = 'field error'
-#     # BusinessType.objects.create(name="Application")
-#     # BusinessType.objects.create(name="application-group")
-#     # BusinessType.objects.create(name="Category")
-#     # BusinessType.objects.create(name="sub-category")
-#     # BusinessType.objects.create(name="device-class")
-#     # BusinessType.objects.create(name="media-type")
-#     # with open("/home/djoudi/PycharmProjects/DynamicQoS/DynamicQoS/QoSmanager/nbar_application.json", 'r') as jsonfile:
-#     #     ap = json.load(jsonfile)
-#     #     for app in ap['applications']:
-#     #         bu = BusinessType.objects.get(name=app['business_type'])
-#     #         BusinessApp(name=app['name'], match=app['match'], business_type=bu).save()
-#
-#     return redirect('policies')
-
-
-def delete_policy(request, police_id):
-    obj = Policy.objects.get(id=police_id)
-    obj.delete()
-    return redirect('policies')
-
-
 def policy_on(request, police_id):
-    obj = Policy.objects.get(id=police_id)
-    obj.enable = True
-    obj.save()
-    objs = Policy.objects.filter(~Q(id=police_id))
+    objs = Policy.objects.filter(enable=True)
     for k in objs:
         k.enable = False
         k.save()
+    obj = Policy.objects.get(id=police_id)
+    obj.enable = True
+    obj.save()
     # return redirect('policies')
-    return HttpResponse("test")
+    return HttpResponseRedirect(reverse('policies', kwargs={}))
+
+
+def policy_delete(request, policy_id):
+    obj = Policy.objects.get(id=policy_id)
+    obj.delete()
+    return HttpResponseRedirect(reverse('policies', kwargs={}))
 
 
 def policy_off(request, police_id):
     obj = Policy.objects.get(id=police_id)
     obj.enable = False
     obj.save()
-    return HttpResponse("off")
+    return HttpResponseRedirect(reverse('policies', kwargs={}))
 
 
 @login_required(login_url='/login/')
@@ -401,7 +353,7 @@ def policies(request):
 @login_required(login_url='/login/')
 def policy_deployment(request, police_id):
     # policeIn = PolicyIn.objects.get(policy_ref_id=police_id)
-    devices = Device.objects.all()
+    devices = Device.objects.filter(policy_ref_id=police_id)
     threads = []
     for device in devices:
         threads.append(Thread(target=device.deploy_policy, args=police_id))
@@ -410,6 +362,9 @@ def policy_deployment(request, police_id):
         th.start()
     for th in threads:
         th.join()
+    policy = Policy.objects.get(id=police_id)
+    policy.deploy = True
+    policy.save()
     # apps = Application.objects.filter(policy_in=policeIn)
     # for device in devices:
     #     if device.wan() or device.ingress():
@@ -521,7 +476,7 @@ def policy_deployment(request, police_id):
     # except Exception as e:
     #     print(e)
 
-    return HttpResponse("okay")
+    return HttpResponseRedirect(reverse('devices', kwargs={'policy_id': police_id}))
 
 
 def devices(request, policy_id):
@@ -542,6 +497,11 @@ def devices(request, policy_id):
     applications = Application.objects.filter(policy_in=PolicyIn.objects.get(policy_ref_id=policy_id))
     applications_len = len(applications)
     today = date.today()
+    groups = Group.objects.filter(policy_id=policy_id)
+    for group in groups:
+        print(group.all_applications)
+    policy = Policy.objects.get(id=policy_id)
+
     return render(request, 'devices_template.html', locals())
 
 
@@ -596,7 +556,7 @@ def nbar_discover_applications(request, policy_id):
 
 @login_required(login_url='/login/')
 def policy_remove(request, police_id):
-    devices = Device.objects.all()
+    devices = Device.objects.filter(policy_ref_id=police_id)
     threads = []
     for device in devices:
         threads.append(Thread(target=device.remove_policy, args=police_id))
@@ -605,7 +565,10 @@ def policy_remove(request, police_id):
         th.start()
     for th in threads:
         th.join()
-    return HttpResponse("removed seccuss")
+    policy = Policy.objects.get(id=police_id)
+    policy.deploy = False
+    policy.save()
+    return HttpResponseRedirect(reverse('devices', kwargs={'policy_id': police_id}))
 
 
 def load_applications(request):
@@ -616,3 +579,7 @@ def load_applications(request):
 
 def policy_dashboard(request, policy_id):
     return render(request, 'policy_dashbord.html', locals())
+
+
+def tuning(request, policy_id):
+    return render(request, 'tuning.html', locals())

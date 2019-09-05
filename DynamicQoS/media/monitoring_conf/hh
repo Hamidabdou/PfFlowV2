@@ -1,0 +1,1758 @@
+
+
+time-range rtp_time_range
+periodic daily 00:00 to 23:59
+exit
+ip access-list extended rtp_acl
+
+
+
+permit ip any any time-range rtp_time_range
+
+
+
+exit
+
+time-range rtsp_time_range
+periodic daily 00:00 to 23:59
+exit
+ip access-list extended rtsp_acl
+
+
+
+permit ip any any time-range rtsp_time_range
+
+
+
+exit
+
+
+class-map rtp
+
+match application rtp
+
+match access-group name rtp_acl
+exit
+
+class-map rtsp
+
+match application rtsp
+
+match access-group name rtsp_acl
+exit
+
+policy-map b11
+
+class rtp
+set dscp EF
+
+class rtsp
+set dscp AF43
+
+
+
+
+
+class-map real-time
+
+
+match ip dscp EF
+
+
+
+
+exit
+
+class-map business
+
+
+
+
+match ip dscp AF43
+
+
+exit
+
+class-map critical
+
+
+
+
+
+exit
+
+class-map non-business
+
+
+
+
+
+exit
+
+class-map non-business2
+
+
+
+
+
+exit
+
+policy-map OUT_b11_GigabitEthernet0/0
+
+
+class real-time
+priority 100
+
+
+
+class business
+bandwidth percent 10
+police cir percent 10 pir percent 10
+conform-action transmit
+exceed-action set-dscp-transmit AF31
+violate-action drop
+random-detect dscp-based
+
+
+
+
+random-detect dscp  AF43 5 10 8
+
+
+
+random-detect dscp  AF42 5 10 8
+
+
+
+random-detect dscp  AF41 5 10 8
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class critical
+bandwidth percent 10
+police cir percent 10 pir percent 10
+conform-action transmit
+exceed-action set-dscp-transmit AF31
+violate-action drop
+random-detect dscp-based
+
+
+
+
+
+
+
+
+
+
+random-detect dscp  AF33 5 10 8
+
+
+
+random-detect dscp  AF32 5 10 8
+
+
+
+random-detect dscp  AF31 5 10 8
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class non-business
+bandwidth percent 10
+police cir percent 10 pir percent 10
+conform-action transmit
+exceed-action set-dscp-transmit AF31
+violate-action drop
+random-detect dscp-based
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+random-detect dscp  AF23 5 10 8
+
+
+
+random-detect dscp  AF22 5 10 8
+
+
+
+random-detect dscp  AF21 5 10 8
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class non-business2
+bandwidth percent 10
+police cir percent 10 pir percent 10
+conform-action transmit
+exceed-action set-dscp-transmit AF31
+violate-action drop
+random-detect dscp-based
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+random-detect dscp  AF13 5 10 8
+
+
+
+random-detect dscp  AF12 5 10 8
+
+
+
+random-detect dscp  AF11 5 10 8
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+exit
+
+
+class-map real-time
+
+
+match ip dscp EF
+
+
+
+
+exit
+
+class-map business
+
+
+
+
+match ip dscp AF43
+
+
+exit
+
+class-map critical
+
+
+
+
+
+exit
+
+class-map non-business
+
+
+
+
+
+exit
+
+class-map non-business2
+
+
+
+
+
+exit
+
+policy-map OUT_b11_Serial0/0/1
+
+
+class real-time
+priority 100
+
+
+
+class business
+bandwidth percent 10
+police cir percent 10 pir percent 10
+conform-action transmit
+exceed-action set-dscp-transmit AF31
+violate-action drop
+random-detect dscp-based
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+random-detect dscp  AF43 5 10 8
+
+
+
+random-detect dscp  AF42 5 10 8
+
+
+
+random-detect dscp  AF41 5 10 8
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class critical
+bandwidth percent 10
+police cir percent 10 pir percent 10
+conform-action transmit
+exceed-action set-dscp-transmit AF31
+violate-action drop
+random-detect dscp-based
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+random-detect dscp  AF33 5 10 8
+
+
+
+random-detect dscp  AF32 5 10 8
+
+
+
+random-detect dscp  AF31 5 10 8
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class non-business
+bandwidth percent 10
+police cir percent 10 pir percent 10
+conform-action transmit
+exceed-action set-dscp-transmit AF31
+violate-action drop
+random-detect dscp-based
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+random-detect dscp  AF23 5 10 8
+
+
+
+random-detect dscp  AF22 5 10 8
+
+
+
+random-detect dscp  AF21 5 10 8
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class non-business2
+bandwidth percent 10
+police cir percent 10 pir percent 10
+conform-action transmit
+exceed-action set-dscp-transmit AF31
+violate-action drop
+random-detect dscp-based
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+random-detect dscp  AF13 5 10 8
+
+
+
+random-detect dscp  AF12 5 10 8
+
+
+
+random-detect dscp  AF11 5 10 8
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+exit
+
+
+
+interface GigabitEthernet0/0
+
+service-policy output OUT_b11_GigabitEthernet0/0
+
+
+interface Serial0/0/1
+
+service-policy output OUT_b11_Serial0/0/1
+
+
+interface GigabitEthernet0/1
+
+service-policy input b11
+service-policy output OUT_b11_GigabitEthernet0/1
+
+
+//////////////////////////////////
+[27/Aug/2019 12:27:05] "GET /manager/policy_deployment/1 HTTP/1.1" 200 4
+
+
+time-range rtp_time_range
+periodic daily 00:00 to 23:59
+exit
+ip access-list extended rtp_acl
+
+
+
+permit ip any any time-range rtp_time_range
+
+
+
+exit
+
+time-range rtsp_time_range
+periodic daily 00:00 to 23:59
+exit
+ip access-list extended rtsp_acl
+
+
+
+permit ip any any time-range rtsp_time_range
+
+
+
+exit
+
+
+class-map rtp
+
+match application rtp
+
+match access-group name rtp_acl
+exit
+
+class-map rtsp
+
+match application rtsp
+
+match access-group name rtsp_acl
+exit
+
+policy-map b11
+
+class rtp
+set dscp EF
+
+class rtsp
+set dscp AF43
+
+
+
+
+
+class-map real-time
+
+
+match ip dscp EF
+
+
+
+
+exit
+
+class-map business
+
+
+
+
+match ip dscp AF43
+
+
+exit
+
+class-map critical
+
+
+
+
+
+exit
+
+class-map non-business
+
+
+
+
+
+exit
+
+class-map non-business2
+
+
+
+
+
+exit
+
+policy-map OUT_b11_Serial0/0/0
+
+
+class real-time
+priority 100
+
+
+
+class business
+bandwidth percent 10
+police cir percent 10 pir percent 10
+conform-action transmit
+exceed-action set-dscp-transmit AF31
+violate-action drop
+random-detect dscp-based
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+random-detect dscp  AF43 5 10 8
+
+
+
+random-detect dscp  AF42 5 10 8
+
+
+
+random-detect dscp  AF41 5 10 8
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class critical
+bandwidth percent 10
+police cir percent 10 pir percent 10
+conform-action transmit
+exceed-action set-dscp-transmit AF31
+violate-action drop
+random-detect dscp-based
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+random-detect dscp  AF33 5 10 8
+
+
+
+random-detect dscp  AF32 5 10 8
+
+
+
+random-detect dscp  AF31 5 10 8
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class non-business
+bandwidth percent 10
+police cir percent 10 pir percent 10
+conform-action transmit
+exceed-action set-dscp-transmit AF31
+violate-action drop
+random-detect dscp-based
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+random-detect dscp  AF23 5 10 8
+
+
+
+random-detect dscp  AF22 5 10 8
+
+
+
+random-detect dscp  AF21 5 10 8
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class non-business2
+bandwidth percent 10
+police cir percent 10 pir percent 10
+conform-action transmit
+exceed-action set-dscp-transmit AF31
+violate-action drop
+random-detect dscp-based
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+random-detect dscp  AF13 5 10 8
+
+
+
+random-detect dscp  AF12 5 10 8
+
+
+
+random-detect dscp  AF11 5 10 8
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+exit
+
+
+
+interface GigabitEthernet0/0
+
+service-policy input b11
+
+
+interface Serial0/0/0
+
+service-policy output OUT_b11_Serial0/0/0
+
+
+//////////////////////////////////

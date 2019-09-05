@@ -21,9 +21,10 @@
                                 </i> <h5 style="display: inline-block">{{ topo.topology_name }}</h5>
 
                                 <span class="pull-right">
-                                    <a class="mr-3 d-inline-block pull-right" data-id="{{ topo.id }}" href="#" ><i class="fa fa-trash" data-toggle="modal" data-target="#kt_modal_3" ></i></a>
-                                    <a class="mr-3 d-inline-block pull-right" href="{% url 'devices' topo.id %}" ><i class="fa fa-magic"></i></a>
+                                    <a data-id="delete" class="mr-3 d-inline-block pull-right" id="{{ topo.id }}"  ><i class="fa fa-trash"  ></i></a>
+                                    <button type="button" id="{{ topo.id }}" class="btn btn-sm btn-info"  >Configure Monitoring</button>
                                     <a class="mr-3 d-inline-block pull-right" href="{% url 'drag_drop' topo.id %}" ><i class="fa fa-sitemap"></i></a>
+                                    <a class="mr-3 d-inline-block pull-right" href="{% url 'start_m' topo.id %}" ><i class="fa fa-hourglass-start"></i></a>
 
 
                                 </span>
@@ -84,7 +85,35 @@
 											</div>
 										<div class="modal-footer">
 											<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-											<button type="button" class="btn btn-danger">Delete</button>
+											<button  id="delete" type="button" class="btn btn-danger">Delete</button>
+										</div>
+									</div>
+								</div>
+							</div>
+{#    modal congitr#}
+    <div class="modal fade" id="kt_modal_4" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" style="display: none;" aria-hidden="true">
+								<div class="modal-dialog modal-lg" role="document">
+									<div class="modal-content">
+										<div class="modal-header">
+											<h5 class="modal-title" id="exampleModalLabel">Configure monitor</h5>
+											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+											</button>
+										</div>
+										<div class="modal-body">
+										 <form id="form1" role="form" method="post" action="{% url 'configure_m' %}">
+{% csrf_token %}
+                        <div class="form-group">
+            <label for="destination">
+                <span class="glyphicon glyphicon-file">
+                </span> Monitoring server</label>
+                            <input type="text" name="destination" id="destination">
+                            <input type="hidden" id="type" name="topo_idk" >
+                        </div>
+
+                        <button type="submit" class="btn btn-success btn-block" ><span
+                                class="glyphicon glyphicon-ok" ></span> Configure
+                        </button>
+                    </form>
 										</div>
 									</div>
 								</div>
@@ -92,3 +121,41 @@
 
 
 {%endblock%}
+
+
+
+{% block scripts %}
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script>
+    $( ".btn-sm" ).click(function() {
+        let topo_id = $(this).attr('id');
+
+        // EDIT button
+         console.log("khra");
+         $('#type').val(topo_id);
+        $("#kt_modal_4").modal('show');
+});
+    var main_id = 0;
+     $( "a[data-id='delete']" ).click(function() {
+         main_id = $(this).attr('id');
+
+        // EDIT button
+         console.log("id");
+        $("#kt_modal_3").modal('show');
+
+});
+     $('#kt_modal_3').on('click', '#delete', function (e) {
+    $.ajax({
+        url: '/delete_topology/'+main_id,
+        method: 'GET',
+        success: function(data, textStatus, jqXHR) {
+            location.reload();
+
+    }
+    })
+});
+
+
+    </script>
+{% endblock %}

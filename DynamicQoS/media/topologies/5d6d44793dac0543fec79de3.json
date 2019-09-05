@@ -1,0 +1,14 @@
+{ "class": "go.GraphLinksModel",
+  "copiesArrays": true,
+  "copiesArrayObjects": true,
+  "linkFromPortIdProperty": "fromPort",
+  "linkToPortIdProperty": "toPort",
+  "nodeDataArray": [ 
+{"category":"Router", "name":"", "leftArray":[ {"portId":"left0", "portType":"eth0/0", "portColor":"#c4eea7"} ], "rightArray":[ {"portId":"right0", "portType":"eth0/1", "portColor":"#c6cef5"} ], "topArray":[], "bottomArray":[], "Address":"1.1.1.1", "Username":"yassine", "Password":"15", "Secret":"15", "key":-3, "loc":"-128 -58.5"},
+{"category":"Router", "name":"", "leftArray":[], "rightArray":[ {"portId":"right0", "portType":"eth0/0", "portColor":"#dfb297"} ], "topArray":[], "bottomArray":[], "Address":"2.2.2.2", "Username":"admin", "Password":"ADMIN", "Secret":"ADMIN", "key":-2, "loc":"-287 -54.5"},
+{"category":"Cloud", "name":"", "leftArray":[ {"portId":"left0", "portType":"eth0/0", "portColor":"#e1c5cf"} ], "rightArray":[], "topArray":[], "bottomArray":[], "key":-4, "loc":"97 -139.5"}
+ ],
+  "linkDataArray": [ 
+{"from":-2, "to":-3, "fromPort":"right0", "toPort":"left0", "points":[-254,-54.5,-240,-54.5,-189.5,-54.5,-189.5,-58.5,-171,-58.5,-161,-58.5]},
+{"from":-3, "to":-4, "fromPort":"right0", "toPort":"left0", "points":[-95,-58.5,-81,-58.5,3.25,-58.5,3.25,-139.5,55.5,-139.5,65.5,-139.5]}
+ ]}

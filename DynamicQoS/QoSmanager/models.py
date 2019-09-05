@@ -50,6 +50,7 @@ class Policy(models.Model):
     name = models.CharField(max_length=45, unique=True, error_messages={'unique': 'this name is in used'})
     description = models.CharField(max_length=45)
     enable = models.BooleanField(default=False)
+    deploy = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -179,6 +180,14 @@ class Group(models.Model):
     policy = models.ForeignKey(Policy, on_delete=models.CASCADE, null=True)
     priority = models.CharField(max_length=45)
 
+    @property
+    def all_applications(self):
+        return len(Application.objects.filter(group=self))
+
+    @property
+    def list_applications(self):
+        return Application.objects.filter(group=self)
+
 
 class RegroupementClass(models.Model):
     group = models.ForeignKey(Group, on_delete=models.CASCADE, null=True)
@@ -280,27 +289,27 @@ class Application(models.Model):
     AF11, CS1, DEFAULT = "CS7", "CS6", "EF", "CS5", "AF43", "AF42", "AF41", "CS4", "AF33", \
                          "AF32", "AF31", "CS3", "AF23", "AF22", "AF21", "CS2", "AF13", "AF12", "AF11", "CS1", "DEFAULT"
     DSCP = (
-            (CS7, "CS7"),
-            (CS6, "CS6"),
-            (EF, "EF"),
-            (CS5, "CS5"),
-            (AF43, "AF43"),
-            (AF42, "AF42"),
-            (AF41, "AF41"),
-            (CS4, "CS4"),
-            (AF33, "AF33"),
-            (AF32, "AF32"),
-            (AF31, "AF31"),
-            (CS3, "CS3"),
-            (AF23, "AF23"),
-            (AF22, "AF22"),
-            (AF21, "AF21"),
-            (CS2, "CS2"),
-            (AF13, "AF13"),
-            (AF12, "AF12"),
-            (AF11, "AF11"),
-            (CS1, "CS1"),
-            (DEFAULT, "DEFAULT"),
+        (CS7, "CS7"),
+        (CS6, "CS6"),
+        (EF, "EF"),
+        (CS5, "CS5"),
+        (AF43, "AF43"),
+        (AF42, "AF42"),
+        (AF41, "AF41"),
+        (CS4, "CS4"),
+        (AF33, "AF33"),
+        (AF32, "AF32"),
+        (AF31, "AF31"),
+        (CS3, "CS3"),
+        (AF23, "AF23"),
+        (AF22, "AF22"),
+        (AF21, "AF21"),
+        (CS2, "CS2"),
+        (AF13, "AF13"),
+        (AF12, "AF12"),
+        (AF11, "AF11"),
+        (CS1, "CS1"),
+        (DEFAULT, "DEFAULT"),
     )
 
     IP, TCP, UDP = "ip", "tcp", "udp"
@@ -437,7 +446,7 @@ class Device(models.Model):
     hostname = models.CharField(max_length=45)
     management = models.ForeignKey(Access, on_delete=models.CASCADE, null=True)
     topology_ref = models.ForeignKey(Topology, on_delete=models.CASCADE, null=True)
-    policy_ref = models.ForeignKey(Policy, on_delete=models.CASCADE, null=True)
+    policy_ref = models.ForeignKey(Policy, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         return self.hostname
@@ -643,7 +652,7 @@ class Interface(models.Model):
     egress = models.BooleanField(default=False)
     wan = models.BooleanField(default=False)
 
-    policy_out_ref = models.ForeignKey(PolicyOut, on_delete=models.CASCADE, null=True)
+    policy_out_ref = models.ForeignKey(PolicyOut, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         return self.interface_name
@@ -682,11 +691,15 @@ class Interface(models.Model):
 
 class TuningHistory(models.Model):
     tos = models.ForeignKey(Dscp, on_delete=models.CASCADE, null=True)
+    policy_ref = models.ForeignKey(Policy, on_delete=models.CASCADE, null=True)
 
     @property
     def tos_interface(self):
+        t = None
         interface = Interface.objects.get(policy_out_ref=self.tos.regroupement_class.policy_out)
-        return interface.interface_name
+
+        t= interface.interface_name
+        return str(t)
 
     @property
     def dscp_value(self):

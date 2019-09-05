@@ -3,12 +3,21 @@
     {% load staticfiles %}
     <div class="kt-subheader   kt-grid__item" id="kt_subheader">
 							<div class="kt-subheader__main">
-                                <a href="{% url 'policy_deployment' policy_id %}" class="btn btn-label-success btn-bold">
+                                {% if policy.deploy  %}
+                                <a  href="{% url 'policy_deployment' policy_id %}" class="btn btn-label-success btn-bold disabled">
 									Deploy
 								</a>
 								<a href="{% url 'policy_remove' policy_id %}" class="btn btn-label-danger btn-bold">
 									Remove
 								</a>
+                                {% else %}
+                                    <a  href="{% url 'policy_deployment' policy_id %}" class="btn btn-label-success btn-bold">
+									Deploy
+								</a>
+								<a  href="{% url 'policy_remove' policy_id %}" class="btn btn-label-danger btn-bold disabled">
+									Remove
+								</a>
+                                {% endif %}
 
 								<div class="kt-input-icon kt-input-icon--right kt-subheader__search">
 									<input type="text" class="form-control" placeholder="Search order..." id="generalSearch">
@@ -82,8 +91,8 @@
 													Profit Share between customers
 												</span>
 											</div>
-											<div class="kt-widget14__content">
-												<div class="kt-widget14__legends">
+											<div class="kt-widget14__content ">
+												<div class="kt-widget14__legends d-flex d-flex h4 justify-content-between ">
                                                     <div class="kt-widget14__legend">
 														<span class="kt-widget14__bullet kt-bg-success"></span>
 														<span class="kt-widget14__stats">{{ applications_len }} Applications</span>
@@ -112,6 +121,49 @@
 
 									<!--end:: Widgets/Profit Share-->
 								</div>
+    <div class="kt-portlet">
+								<div class="kt-portlet__body  kt-portlet__body--fit">
+									<div class="row row-no-padding row-col-separator-xl">
+                                        {% for group in groups %}
+										<div class="col-md-12 col-lg-6 col-xl-3">
+
+											<!--begin::New Users-->
+											<div class="kt-widget24">
+												<div class="kt-widget24__details">
+													<div class="kt-widget24__info">
+														<h4 class="kt-widget24__title">
+															{{ group.name }}
+														</h4>
+														<span class="kt-widget24__desc">
+{#															Joined New User#}
+														</span>
+													</div>
+													<span class="kt-widget24__stats kt-font-success">
+														{{ group.all_applications }}
+													</span>
+												</div>
+                                                {% for app in group.list_applications %}
+												<div class="kt-widget24__stats kt-font-success">
+													{{ app.name }}
+												</div>
+                                                    {% endfor %}
+												<div class="kt-widget24__action">
+													<span class="kt-widget24__change">
+{#														Change#}
+													</span>
+													<span class="kt-widget24__number">
+{#														90%#}
+													</span>
+												</div>
+											</div>
+
+											<!--end::New Users-->
+										</div>
+                                        {% endfor %}
+
+									</div>
+								</div>
+							</div>
     <div class="modal fade" id="kt_modal_4" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" style="display: none;" aria-hidden="true">
 								<div class="modal-dialog modal-lg" role="document">
 									<div class="modal-content">
@@ -145,7 +197,7 @@
 											</button>
 										</div>
 										<div class="modal-body">
-                                            <p>Are you sure you?</p>
+                                            <p id="render">Are you sure you?</p>
 
 											</div>
 										<div class="modal-footer">
