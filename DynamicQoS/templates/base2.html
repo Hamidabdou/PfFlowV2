@@ -86,6 +86,8 @@
 <link rel="icon" type="image/png" sizes="16x16" href={% static '/assets/media/logos/favicon-16x16.png'%}>
 <link rel="manifest" href={% static '/assets/media/logos/site.webmanifest'%}>
     <link rel="shortcut icon" href={% static '/assets/media/logos/favicon.ico'%}>
+    {% block css %}
+    {% endblock %}
     <style>
         .container {
             width: 50%;

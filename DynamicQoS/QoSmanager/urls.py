@@ -19,5 +19,6 @@ urlpatterns = [
     path('policy_dashboard/<policy_id>', views.policy_dashboard, name='policy_dashboard'),
     path('policy_delete/<policy_id>', views.policy_delete, name='policy_delete'),
     path('tuning/<policy_id>', views.tuning, name='tuning'),
+    path('discovery/<policy_id>', views.discovery_view, name='discovery'),
 
 ]

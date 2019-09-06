@@ -3,13 +3,14 @@ from threading import Thread
 
 from DynamicQoS.settings import MEDIA_ROOT
 import requests
-from datetime import date
+from datetime import date, datetime
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse
 
+from QoSmonitor.tasks import nbar_discovery_task
 from .forms import *
 from .models import *
 from QoSmonitor.models import *
@@ -592,5 +593,5 @@ def discovery_view(request, policy_id):
         if frm.is_valid():
             time_delta = frm.start - datetime.now()
             nbar_discovery_task(frm.end, policy_id, schedule=time_delta)
-
-    return render(request, 'discovery.html')
+    ctx={frm,policy_id}
+    return render(request, 'discovery.html',context=ctx)
