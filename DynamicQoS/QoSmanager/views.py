@@ -590,8 +590,9 @@ def discovery_view(request, policy_id):
     frm = DiscoveryForm()
     if request.method == 'POST':
         frm = DiscoveryForm(request.POST)
-        if frm.is_valid():
-            time_delta = frm.start - datetime.now()
-            nbar_discovery_task(frm.end, policy_id, schedule=time_delta)
-    ctx={frm,policy_id}
+
+
+        time_delta = datetime.strptime(request.POST['start'],'%Y/%m/%d %H:%M') - datetime.now()
+        nbar_discovery_task(request.POST['end'] ,policy_id, schedule=time_delta)
+    ctx={"form":frm,"id":policy_id}
     return render(request, 'discovery.html',context=ctx)

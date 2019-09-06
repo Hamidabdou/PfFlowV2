@@ -131,7 +131,7 @@ def nbar_discovery_task(end_time, id_policy):
     for th in threads:
         th.join()
 
-    while datetime.now() < end_time:
+    while datetime.now() < datetime.strptime(end_time,'%Y/%m/%d %H:%M'):
         devices = Device.objects.filter(policy_ref_id=policy_id)
         application = []
         nbar_apps = Application.objects.all()

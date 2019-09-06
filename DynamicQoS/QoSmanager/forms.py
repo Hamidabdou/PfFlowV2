@@ -49,14 +49,14 @@ class AddCustomApplicationForm(forms.ModelForm):
 
 class DiscoveryForm(forms.Form):
     start = forms.DateTimeField(
-        input_formats=['%d/%m/%Y %H:%M'],
+        input_formats=['%Y/%m/%d %H:%M'],
         widget=forms.DateTimeInput(attrs={
             'class': 'form-control datetimepicker-input',
             'data-target': '#datetimepicker1'
         })
     )
     end = forms.DateTimeField(
-        input_formats=['%d/%m/%Y %H:%M'],
+        input_formats=['%Y/%m/%d %H:%M'],
         widget=forms.DateTimeInput(attrs={
             'class': 'form-control datetimepicker-input',
             'data-target': '#datetimepicker2'
