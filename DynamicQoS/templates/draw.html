@@ -22,9 +22,11 @@
 
                                 <span class="pull-right">
                                     <a data-id="delete" class="mr-3 d-inline-block pull-right" id="{{ topo.id }}"  ><i class="fa fa-trash"  ></i></a>
-                                    <button type="button" id="{{ topo.id }}" class="btn btn-sm btn-info"  >Configure Monitoring</button>
+                                    <a class="mr-3 d-inline-block pull-right" href="{% url 'start_m' topo.id %}" ><i class="fa fa-chart-area"></i></a>
+
+
+                                    <a  id="{{ topo.id }}" class="mr-3 d-inline-block pull-right btn-icon-only"  ><i class="fa fa-wrench"></i></a>
                                     <a class="mr-3 d-inline-block pull-right" href="{% url 'drag_drop' topo.id %}" ><i class="fa fa-sitemap"></i></a>
-                                    <a class="mr-3 d-inline-block pull-right" href="{% url 'start_m' topo.id %}" ><i class="fa fa-hourglass-start"></i></a>
 
 
                                 </span>
@@ -128,7 +130,7 @@
   <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
     <script>
-    $( ".btn-sm" ).click(function() {
+    $( ".btn-icon-only" ).click(function() {
         let topo_id = $(this).attr('id');
 
         // EDIT button

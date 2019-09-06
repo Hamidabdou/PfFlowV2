@@ -1,6 +1,7 @@
 from background_task import background
 import requests
 
+from QoSmanager.models import *
 from .utils import *
 from .models import *
 from datetime import datetime
@@ -120,9 +121,10 @@ def start_monitoring_api_call(topology_name):
 
 
 @background(schedule=60)
-def nbar_discovery_task(end_time, id_policy):
-    dvcs = Device.objects.filter(policy_ref_id=id_policy)
+def nbar_discovery_task(end_time, policy_id):
+    dvcs = Device.objects.filter(policy_ref_id=policy_id)
     threads = []
+    print("starting Discovery")
     for dvcs in dvcs:
         threads.append(Thread(target=dvcs.enable_nbar))
     for th in threads:
@@ -138,29 +140,32 @@ def nbar_discovery_task(end_time, id_policy):
         apps = BusinessApp.objects.all()
         for device in devices:
             application.extend(device.discovery_application())
-        for app in set(application):
-            c = False
-            b = BusinessApp.objects.filter(name=app)
-            for a in b:
-                b_id = a.id
-                if len(Application.objects.filter(business_app=a,
-                                                  policy_in=PolicyIn.objects.get(policy_ref=policy_id))):
-                    c = True
-            # c =
-            if len(b) != 0 and not c:
-                ap = Application.objects.create(business_app=BusinessApp.objects.get(id=b_id),
-                                                business_type=BusinessApp.objects.get(id=b_id).business_type,
-                                                policy_in=PolicyIn.objects.get(policy_ref_id=policy_id),
-                                                mark=BusinessApp.objects.get(id=b_id).recommended_dscp)
-                if ap.mark.startswith("A"):
-                    ap.group = Group.objects.get(priority=app.app_priority, policy_id=policy_id)
-                    ap.save()
-                elif ap.mark == "EF":
-                    ap.group = Group.objects.get(priority="EF", policy_id=policy_id)
-                    ap.save()
-                elif ap.mark == "DEFAULT":
-                    ap.group = Group.objects.get(priority="DEFAULT", policy_id=policy_id)
-                    ap.save()
-                else:
-                    ap.save()
-        time.sleep(300)
+        print("application:...")
+        print(set(application))
+        # for app in set(application):
+        #     c = False
+        #     b = BusinessApp.objects.filter(name=app)
+        #     for a in b:
+        #         b_id = a.id
+        #         if len(Application.objects.filter(business_app=a,
+        #                                           policy_in=PolicyIn.objects.get(policy_ref=policy_id))):
+        #             c = True
+        #     # c =
+        #     if len(b) != 0 and not c:
+        #         ap = Application.objects.create(business_app=BusinessApp.objects.get(id=b_id),
+        #                                         business_type=BusinessApp.objects.get(id=b_id).business_type,
+        #                                         policy_in=PolicyIn.objects.get(policy_ref_id=policy_id),
+        #                                         mark=BusinessApp.objects.get(id=b_id).recommended_dscp)
+        #         if ap.mark.startswith("A"):
+        #             ap.group = Group.objects.get(priority=app.app_priority, policy_id=policy_id)
+        #             ap.save()
+        #         elif ap.mark == "EF":
+        #             ap.group = Group.objects.get(priority="EF", policy_id=policy_id)
+        #             ap.save()
+        #         elif ap.mark == "DEFAULT":
+        #             ap.group = Group.objects.get(priority="DEFAULT", policy_id=policy_id)
+        #             ap.save()
+        #         else:
+        #             ap.save()
+        print("slepp ")
+        time.sleep(60)
