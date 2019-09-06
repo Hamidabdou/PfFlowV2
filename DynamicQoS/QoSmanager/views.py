@@ -583,3 +583,14 @@ def policy_dashboard(request, policy_id):
 
 def tuning(request, policy_id):
     return render(request, 'tuning.html', locals())
+
+
+def discovery_view(request, policy_id):
+    frm = DiscoveryForm()
+    if request.method == 'POST':
+        frm = DiscoveryForm(request.POST)
+        if frm.is_valid():
+            time_delta = frm.start - datetime.now()
+            nbar_discovery_task(frm.end, policy_id, schedule=time_delta)
+
+    return render(request, 'discovery.html')
