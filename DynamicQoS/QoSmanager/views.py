@@ -330,31 +330,31 @@ def policies(request):
                                                             group=Group.objects.get(priority="EF", policy=a),
                                                             policy_out=po)
                 Dscp.objects.create(dscp_value="EF", regroupement_class=realtime)
-                policing = Policing.objects.create(cir="40", pir="45", dscp_transmit="AF21")
+                policing = Policing.objects.create(cir="35", pir="40", dscp_transmit="AF21")
                 shaping = Shaping.objects.create(peak="10", average="10")
-                high = RegroupementClass.objects.create(shaping=shaping, policing=policing, bandwidth="40",
+                high = RegroupementClass.objects.create(shaping=shaping, policing=policing, bandwidth="35",
                                                         group=Group.objects.get(priority="4", policy=a),
                                                         policy_out=po)
                 Dscp.objects.create(dscp_value="AF43", regroupement_class=high, drop_max="85", drop_min="70",
                                     denominator="20")
                 Dscp.objects.create(dscp_value="AF42", regroupement_class=high, drop_max="95", drop_min="80",
                                     denominator="15")
-                Dscp.objects.create(dscp_value="AF41", regroupement_class=high, drop_max="90", drop_min="100",
+                Dscp.objects.create(dscp_value="AF41", regroupement_class=high, drop_max="100", drop_min="90",
                                     denominator="10")
-                policing = Policing.objects.create(cir="30", pir="35", dscp_transmit="AF11")
+                policing = Policing.objects.create(cir="25", pir="30", dscp_transmit="AF11")
                 shaping = Shaping.objects.create(peak="10", average="10")
-                priority = RegroupementClass.objects.create(shaping=shaping, policing=policing, bandwidth="30",
+                priority = RegroupementClass.objects.create(shaping=shaping, policing=policing, bandwidth="25",
                                                             group=Group.objects.get(priority="3", policy=a),
                                                             policy_out=po)
-                Dscp.objects.create(dscp_value="AF33", regroupement_class=priority, drop_max="35", drop_min="45",
+                Dscp.objects.create(dscp_value="AF33", regroupement_class=priority, drop_max="45", drop_min="35",
                                     denominator="45")
                 Dscp.objects.create(dscp_value="AF32", regroupement_class=priority, drop_max="50", drop_min="40",
                                     denominator="40")
                 Dscp.objects.create(dscp_value="AF31", regroupement_class=priority, drop_max="65", drop_min="55",
                                     denominator="35")
                 policing = Policing.objects.create(cir="10", pir="10", dscp_transmit="AF31")
-                shaping = Shaping.objects.create(peak="15", average="10")
-                med = RegroupementClass.objects.create(shaping=shaping, policing=policing, bandwidth="15",
+                shaping = Shaping.objects.create(peak="10", average="15")
+                med = RegroupementClass.objects.create(shaping=shaping, policing=policing, bandwidth="10",
                                                        group=Group.objects.get(priority="2", policy=a),
                                                        policy_out=po)
                 Dscp.objects.create(dscp_value="AF23", regroupement_class=med, drop_max="30", drop_min="23",
@@ -364,8 +364,8 @@ def policies(request):
                 Dscp.objects.create(dscp_value="AF21", regroupement_class=med, drop_max="40", drop_min="33",
                                     denominator="50")
                 policing = Policing.objects.create(cir="10", pir="10", dscp_transmit="AF31")
-                shaping = Shaping.objects.create(peak="10", average="10")
-                low = RegroupementClass.objects.create(shaping=shaping, policing=policing, bandwidth="10",
+                shaping = Shaping.objects.create(peak="5", average="10")
+                low = RegroupementClass.objects.create(shaping=shaping, policing=policing, bandwidth="5",
                                                        group=Group.objects.get(priority="1", policy=a),
                                                        policy_out=po)
                 Dscp.objects.create(dscp_value="AF13", regroupement_class=low, drop_max="15", drop_min="10",
