@@ -133,39 +133,61 @@ def nbar_discovery_task(end_time, policy_id):
     for th in threads:
         th.join()
 
-    while datetime.now() < datetime.strptime(end_time,'%Y/%m/%d %H:%M'):
+    while datetime.now() < datetime.strptime(end_time, '%Y/%m/%d %H:%M'):
         devices = Device.objects.filter(policy_ref_id=policy_id)
         application = []
-        nbar_apps = Application.objects.all()
-        apps = BusinessApp.objects.all()
         for device in devices:
             application.extend(device.discovery_application())
         print("application:...")
+        print("saha:...")
         print(set(application))
-        # for app in set(application):
-        #     c = False
-        #     b = BusinessApp.objects.filter(name=app)
-        #     for a in b:
-        #         b_id = a.id
-        #         if len(Application.objects.filter(business_app=a,
-        #                                           policy_in=PolicyIn.objects.get(policy_ref=policy_id))):
-        #             c = True
-        #     # c =
-        #     if len(b) != 0 and not c:
-        #         ap = Application.objects.create(business_app=BusinessApp.objects.get(id=b_id),
-        #                                         business_type=BusinessApp.objects.get(id=b_id).business_type,
-        #                                         policy_in=PolicyIn.objects.get(policy_ref_id=policy_id),
-        #                                         mark=BusinessApp.objects.get(id=b_id).recommended_dscp)
-        #         if ap.mark.startswith("A"):
-        #             ap.group = Group.objects.get(priority=app.app_priority, policy_id=policy_id)
-        #             ap.save()
-        #         elif ap.mark == "EF":
-        #             ap.group = Group.objects.get(priority="EF", policy_id=policy_id)
-        #             ap.save()
-        #         elif ap.mark == "DEFAULT":
-        #             ap.group = Group.objects.get(priority="DEFAULT", policy_id=policy_id)
-        #             ap.save()
-        #         else:
-        #             ap.save()
+        for app in set(application):
+            print(app)
+            c = False
+            b = BusinessApp.objects.filter(name=app)
+            print(len(b))
+            for a in b:
+                b_id = a.id
+                print("name:", a.name)
+                if len(Application.objects.filter(business_app=a,
+                                                  policy_in=PolicyIn.objects.get(policy_ref=policy_id))) != 0:
+                    c = True
+            if len(b) != 0 and not c:
+                print("save the application")
+                ap = Application.objects.create(business_app=BusinessApp.objects.get(id=b_id),
+                                                source="any", destination="any", begin_time="00:00",
+                                                end_time="any",
+                                                business_type=BusinessApp.objects.get(id=b_id).business_type,
+                                                policy_in=PolicyIn.objects.get(policy_ref_id=policy_id),
+                                                mark=BusinessApp.objects.get(id=b_id).recommended_dscp)
+                if ap.mark.startswith("A"):
+                    ap.group = Group.objects.get(priority=ap.app_priority, policy_id=policy_id)
+                    ap.save()
+                if ap.mark == "EF":
+                    ap.group = Group.objects.get(priority="EF", policy_id=policy_id)
+                    ap.save()
+                elif ap.mark == "DEFAULT":
+                    ap.group = Group.objects.get(priority="DEFAULT", policy_id=policy_id)
+                    ap.save()
+                elif ap.mark == "CS6":
+                    ap.group = Group.objects.get(priority="CS6", policy_id=policy_id)
+                    ap.save()
+                elif ap.mark == "CS5":
+                    ap.group = Group.objects.get(priority="CS5", policy_id=policy_id)
+                    ap.save()
+                elif ap.mark == "CS4":
+                    ap.group = Group.objects.get(priority="CS4", policy_id=policy_id)
+                    ap.save()
+                elif ap.mark == "CS3":
+                    ap.group = Group.objects.get(priority="CS3", policy_id=policy_id)
+                    ap.save()
+                elif ap.mark == "CS2":
+                    ap.group = Group.objects.get(priority="CS2", policy_id=policy_id)
+                    ap.save()
+                elif ap.mark == "CS1":
+                    ap.group = Group.objects.get(priority="CS1", policy_id=policy_id)
+                    ap.save()
+                else:
+                    ap.save()
         print("slepp ")
         time.sleep(60)

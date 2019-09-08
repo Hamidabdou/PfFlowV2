@@ -210,7 +210,7 @@ class RegroupementClass(models.Model):
         v = 0
         dscps = Dscp.objects.filter(regroupement_class=self)
         for tos in dscps:
-            if tos.delay_ratio >= 2 or tos.delay_ratio >= 2:
+            if tos.delay_ratio >= 2 or tos.loss_ratio >= 2:
                 if tos.c_ratio > v:
                     v = tos.c_ratio
                     oppressed = tos

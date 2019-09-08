@@ -619,6 +619,8 @@ def policy_dashboard(request, policy_id):
 
 def tuning(request, policy_id):
     return render(request, 'tuning.html', locals())
+def all_tuning(request):
+    return render(request, 'all_tuning.html', locals())
 
 
 def discovery_view(request, policy_id):

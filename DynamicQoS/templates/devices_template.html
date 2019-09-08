@@ -2,7 +2,7 @@
 {% block content%}
     {% load staticfiles %}
     <div class="kt-subheader   kt-grid__item" id="kt_subheader">
-							<div class="kt-subheader__main">
+        <div class="kt-subheader__main">
                                 {% if policy.deploy  %}
                                 <a  href="{% url 'policy_deployment' policy_id %}" class="btn btn-label-success btn-bold disabled">
 									Deploy
@@ -26,62 +26,18 @@
 									</span>
 								</div>
 							</div>
-							<div class="kt-subheader__toolbar">
+        <div class="kt-subheader__toolbar">
 								<div class="kt-subheader__wrapper">
 									<a href="#" class="btn kt-subheader__btn-daterange" id="kt_dashboard_daterangepicker" data-toggle="kt-tooltip" title="" data-placement="left" data-original-title="">
 										<span class="kt-subheader__btn-daterange-title" id="kt_dashboard_daterangepicker_title">Today</span>&nbsp;
 										<span class="kt-subheader__btn-daterange-date" id="kt_dashboard_daterangepicker_date">{{ today }}</span>
 										<i class="flaticon2-calendar-1"></i>
 									</a>
-									<div class="dropdown dropdown-inline" data-toggle="kt-tooltip" title="" data-placement="left" data-original-title="Quick actions">
-										<a href="#" class="btn btn-brand btn-icon" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-											<i class="flaticon2-plus"></i>
-										</a>
-										<div class="dropdown-menu dropdown-menu-right" x-placement="bottom-end" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(35px, 32px, 0px);">
-											<ul class="kt-nav">
-												<li class="kt-nav__section kt-nav__section--first">
-													<span class="kt-nav__section-text">Add new:</span>
-												</li>
-												<li class="kt-nav__item">
-													<a href="#" class="kt-nav__link">
-														<i class="kt-nav__link-icon flaticon2-graph"></i>
-														<span class="kt-nav__link-text">Order</span>
-													</a>
-												</li>
-												<li class="kt-nav__item">
-													<a href="#" class="kt-nav__link">
-														<i class="kt-nav__link-icon flaticon2-calendar-4"></i>
-														<span class="kt-nav__link-text">Event</span>
-													</a>
-												</li>
-												<li class="kt-nav__item">
-													<a href="#" class="kt-nav__link">
-														<i class="kt-nav__link-icon flaticon2-layers-1"></i>
-														<span class="kt-nav__link-text">Report</span>
-													</a>
-												</li>
-												<li class="kt-nav__item">
-													<a href="#" class="kt-nav__link">
-														<i class="kt-nav__link-icon flaticon2-calendar-4"></i>
-														<span class="kt-nav__link-text">Post</span>
-													</a>
-												</li>
-												<li class="kt-nav__item">
-													<a href="#" class="kt-nav__link">
-														<i class="kt-nav__link-icon flaticon2-file-1"></i>
-														<span class="kt-nav__link-text">File</span>
-													</a>
-												</li>
-											</ul>
-										</div>
-									</div>
 								</div>
 							</div>
-						</div>
-    <div class="col-xl-4">
-
-									<!--begin:: Widgets/Profit Share-->
-									<div class="kt-portlet kt-portlet--height-fluid">
+    </div>
+    <div class="col-xl-4" style="margin-left: 30px;margin-right: 20px;margin-top:30px;padding-right: 0px; width: 93.68%">
+        <div class="kt-portlet kt-portlet--height-fluid">
 										<div class="kt-widget14">
 											<div class="kt-widget14__header">
 												<h3 class="kt-widget14__title">
@@ -92,7 +48,7 @@
 												</span>
 											</div>
 											<div class="kt-widget14__content ">
-												<div class="kt-widget14__legends d-flex d-flex h4 justify-content-between ">
+												<div class="kt-widget14__legends d-flex d-flex h5 justify-content-between ">
                                                     <div class="kt-widget14__legend">
 														<span class="kt-widget14__bullet kt-bg-success"></span>
 														<span class="kt-widget14__stats">{{ applications_len }} Applications</span>
@@ -118,10 +74,8 @@
 											</div>
 										</div>
 									</div>
-
-									<!--end:: Widgets/Profit Share-->
-								</div>
-    <div class="kt-portlet">
+    </div>
+    <div class="kt-portlet" style="margin-left: 40px;margin-right: 40px">
 								<div class="kt-portlet__body  kt-portlet__body--fit">
 									<div class="row row-no-padding row-col-separator-xl">
                                         {% for group in groups %}
@@ -189,7 +143,7 @@
 								</div>
 							</div>
     <div class="modal fade" id="kt_modal_3" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" style="display: none;" aria-hidden="true">
-								<div class="modal-dialog" role="document">
+        <div class="modal-dialog" role="document">
 									<div class="modal-content">
 										<div class="modal-header">
 											<h5 class="modal-title" id="exampleModalLabel">Confirm Deletion</h5>
@@ -206,8 +160,8 @@
 										</div>
 									</div>
 								</div>
-							</div>
-<div class="kt-portlet kt-portlet--mobile">
+    </div>
+<div class="kt-portlet kt-portlet--mobile" style="margin-right:40px; margin-left:40px;">
         <div class="kt-portlet__head kt-portlet__head--lg">
             <div class="kt-portlet__head-label">
                 <span class="kt-portlet__head-icon">
