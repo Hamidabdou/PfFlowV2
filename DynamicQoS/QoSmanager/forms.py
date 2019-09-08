@@ -5,6 +5,16 @@ from .models import *
 class AddApplicationForm(forms.ModelForm):
     class Meta:
         model = Application
+        widgets = {
+            'business_type': forms.Select(attrs={'class': 'form-control'}),
+            'business_app': forms.Select(attrs={'class': 'form-control'}),
+            'mark': forms.Select(attrs={'class': 'form-control'}),
+            'begin_time': forms.TextInput(attrs={'class': 'form-control'}),
+            'end_time': forms.TextInput(attrs={'class': 'form-control' }),
+            'source': forms.TextInput(attrs={'class': 'form-control'}),
+            'destination': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+
         fields = (
             'business_type', 'business_app', 'mark', 'begin_time', 'end_time', 'source',
             'destination')
@@ -34,15 +44,26 @@ class AddPolicyForm(forms.ModelForm):
         attrs={'class': 'form-control', 'placeholder': 'Enter the policy name', 'type': 'text'}))
     description = forms.CharField(max_length=150, widget=forms.Textarea(
         attrs={'class': 'form-control', 'placeholder': 'describe you policy here ...', 'rows': '2'}))
-    topologies = forms.ModelChoiceField(queryset=Topology.objects.all())
+    topologies = forms.ModelChoiceField(
+        queryset=Topology.objects.all(), widget=forms.Select(attrs={
+            'class': 'form-control',
+            'style': 'margin-bottom: 12px;'
+        }))
 
 
 class AddCustomApplicationForm(forms.ModelForm):
     class Meta:
         model = Application
-        # widgets = {
-        #     'custom_name': forms.TextInput(attrs={'style': "color:#646c9a;"}),
-        # }
+        widgets = {
+            'custom_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'protocol_type': forms.Select(attrs={'class': 'form-control'}),
+            'port_number': forms.TextInput(attrs={'class': 'form-control'}),
+            'begin_time': forms.TextInput(attrs={'class': 'form-control'}),
+            'end_time': forms.TextInput(attrs={'class': 'form-control'}),
+            'source': forms.TextInput(attrs={'class': 'form-control'}),
+            'destination': forms.TextInput(attrs={'class': 'form-control'}),
+            'mark': forms.Select(attrs={'class': 'form-control'}),
+        }
         fields = ('custom_name', 'protocol_type', 'port_number', 'begin_time', 'end_time', 'source', 'destination',
                   'mark')
 

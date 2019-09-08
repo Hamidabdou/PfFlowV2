@@ -1,15 +1,28 @@
 {% extends 'base2.html'%}
 {% block content%}
 {% load staticfiles %}
+    <div class="kt-subheader   kt-grid__item" id="kt_subheader">
+        <div class="kt-subheader__main">
+                <h3 class="kt-subheader__title">Policy Dashboard</h3>
+                <span class="kt-subheader__separator kt-subheader__separator--v"></span>
 
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item">
-          <a href="#">Applications Details</a>
-        </li>
-    </ol>
 
-    <div class="row">
-    <div class="col-lg-6">
+                <div class="kt-input-icon kt-input-icon--right kt-subheader__search kt-hidden">
+                    <input type="text" class="form-control" placeholder="Search order..." id="generalSearch">
+                    <span class="kt-input-icon__icon kt-input-icon__icon--right">
+                        <span><i class="flaticon2-search-1"></i></span>
+                    </span>
+                </div>
+            </div>
+            <div class="kt-subheader__toolbar">
+
+            </div>
+    </div>
+
+
+    <div class="row" style="margin-top: 50px">
+    <div class="col-lg-1"></div>
+    <div class="col-lg-5">
         <div class="card">
             <div class="card-header">
               <i class="fa fa-plus"></i> Custom Application
@@ -24,7 +37,7 @@
     {{ hidden_field }}
   {% endfor %}
 
-  <table class="table table-bordered">
+  <table class="table" style="border: none;">
     {% for field in custom_form.visible_fields %}
       <tr>
         <th style='color:#646c9a;' >{{ field.label_tag }}</th>
@@ -38,7 +51,7 @@
   </table>
                   <div class="form-group">
                         <div class="col-md-8">
-                            <button type="submit" class="btn btn-primary btn-block" >Add</button>
+                            <button type="submit" class="btn btn-primary btn-block" style="margin-left: 70px">Add</button>
                         </div>
                     </div>
                   </form>
@@ -47,12 +60,12 @@
     </div>
 
 
-    <div class="col-lg-6">
+    <div class="col-lg-5">
         <div class="card">
             <div class="card-header">
               <i class="fa fa-plus"></i> New Application
             </div>
-            <div class="card-body">
+            <div class="card-body" style="padding-bottom: 18px;">
                   <form method="post" id="app_form" action="{% url 'add_application' police_id %}"data-application-url="{% url 'ajax_load_applications' %}" novalidate >
 
                    {% csrf_token %}
@@ -63,7 +76,7 @@
     {{ hidden_field }}
   {% endfor %}
 
-  <table class="table table-bordered">
+  <table class="table">
     {% for field in app_form.visible_fields %}
       <tr>
         <th style='color:#646c9a;' >{{ field.label_tag }}</th>
@@ -77,17 +90,17 @@
   </table>
                   <div class="form-group">
                         <div class="col-md-8">
-                            <button type="submit" class="btn btn-primary btn-block" >Add</button>
+                            <button type="submit" class="btn btn-primary btn-block" style="margin-top: 68px; margin-left: 70px">Add</button>
                         </div>
                     </div>
                   </form>
             </div>
         </div>
     </div>
-
+    <div class="col-lg-1"></div>
 
     </div>
-    <div class="row">
+    <div class="row" style="margin-top: 20px">
         <div class="modal fade" id="kt_modal_4" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" style="display: none;" aria-hidden="true">
 								<div class="modal-dialog modal-lg" role="document">
 									<div class="modal-content">
@@ -157,7 +170,7 @@
 									</div>
 								</div>
 							</div>
-    <div class="kt-portlet kt-portlet--mobile">
+    <div class="kt-portlet kt-portlet--mobile" style="margin-left:40px; margin-right:40px">
         <div class="kt-portlet__head kt-portlet__head--lg">
             <div class="kt-portlet__head-label">
                 <span class="kt-portlet__head-icon">
