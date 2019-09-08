@@ -156,7 +156,7 @@ def nbar_discovery_task(end_time, policy_id):
                 print("save the application")
                 ap = Application.objects.create(business_app=BusinessApp.objects.get(id=b_id),
                                                 source="any", destination="any", begin_time="00:00",
-                                                end_time="any",
+                                                end_time="23:59",
                                                 business_type=BusinessApp.objects.get(id=b_id).business_type,
                                                 policy_in=PolicyIn.objects.get(policy_ref_id=policy_id),
                                                 mark=BusinessApp.objects.get(id=b_id).recommended_dscp)

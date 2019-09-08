@@ -9,25 +9,25 @@ from netmiko import ConnectHandler
 
 
 class Topology(models.Model):
-    topology_name = models.CharField(max_length=45)
-    topology_desc = models.CharField(max_length=45)
+    topology_name = models.CharField(max_length=255)
+    topology_desc = models.CharField(max_length=255)
 
     def __str__(self):
         return self.topology_name
 
 
 class BusinessType(models.Model):
-    name = models.CharField(max_length=45, unique=True)
+    name = models.CharField(max_length=255, unique=True)
 
     def __str__(self):
         return self.name
 
 
 class BusinessApp(models.Model):
-    name = models.CharField(max_length=45)
+    name = models.CharField(max_length=255)
     business_type = models.ForeignKey(BusinessType, on_delete=models.CASCADE, null=True)
-    match = models.CharField(max_length=45)
-    recommended_dscp = models.CharField(max_length=45)
+    match = models.CharField(max_length=255)
+    recommended_dscp = models.CharField(max_length=255)
     delay_ref = models.IntegerField()
     loss_ref = models.IntegerField()
 
@@ -47,8 +47,8 @@ class BusinessApp(models.Model):
 
 
 class Policy(models.Model):
-    name = models.CharField(max_length=45, unique=True, error_messages={'unique': 'this name is in used'})
-    description = models.CharField(max_length=45)
+    name = models.CharField(max_length=255, unique=True, error_messages={'unique': 'this name is in used'})
+    description = models.CharField(max_length=255)
     enable = models.BooleanField(default=False)
     deploy = models.BooleanField(default=False)
 
@@ -165,20 +165,20 @@ class PolicyOut(models.Model):
 
 
 class Policing(models.Model):
-    cir = models.CharField(max_length=45)
-    pir = models.CharField(max_length=45)
-    dscp_transmit = models.CharField(max_length=45)
+    cir = models.CharField(max_length=255)
+    pir = models.CharField(max_length=255)
+    dscp_transmit = models.CharField(max_length=255)
 
 
 class Shaping(models.Model):
-    peak = models.CharField(max_length=45)
-    average = models.CharField(max_length=45)
+    peak = models.CharField(max_length=255)
+    average = models.CharField(max_length=255)
 
 
 class Group(models.Model):
-    name = models.CharField(max_length=45)
+    name = models.CharField(max_length=255)
     policy = models.ForeignKey(Policy, on_delete=models.CASCADE, null=True)
-    priority = models.CharField(max_length=45)
+    priority = models.CharField(max_length=255)
 
     @property
     def all_applications(self):
@@ -194,8 +194,8 @@ class RegroupementClass(models.Model):
     policing = models.ForeignKey(Policing, on_delete=models.CASCADE, null=True)
     shaping = models.ForeignKey(Shaping, on_delete=models.CASCADE, null=True)
     policy_out = models.ForeignKey(PolicyOut, on_delete=models.CASCADE, null=True)
-    bandwidth = models.CharField(max_length=45)
-    priority = models.CharField(max_length=45)
+    bandwidth = models.CharField(max_length=255)
+    priority = models.CharField(max_length=255)
 
     def __str__(self):
         return self.name
@@ -231,15 +231,15 @@ class RegroupementClass(models.Model):
 
 
 class Dscp(models.Model):
-    dscp_value = models.CharField(max_length=45)
+    dscp_value = models.CharField(max_length=255)
     regroupement_class = models.ForeignKey(RegroupementClass, on_delete=models.CASCADE, null=True)
-    drop_min = models.CharField(max_length=45)
-    drop_max = models.CharField(max_length=45)
-    denominator = models.CharField(max_length=45)
-    drop_min_old = models.CharField(max_length=45)
-    drop_max_old = models.CharField(max_length=45)
-    drop_min_new = models.CharField(max_length=45)
-    drop_max_new = models.CharField(max_length=45)
+    drop_min = models.CharField(max_length=255)
+    drop_max = models.CharField(max_length=255)
+    denominator = models.CharField(max_length=255)
+    drop_min_old = models.CharField(max_length=255)
+    drop_max_old = models.CharField(max_length=255)
+    drop_min_new = models.CharField(max_length=255)
+    drop_max_new = models.CharField(max_length=255)
     delay = models.IntegerField(null=True, default=400)
     loss = models.IntegerField(null=True, default=20)
     ratio = models.IntegerField(null=True, default=40)
@@ -325,13 +325,13 @@ class Application(models.Model):
     mark = models.CharField(max_length=20, choices=DSCP)
     dscp = models.ForeignKey(Dscp, on_delete=models.CASCADE, null=True)
     group = models.ForeignKey(Group, on_delete=models.CASCADE, null=True)
-    source = models.CharField(max_length=45)
-    destination = models.CharField(max_length=45)
-    begin_time = models.CharField(max_length=45)
-    end_time = models.CharField(max_length=45)
-    protocol_type = models.CharField(max_length=45, choices=PROTOCOL, default=IP)
-    port_number = models.CharField(max_length=45)
-    custom_name = models.CharField(max_length=45)
+    source = models.CharField(max_length=255)
+    destination = models.CharField(max_length=255)
+    begin_time = models.CharField(max_length=255)
+    end_time = models.CharField(max_length=255)
+    protocol_type = models.CharField(max_length=255, choices=PROTOCOL, default=IP)
+    port_number = models.CharField(max_length=255)
+    custom_name = models.CharField(max_length=255)
 
     def __str__(self):
         return self.name
@@ -435,15 +435,15 @@ class Application(models.Model):
 
 
 class Access(models.Model):
-    management_interface = models.CharField(max_length=45)
-    management_address = models.CharField(max_length=45)
-    username = models.CharField(max_length=45)
-    password = models.CharField(max_length=45)
-    enable_secret = models.CharField(max_length=45)
+    management_interface = models.CharField(max_length=255)
+    management_address = models.CharField(max_length=255)
+    username = models.CharField(max_length=255)
+    password = models.CharField(max_length=255)
+    enable_secret = models.CharField(max_length=255)
 
 
 class Device(models.Model):
-    hostname = models.CharField(max_length=45)
+    hostname = models.CharField(max_length=255)
     management = models.ForeignKey(Access, on_delete=models.CASCADE, null=True)
     topology_ref = models.ForeignKey(Topology, on_delete=models.CASCADE, null=True)
     policy_ref = models.ForeignKey(Policy, on_delete=models.SET_NULL, null=True)
@@ -472,7 +472,7 @@ class Device(models.Model):
         device = None
         try:
             device = driver(self.management.management_address, self.management.username,
-                            self.management.password)
+                            self.management.password,timeout=180)
             device.open()
         except Exception as e:
             print(e)
@@ -646,7 +646,7 @@ class Device(models.Model):
 
 
 class Interface(models.Model):
-    interface_name = models.CharField(max_length=45)
+    interface_name = models.CharField(max_length=255)
     ingress = models.BooleanField(default=False)
     device_ref = models.ForeignKey(Device, on_delete=models.CASCADE, null=True)
     egress = models.BooleanField(default=False)
@@ -692,13 +692,14 @@ class Interface(models.Model):
 class TuningHistory(models.Model):
     tos = models.ForeignKey(Dscp, on_delete=models.CASCADE, null=True)
     policy_ref = models.ForeignKey(Policy, on_delete=models.CASCADE, null=True)
+    timestamp = models.DateTimeField(null=False)
 
     @property
     def tos_interface(self):
         t = None
         interface = Interface.objects.get(policy_out_ref=self.tos.regroupement_class.policy_out)
 
-        t= interface.interface_name
+        t = interface.interface_name
         return str(t)
 
     @property

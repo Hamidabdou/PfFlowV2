@@ -1,5 +1,5 @@
 {% for group in groups %}
-class-map {{group.name}}
+class-map match-any {{group.name}}
 {% for app in classes %}
 {% if app.group == group %}
 match ip dscp {{app.dscp_value}}
