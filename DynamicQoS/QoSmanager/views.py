@@ -11,6 +11,8 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 
 from QoSmonitor.tasks import nbar_discovery_task
+
+from QoSmonitor.tasks import all_in_task
 from .forms import *
 from .models import *
 from QoSmonitor.models import *
@@ -211,13 +213,25 @@ def add_application(request, police_id):
 def add_custom_application(request, police_id):
     # app_form = AddApplicationForm(request.POST)
     # groupe = Group.objects.get(priority=request.POST['app_priority'], policy_id=police_id)
-
+    mark = request.POST['mark']
+    begin = request.POST['begin_time']
+    end = request.POST['end_time']
+    source = request.POST['source']
+    destination = request.POST['destination']
+    if begin == '':
+        begin = "00:00"
+    if end == '':
+        end = "23:59"
+    if source == '':
+        source = "any"
+    if destination == '':
+        destination = "any"
     app = Application(policy_in_id=PolicyIn.objects.get(policy_ref_id=police_id).id,
-                      mark=request.POST['mark'],
-                      source=request.POST['source'],
-                      destination=request.POST['destination'],
-                      begin_time=request.POST['begin_time'],
-                      end_time=request.POST['end_time'],
+                      mark=mark,
+                      source=source,
+                      destination=destination,
+                      begin_time=begin,
+                      end_time=end,
                       protocol_type=request.POST['protocol_type'],
                       port_number=request.POST['port_number'],
                       custom_name=request.POST['custom_name'], )
@@ -276,6 +290,27 @@ def policy_on(request, police_id):
 
 def policy_delete(request, policy_id):
     obj = Policy.objects.get(id=policy_id)
+    if obj.deploy:
+        devices = Device.objects.filter(policy_ref_id=policy_id)
+        threads = []
+        for device in devices:
+            threads.append(Thread(target=device.remove_policy, args=policy_id))
+        for th in threads:
+            print("removing thread started")
+            th.start()
+        for th in threads:
+            th.join()
+        policy = Policy.objects.get(id=policy_id)
+        policy.deploy = False
+        policy.save()
+    policiesout = PolicyOut.objects.filter(policy_ref=obj)
+    for po in policiesout:
+        regs = RegroupementClass.objects.filter(policy_out=po)
+        for reg in regs:
+            if reg.policing is not None:
+                reg.policing.delete()
+            if reg.shaping is not None:
+                reg.shaping.delete()
     obj.delete()
     return HttpResponseRedirect(reverse('policies', kwargs={}))
 
@@ -304,7 +339,7 @@ def policies(request):
                 device.policy_ref = a
                 device.save()
             police_id = a.id
-            PolicyIn.objects.create(policy_ref=a)
+            PolicyIn.objects.create(policy_ref=a, id=a.id)
             interfaces = Interface.objects.filter(ingress=False)
             # print(interfaces)
             Group.objects.create(name="VOIP", priority="EF", policy=a)
@@ -336,116 +371,116 @@ def policies(request):
                                                         group=Group.objects.get(priority="4", policy=a),
                                                         policy_out=po)
                 af43 = Dscp.objects.create(dscp_value="AF43", regroupement_class=high, drop_max="85", drop_min="70",
-                                    denominator="20")
-                af43.drop_max_old=af43.drop_max
+                                           denominator="20")
+                af43.drop_max_old = af43.drop_max
                 af43.drop_max_new = af43.drop_max
                 af43.drop_min_old = af43.drop_min
                 af43.drop_min_new = af43.drop_min
                 af43.save()
-                TuningHistory.objects.create(tos=af43, policy_ref=a,timestamp=datetime.now())
+                TuningHistory.objects.create(tos=af43, policy_ref=a, timestamp=datetime.now())
                 af42 = Dscp.objects.create(dscp_value="AF42", regroupement_class=high, drop_max="95", drop_min="80",
-                                    denominator="15")
+                                           denominator="15")
                 af42.drop_max_old = af42.drop_max
                 af42.drop_max_new = af42.drop_max
                 af42.drop_min_old = af42.drop_min
                 af42.drop_min_new = af42.drop_min
                 af42.save()
-                TuningHistory.objects.create(tos=af42, policy_ref=a,timestamp=datetime.now())
-                af41=Dscp.objects.create(dscp_value="AF41", regroupement_class=high, drop_max="100", drop_min="90",
-                                    denominator="10")
+                TuningHistory.objects.create(tos=af42, policy_ref=a, timestamp=datetime.now())
+                af41 = Dscp.objects.create(dscp_value="AF41", regroupement_class=high, drop_max="100", drop_min="90",
+                                           denominator="10")
                 af41.drop_max_old = af41.drop_max
                 af41.drop_max_new = af41.drop_max
                 af41.drop_min_old = af41.drop_min
                 af41.drop_min_new = af41.drop_min
                 af41.save()
-                TuningHistory.objects.create(tos=af41, policy_ref=a,timestamp=datetime.now())
+                TuningHistory.objects.create(tos=af41, policy_ref=a, timestamp=datetime.now())
                 policing = Policing.objects.create(cir="25", pir="30", dscp_transmit="AF11")
                 shaping = Shaping.objects.create(peak="10", average="10")
                 priority = RegroupementClass.objects.create(shaping=shaping, policing=policing, bandwidth="25",
                                                             group=Group.objects.get(priority="3", policy=a),
                                                             policy_out=po)
-                af33=Dscp.objects.create(dscp_value="AF33", regroupement_class=priority, drop_max="45", drop_min="35",
-                                    denominator="45")
+                af33 = Dscp.objects.create(dscp_value="AF33", regroupement_class=priority, drop_max="45", drop_min="35",
+                                           denominator="45")
                 af33.drop_max_old = af33.drop_max
                 af33.drop_max_new = af33.drop_max
                 af33.drop_min_old = af33.drop_min
                 af33.drop_min_new = af33.drop_min
                 af33.save()
-                TuningHistory.objects.create(tos=af33, policy_ref=a,timestamp=datetime.now())
-                af32=Dscp.objects.create(dscp_value="AF32", regroupement_class=priority, drop_max="50", drop_min="40",
-                                    denominator="40")
+                TuningHistory.objects.create(tos=af33, policy_ref=a, timestamp=datetime.now())
+                af32 = Dscp.objects.create(dscp_value="AF32", regroupement_class=priority, drop_max="50", drop_min="40",
+                                           denominator="40")
                 af32.drop_max_old = af32.drop_max
                 af32.drop_max_new = af32.drop_max
                 af32.drop_min_old = af32.drop_min
                 af32.drop_min_new = af32.drop_min
                 af32.save()
-                TuningHistory.objects.create(tos=af32, policy_ref=a,timestamp=datetime.now())
-                af31=Dscp.objects.create(dscp_value="AF31", regroupement_class=priority, drop_max="65", drop_min="55",
-                                    denominator="35")
+                TuningHistory.objects.create(tos=af32, policy_ref=a, timestamp=datetime.now())
+                af31 = Dscp.objects.create(dscp_value="AF31", regroupement_class=priority, drop_max="65", drop_min="55",
+                                           denominator="35")
                 af31.drop_max_old = af31.drop_max
                 af31.drop_max_new = af31.drop_max
                 af31.drop_min_old = af31.drop_min
                 af31.drop_min_new = af31.drop_min
                 af31.save()
-                TuningHistory.objects.create(tos=af31, policy_ref=a,timestamp=datetime.now())
+                TuningHistory.objects.create(tos=af31, policy_ref=a, timestamp=datetime.now())
                 policing = Policing.objects.create(cir="10", pir="10", dscp_transmit="AF31")
                 shaping = Shaping.objects.create(peak="10", average="15")
                 med = RegroupementClass.objects.create(shaping=shaping, policing=policing, bandwidth="10",
                                                        group=Group.objects.get(priority="2", policy=a),
                                                        policy_out=po)
-                af23=Dscp.objects.create(dscp_value="AF23", regroupement_class=med, drop_max="30", drop_min="23",
-                                    denominator="60")
+                af23 = Dscp.objects.create(dscp_value="AF23", regroupement_class=med, drop_max="30", drop_min="23",
+                                           denominator="60")
                 af23.drop_max_old = af23.drop_max
                 af23.drop_max_new = af23.drop_max
                 af23.drop_min_old = af23.drop_min
                 af23.drop_min_new = af23.drop_min
                 af23.save()
-                TuningHistory.objects.create(tos=af23, policy_ref=a,timestamp=datetime.now())
-                af22=Dscp.objects.create(dscp_value="AF22", regroupement_class=med, drop_max="35", drop_min="27",
-                                    denominator="55")
+                TuningHistory.objects.create(tos=af23, policy_ref=a, timestamp=datetime.now())
+                af22 = Dscp.objects.create(dscp_value="AF22", regroupement_class=med, drop_max="35", drop_min="27",
+                                           denominator="55")
                 af22.drop_max_old = af22.drop_max
                 af22.drop_max_new = af22.drop_max
                 af22.drop_min_old = af22.drop_min
                 af22.drop_min_new = af22.drop_min
                 af22.save()
-                TuningHistory.objects.create(tos=af22, policy_ref=a,timestamp=datetime.now())
-                af21=Dscp.objects.create(dscp_value="AF21", regroupement_class=med, drop_max="40", drop_min="33",
-                                    denominator="50")
+                TuningHistory.objects.create(tos=af22, policy_ref=a, timestamp=datetime.now())
+                af21 = Dscp.objects.create(dscp_value="AF21", regroupement_class=med, drop_max="40", drop_min="33",
+                                           denominator="50")
                 af21.drop_max_old = af21.drop_max
                 af21.drop_max_new = af21.drop_max
                 af21.drop_min_old = af21.drop_min
                 af21.drop_min_new = af21.drop_min
                 af21.save()
-                TuningHistory.objects.create(tos=af21, policy_ref=a,timestamp=datetime.now())
+                TuningHistory.objects.create(tos=af21, policy_ref=a, timestamp=datetime.now())
                 policing = Policing.objects.create(cir="10", pir="10", dscp_transmit="AF31")
                 shaping = Shaping.objects.create(peak="5", average="10")
                 low = RegroupementClass.objects.create(shaping=shaping, policing=policing, bandwidth="5",
                                                        group=Group.objects.get(priority="1", policy=a),
                                                        policy_out=po)
-                af13=Dscp.objects.create(dscp_value="AF13", regroupement_class=low, drop_max="15", drop_min="10",
-                                    denominator="80")
+                af13 = Dscp.objects.create(dscp_value="AF13", regroupement_class=low, drop_max="15", drop_min="10",
+                                           denominator="80")
                 af13.drop_max_old = af13.drop_max
                 af13.drop_max_new = af13.drop_max
                 af13.drop_min_old = af13.drop_min
                 af13.drop_min_new = af13.drop_min
                 af13.save()
-                TuningHistory.objects.create(tos=af13, policy_ref=a,timestamp=datetime.now())
-                af12=Dscp.objects.create(dscp_value="AF12", regroupement_class=low, drop_max="20", drop_min="13",
-                                    denominator="70")
+                TuningHistory.objects.create(tos=af13, policy_ref=a, timestamp=datetime.now())
+                af12 = Dscp.objects.create(dscp_value="AF12", regroupement_class=low, drop_max="20", drop_min="13",
+                                           denominator="70")
                 af12.drop_max_old = af12.drop_max
                 af12.drop_max_new = af12.drop_max
                 af12.drop_min_old = af12.drop_min
                 af12.drop_min_new = af12.drop_min
                 af12.save()
-                TuningHistory.objects.create(tos=af12, policy_ref=a,timestamp=datetime.now())
-                af11=Dscp.objects.create(dscp_value="AF11", regroupement_class=low, drop_max="25", drop_min="17",
-                                    denominator="65")
+                TuningHistory.objects.create(tos=af12, policy_ref=a, timestamp=datetime.now())
+                af11 = Dscp.objects.create(dscp_value="AF11", regroupement_class=low, drop_max="25", drop_min="17",
+                                           denominator="65")
                 af11.drop_max_old = af11.drop_max
                 af11.drop_max_new = af11.drop_max
                 af11.drop_min_old = af11.drop_min
                 af11.drop_min_new = af11.drop_min
                 af11.save()
-                TuningHistory.objects.create(tos=af11, policy_ref=a,timestamp=datetime.now())
+                TuningHistory.objects.create(tos=af11, policy_ref=a, timestamp=datetime.now())
 
             return redirect('policies')
         else:
@@ -691,6 +726,8 @@ def policy_dashboard(request, policy_id):
 
 def tuning(request, policy_id):
     return render(request, 'tuning.html', locals())
+
+
 def all_tuning(request):
     return render(request, 'all_tuning.html', locals())
 
@@ -700,8 +737,19 @@ def discovery_view(request, policy_id):
     if request.method == 'POST':
         frm = DiscoveryForm(request.POST)
 
+        time_delta = datetime.strptime(request.POST['start'], '%Y/%m/%d %H:%M') - datetime.now()
+        nbar_discovery_task(request.POST['end'], policy_id, schedule=time_delta)
+    ctx = {"form": frm, "id": policy_id}
+    return render(request, 'discovery.html', context=ctx)
 
-        time_delta = datetime.strptime(request.POST['start'],'%Y/%m/%d %H:%M') - datetime.now()
-        nbar_discovery_task(request.POST['end'] ,policy_id, schedule=time_delta)
-    ctx={"form":frm,"id":policy_id}
-    return render(request, 'discovery.html',context=ctx)
+
+def all_in_view(request):
+    policy_form = AllInForm()
+    if request.method == 'POST':
+        policy_form = AllInForm(request.POST)
+        topo = request.POST['topologies']
+        policy = Policy.objects.create(name=request.POST['name'], description=request.POST['name'])
+        time_delta = datetime.strptime(request.POST['start'], '%Y/%m/%d %H:%M') - datetime.now()
+        all_in_task(topo, policy.id, request.POST['start'])
+    ctx = {"policy_form": policy_form}
+    return render(request, 'all_in.html', context=ctx)

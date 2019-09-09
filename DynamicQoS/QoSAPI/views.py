@@ -441,6 +441,9 @@ class ApplicationViewSet(viewsets.ModelViewSet):
             for the currently authenticated user.
             """
         policy = self.request.query_params.get('policy_id', None)
+        print(type(policy))
+        # print(policyins)
+        # policy_in =PolicyIn.objects.get(policy_ref=policyins)
         if policy == None:
             return Application.objects.all()
         return Application.objects.filter(policy_in=policy)

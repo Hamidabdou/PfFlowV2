@@ -98,15 +98,24 @@ class ApplicationSerializer(sr.HyperlinkedModelSerializer):
     def update(self, instance, validated_data):
         print(validated_data)
         instance.mark = validated_data.get('mark', instance.mark)
-        print("khraaaaa")
+        # print("khraaaaa")
         print(instance.mark)
         if instance.mark == "EF":
             instance.group = Group.objects.get(priority="EF", policy_id=instance.group.policy)
         elif instance.mark == "DEFAULT":
             instance.group = Group.objects.get(priority="DEFAULT", policy_id=instance.group.policy)
-
-        elif str(instance.mark).startswith("C"):
-            instance.group = Group.objects.get(priority="SELECTOR", policy_id=instance.group.policy)
+        elif str(instance.mark) == "CS6":
+            instance.group = Group.objects.get(priority="CS6", policy_id=instance.group.policy)
+        elif str(instance.mark) == "CS5":
+            instance.group = Group.objects.get(priority="CS5", policy_id=instance.group.policy)
+        elif str(instance.mark) == "CS4":
+            instance.group = Group.objects.get(priority="CS4", policy_id=instance.group.policy)
+        elif str(instance.mark) == "CS3":
+            instance.group = Group.objects.get(priority="CS3", policy_id=instance.group.policy)
+        elif str(instance.mark) == "CS2":
+            instance.group = Group.objects.get(priority="CS2", policy_id=instance.group.policy)
+        elif str(instance.mark) == "CS1":
+            instance.group = Group.objects.get(priority="CS1", policy_id=instance.group.policy)
 
         else:
             instance.group = Group.objects.get(priority=instance.app_priority, policy_id=instance.group.policy)
@@ -141,7 +150,6 @@ class DeviceSerializer(sr.HyperlinkedModelSerializer):
 
 
 class TuningSerializer(sr.HyperlinkedModelSerializer):
-
     tos_dscp = sr.ReadOnlyField(source='dscp_value')
     interface_tos = sr.ReadOnlyField(source='tos_interface')
     tos_min_old = sr.ReadOnlyField(source='drop_min_old')
@@ -151,4 +159,5 @@ class TuningSerializer(sr.HyperlinkedModelSerializer):
 
     class Meta:
         model = TuningHistory
-        fields = ['id', 'timestamp', 'interface_tos', 'tos_dscp', 'tos_min_old', 'tos_max_old', 'tos_min_new', 'tos_max_new']
+        fields = ['id', 'timestamp', 'interface_tos', 'tos_dscp', 'tos_min_old', 'tos_max_old', 'tos_min_new',
+                  'tos_max_new']

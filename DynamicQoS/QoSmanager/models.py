@@ -284,12 +284,11 @@ class Dscp(models.Model):
 
 
 class Application(models.Model):
-    CS7, CS6, EF, CS5, AF43, AF42, AF41, CS4, AF33, \
+    CS6, EF, CS5, AF43, AF42, AF41, CS4, AF33, \
     AF32, AF31, CS3, AF23, AF22, AF21, CS2, AF13, AF12, \
-    AF11, CS1, DEFAULT = "CS7", "CS6", "EF", "CS5", "AF43", "AF42", "AF41", "CS4", "AF33", \
+    AF11, CS1, DEFAULT = "CS6", "EF", "CS5", "AF43", "AF42", "AF41", "CS4", "AF33", \
                          "AF32", "AF31", "CS3", "AF23", "AF22", "AF21", "CS2", "AF13", "AF12", "AF11", "CS1", "DEFAULT"
     DSCP = (
-        (CS7, "CS7"),
         (CS6, "CS6"),
         (EF, "EF"),
         (CS5, "CS5"),
@@ -325,10 +324,10 @@ class Application(models.Model):
     mark = models.CharField(max_length=20, choices=DSCP)
     dscp = models.ForeignKey(Dscp, on_delete=models.CASCADE, null=True)
     group = models.ForeignKey(Group, on_delete=models.CASCADE, null=True)
-    source = models.CharField(max_length=255)
-    destination = models.CharField(max_length=255)
-    begin_time = models.CharField(max_length=255)
-    end_time = models.CharField(max_length=255)
+    source = models.CharField(max_length=255, null=True)
+    destination = models.CharField(max_length=255, null=True)
+    begin_time = models.CharField(max_length=255, null=True)
+    end_time = models.CharField(max_length=255, null=True)
     protocol_type = models.CharField(max_length=255, choices=PROTOCOL, default=IP)
     port_number = models.CharField(max_length=255)
     custom_name = models.CharField(max_length=255)
@@ -472,7 +471,7 @@ class Device(models.Model):
         device = None
         try:
             device = driver(self.management.management_address, self.management.username,
-                            self.management.password,timeout=180)
+                            self.management.password, timeout=180)
             device.open()
         except Exception as e:
             print(e)
@@ -716,7 +715,7 @@ class TuningHistory(models.Model):
 
     @property
     def drop_min_new(self):
-        return self.tos.drop_max_new
+        return self.tos.drop_min_new
 
     @property
     def drop_max_new(self):

@@ -21,5 +21,6 @@ urlpatterns = [
     path('tuning/<policy_id>', views.tuning, name='tuning'),
     path('discovery/<policy_id>', views.discovery_view, name='discovery'),
     path('all_tuning/', views.all_tuning, name='all_tuning'),
+    path('all_in/', views.all_in_view, name='all_in'),
 
 ]

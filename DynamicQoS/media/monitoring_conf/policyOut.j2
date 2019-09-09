@@ -8,6 +8,7 @@ match ip dscp {{app.dscp_value}}
 exit
 {% endfor %}
 policy-map {{a.name}}
+description {{ a.description }}
 {% for class in regroupement_classes %}
 {% if class.group.priority=="EF" %}
 class {{class.name}}
@@ -22,7 +23,7 @@ violate-action drop
 random-detect dscp-based
 {% for dscp in dscp_list %}
 {% if dscp.regroupement_class == class %}
-random-detect dscp  {{ dscp.dscp_value}} {{ dscp.drop_min}} {{ dscp.drop_max}} {{ dscp.denominator}}
+random-detect dscp  {{ dscp.dscp_value}} {{ dscp.drop_min_new}} {{ dscp.drop_max_new}} {{ dscp.denominator}}
 {% endif %}
 {% endfor %}
 {% endif %}
