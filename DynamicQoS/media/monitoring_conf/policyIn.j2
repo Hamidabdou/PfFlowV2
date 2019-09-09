@@ -7,7 +7,9 @@ match access-group name {{ class.acl_name }}
 exit
 {% endfor %}
 policy-map {{a.name}}
+description {{ a.description }}
 {% for class in classes %}
 class {{class.name}}
 set dscp {{class.dscp_value}}
+exit
 {% endfor %}

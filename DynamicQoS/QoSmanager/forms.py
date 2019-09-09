@@ -10,7 +10,7 @@ class AddApplicationForm(forms.ModelForm):
             'business_app': forms.Select(attrs={'class': 'form-control'}),
             'mark': forms.Select(attrs={'class': 'form-control'}),
             'begin_time': forms.TextInput(attrs={'class': 'form-control'}),
-            'end_time': forms.TextInput(attrs={'class': 'form-control' }),
+            'end_time': forms.TextInput(attrs={'class': 'form-control'}),
             'source': forms.TextInput(attrs={'class': 'form-control'}),
             'destination': forms.TextInput(attrs={'class': 'form-control'}),
         }
@@ -52,6 +52,11 @@ class AddPolicyForm(forms.ModelForm):
 
 
 class AddCustomApplicationForm(forms.ModelForm):
+    # begin_time = forms.CharField(required=False)
+    # end_time = forms.CharField(required=False)
+    # source = forms.CharField(required=False)
+    # destination = forms.CharField(required=False)
+
     class Meta:
         model = Application
         widgets = {
@@ -81,5 +86,24 @@ class DiscoveryForm(forms.Form):
         widget=forms.DateTimeInput(attrs={
             'class': 'form-control datetimepicker-input',
             'data-target': '#datetimepicker2'
+        })
+    )
+
+
+class AllInForm(forms.Form):
+    name = forms.CharField(max_length=45, widget=forms.TextInput(
+        attrs={'class': 'form-control', 'placeholder': 'Enter the policy name', 'type': 'text'}))
+    description = forms.CharField(max_length=150, widget=forms.Textarea(
+        attrs={'class': 'form-control', 'placeholder': 'describe you policy here ...', 'rows': '2'}))
+    topologies = forms.ModelChoiceField(
+        queryset=Topology.objects.all(), widget=forms.Select(attrs={
+            'class': 'form-control',
+            'style': 'margin-bottom: 12px;'
+        }))
+    start = forms.DateTimeField(
+        input_formats=['%Y/%m/%d %H:%M'],
+        widget=forms.DateTimeInput(attrs={
+            'class': 'form-control datetimepicker-input',
+            'data-target': '#datetimepicker1'
         })
     )
