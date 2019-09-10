@@ -263,20 +263,23 @@
                                                           rx="1"></rect>
 												</g>
 											</svg></span><span class="kt-menu__link-text">Topologies</span></a></li>
-                        <li class="kt-menu__item "><a href="{% url 'policies' %}" class="kt-menu__link "><span
-                                class="kt-menu__link-icon"><svg xmlns="http://www.w3.org/2000/svg"
-                                                                xmlns:xlink="http://www.w3.org/1999/xlink" width="24px"
-                                                                height="24px" viewBox="0 0 24 24" version="1.1"
-                                                                class="kt-svg-icon">
-    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <rect id="bound" x="0" y="0" width="24" height="24"/>
-        <rect id="Rectangle-20" fill="#000000" opacity="0.3" x="4" y="5" width="16" height="2" rx="1"/>
-        <rect id="Rectangle-20-Copy-3" fill="#000000" opacity="0.3" x="4" y="13" width="16" height="2" rx="1"/>
-        <path d="M5,9 L13,9 C13.5522847,9 14,9.44771525 14,10 C14,10.5522847 13.5522847,11 13,11 L5,11 C4.44771525,11 4,10.5522847 4,10 C4,9.44771525 4.44771525,9 5,9 Z M5,17 L13,17 C13.5522847,17 14,17.4477153 14,18 C14,18.5522847 13.5522847,19 13,19 L5,19 C4.44771525,19 4,18.5522847 4,18 C4,17.4477153 4.44771525,17 5,17 Z"
-              id="Combined-Shape" fill="#000000"/>
-    </g>
-</svg>
-                        </span><span class="kt-menu__link-text">QoS Policy</span></a></li>
+                        <li class="kt-menu__item kt-menu__item--submenu" aria-haspopup="true" data-ktmenu-submenu-toggle="hover"><a href="javascript:;" class="kt-menu__link kt-menu__toggle"><span class="kt-menu__link-icon"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1" class="kt-svg-icon kt-svg-icon--warning">
+												<g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+													<rect id="bound" x="0" y="0" width="24" height="24"></rect>
+													<rect id="Rectangle-62-Copy" fill="#000000" opacity="0.3" x="13" y="4" width="3" height="16" rx="1.5"></rect>
+													<rect id="Rectangle-62-Copy-2" fill="#000000" x="8" y="9" width="3" height="11" rx="1.5"></rect>
+													<rect id="Rectangle-62-Copy-4" fill="#000000" x="18" y="11" width="3" height="9" rx="1.5"></rect>
+													<rect id="Rectangle-62-Copy-3" fill="#000000" x="3" y="13" width="3" height="7" rx="1.5"></rect>
+												</g>
+											</svg></span><span class="kt-menu__link-text">Quality of Service</span><i class="kt-menu__ver-arrow la la-angle-right"></i></a>
+									<div class="kt-menu__submenu " kt-hidden-height="200" style=""><span class="kt-menu__arrow"></span>
+										<ul class="kt-menu__subnav">
+											<li class="kt-menu__item  kt-menu__item--parent" aria-haspopup="true"><span class="kt-menu__link"><span class="kt-menu__link-text">Quality of Service</span></span></li>
+											<li class="kt-menu__item " aria-haspopup="true"><a href="{% url 'policies' %}" class="kt-menu__link "><i class="kt-menu__link-bullet kt-menu__link-bullet--dot"><span></span></i><span class="kt-menu__link-text">QoS policy</span></a></li>
+											<li class="kt-menu__item " aria-haspopup="true"><a href="{% url 'all_in' %}" class="kt-menu__link "><i class="kt-menu__link-bullet kt-menu__link-bullet--dot"><span></span></i><span class="kt-menu__link-text">Fast Policy</span></a></li>
+										</ul>
+									</div>
+								</li>
                         <li class="kt-menu__item " aria-haspopup="true"><a href="{% url 'FlowTable' %}"
                                                                            class="kt-menu__link "><span
                                 class="kt-menu__link-icon"><svg xmlns="http://www.w3.org/2000/svg"   xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1" class="kt-svg-icon kt-svg-icon--success">
@@ -352,10 +355,10 @@
                                     <img class="kt-hidden" alt="Pic" src={% static 'assets/media/users/300_25.jpg' %}/>
 
                                     <!--use below badge element instead the user avatar to display username's first letter(remove kt-hidden class to display it) -->
-                                    <span class="kt-badge kt-badge--lg kt-badge--rounded kt-badge--bold kt-font-success"> {{ user.username|upper }} </span>
+                                    <span class="kt-badge kt-badge--lg kt-badge--rounded kt-badge--bold kt-font-success center-block" style="margin-left: 10px;"> {{ user.username|upper }} </span>
                                 </div>
                                 <div class="kt-user-card__name">
-                                    Sean Stone
+{#                                    Sean Stone#}
                                 </div>
                                 <div class="kt-user-card__badge">
 

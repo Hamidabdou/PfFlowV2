@@ -1,1 +1,1 @@
-# DynamicQoS
+# Smart QoS Manager
