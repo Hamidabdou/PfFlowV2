@@ -147,7 +147,8 @@ def index(request):
 
 
 def add_application(request, police_id):
-    # app_form = AddApplicationForm(request.POST)
+    app_form = AddApplicationForm(request.POST)
+
     app_id = request.POST['business_app']
     type_id = request.POST['business_type']
     mark = request.POST['mark']
@@ -211,6 +212,7 @@ def add_application(request, police_id):
 
 
 def add_custom_application(request, police_id):
+
     # app_form = AddApplicationForm(request.POST)
     # groupe = Group.objects.get(priority=request.POST['app_priority'], policy_id=police_id)
     mark = request.POST['mark']
@@ -484,7 +486,7 @@ def policies(request):
 
             return redirect('policies')
         else:
-            error = 'name error'
+            error = 'policy already exist'
 
         return render(request, 'policy.html', locals())
     else:

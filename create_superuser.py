@@ -6,7 +6,7 @@ password = 'admin'
 
 try:
     User.objects.get(username='admin')
-    print ("User 'admin' already exist")
+    print("User 'admin' already exist")
 except User.DoesNotExist:
     User.objects.create_superuser('admin', email, password)
-    print ("User 'admin created with default password'")
+    print("User 'admin created with default password'")
