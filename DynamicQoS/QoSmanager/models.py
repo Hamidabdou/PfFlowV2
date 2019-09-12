@@ -285,11 +285,12 @@ class Dscp(models.Model):
 
 
 class Application(models.Model):
-    CS6, EF, CS5, AF43, AF42, AF41, CS4, AF33, \
+    RECOMMENDED, CS6, EF, CS5, AF43, AF42, AF41, CS4, AF33, \
     AF32, AF31, CS3, AF23, AF22, AF21, CS2, AF13, AF12, \
-    AF11, CS1, DEFAULT = "CS6", "EF", "CS5", "AF43", "AF42", "AF41", "CS4", "AF33", \
+    AF11, CS1, DEFAULT = "RECOMMENDED", "CS6", "EF", "CS5", "AF43", "AF42", "AF41", "CS4", "AF33", \
                          "AF32", "AF31", "CS3", "AF23", "AF22", "AF21", "CS2", "AF13", "AF12", "AF11", "CS1", "DEFAULT"
     DSCP = (
+        (RECOMMENDED, "RECOMMENDED"),
         (CS6, "CS6"),
         (EF, "EF"),
         (CS5, "CS5"),
@@ -322,7 +323,7 @@ class Application(models.Model):
     business_type = models.ForeignKey(BusinessType, on_delete=models.CASCADE, null=True)
     business_app = models.ForeignKey(BusinessApp, on_delete=models.CASCADE, null=True)
     policy_in = models.ForeignKey(PolicyIn, on_delete=models.CASCADE, null=True)
-    mark = models.CharField(max_length=20, choices=DSCP)
+    mark = models.CharField(max_length=20, choices=DSCP,default=RECOMMENDED)
     dscp = models.ForeignKey(Dscp, on_delete=models.CASCADE, null=True)
     group = models.ForeignKey(Group, on_delete=models.CASCADE, null=True)
     source = models.CharField(max_length=255, null=True)
