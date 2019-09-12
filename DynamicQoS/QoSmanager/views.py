@@ -164,7 +164,7 @@ def add_application(request, police_id):
         source = "any"
     if destination == '':
         destination = "any"
-    if mark == '':
+    if mark == 'RECOMMENDED':
         mark = BusinessApp.objects.get(id=app_id).recommended_dscp
 
     # groupe = Group.objects.get(priority=request.POST['mark'], policy_id=police_id)
@@ -228,6 +228,8 @@ def add_custom_application(request, police_id):
         source = "any"
     if destination == '':
         destination = "any"
+    if mark == 'RECOMMENDED':
+        mark = 'AF43'
     app = Application(policy_in_id=PolicyIn.objects.get(policy_ref_id=police_id).id,
                       mark=mark,
                       source=source,
