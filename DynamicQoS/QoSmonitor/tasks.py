@@ -1,5 +1,4 @@
 from background_task import background
-import requests
 
 from QoSmanager.models import *
 from .utils import *
@@ -124,11 +123,11 @@ def start_monitoring_api_call(topology_name):
 def nbar_discovery_task(end_time, policy_id):
     dvcs = Device.objects.filter(policy_ref_id=policy_id)
     threads = []
-    print("starting Discovery")
+    print("enabling nbar in devices")
     for dvcs in dvcs:
         threads.append(Thread(target=dvcs.enable_nbar))
     for th in threads:
-        print("start thread")
+        print("nbar thread")
         th.start()
     for th in threads:
         th.join()
@@ -136,13 +135,12 @@ def nbar_discovery_task(end_time, policy_id):
     while datetime.now() < datetime.strptime(end_time, '%Y/%m/%d %H:%M'):
         devices = Device.objects.filter(policy_ref_id=policy_id)
         application = []
+        print("discovering start now ")
         for device in devices:
             application.extend(device.discovery_application())
-        print("application:...")
-        print("saha:...")
+        print("application:")
         print(set(application))
         for app in set(application):
-            print(app)
             c = False
             b = BusinessApp.objects.filter(name=app)
             print(len(b))
@@ -199,8 +197,10 @@ def all_in_task(topology_id, policy_id, start_time):
     a = Policy.objects.get(id=policy_id)
     devices = Device.objects.filter(topology_ref_id=topo)
     for device in devices:
+        print("set the policy ref in device: "+device.hostname)
         device.policy_ref = a
         device.save()
+    print("policy In creation")
     PolicyIn.objects.create(policy_ref=a, id=a.id)
     interfaces = Interface.objects.filter(ingress=False)
     Group.objects.create(name="VOIP", priority="EF", policy=a)
@@ -344,7 +344,7 @@ def all_in_task(topology_id, policy_id, start_time):
         TuningHistory.objects.create(tos=af11, policy_ref=a, timestamp=datetime.now())
     dvcs = Device.objects.filter(policy_ref_id=policy_id)
     threads = []
-    print("starting Discovery")
+    print("enabling nbar")
     for dvcs in dvcs:
         threads.append(Thread(target=dvcs.enable_nbar))
     for th in threads:
