@@ -321,6 +321,19 @@ def policy_delete(request, policy_id):
 
 def policy_off(request, police_id):
     obj = Policy.objects.get(id=police_id)
+    if obj.deploy:
+        devices = Device.objects.filter(policy_ref_id=police_id)
+        threads = []
+        for device in devices:
+            threads.append(Thread(target=device.remove_policy, args=police_id))
+        for th in threads:
+            print("removing thread started")
+            th.start()
+        for th in threads:
+            th.join()
+        policy = Policy.objects.get(id=police_id)
+        policy.deploy = False
+        policy.save()
     obj.enable = False
     obj.save()
     return HttpResponseRedirect(reverse('policies', kwargs={}))

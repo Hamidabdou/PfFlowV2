@@ -3,6 +3,7 @@
 {% load staticfiles %}
     <div class="kt-subheader   kt-grid__item" id="kt_subheader">
         <div class="kt-subheader__main">
+                <a href="{% url 'policy_dashboard' police_id %} "><span><i class="fas fa-arrow-left"></i></span></a>
                 <h3 class="kt-subheader__title">Policy Dashboard</h3>
                 <span class="kt-subheader__separator kt-subheader__separator--v"></span>
 
@@ -116,7 +117,6 @@
                             <label for="mark"><span class="glyphicon glyphicon-file"></span> Mark</label>
                             <select name="mark" required="" id="mark">
                                 <option value="" selected="">---------</option>
-                                <option value="CS7">CS7</option>
                                 <option value="CS6">CS6</option>
                                 <option value="EF">EF</option>
                                 <option value="CS5">CS5</option>
