@@ -212,7 +212,6 @@ def add_application(request, police_id):
 
 
 def add_custom_application(request, police_id):
-
     # app_form = AddApplicationForm(request.POST)
     # groupe = Group.objects.get(priority=request.POST['app_priority'], policy_id=police_id)
     mark = request.POST['mark']
@@ -750,10 +749,10 @@ def all_tuning(request):
 
     return render(request, 'all_tuning.html', locals())
 
-def run_tuning(request):
-    tuning_task()
-    return HttpResponseRedirect(reverse('all_tuning', kwargs={}))
 
+def run_tuning(request):
+    # tuning_task()
+    return HttpResponseRedirect(reverse('all_tuning', kwargs={}))
 
 
 def discovery_view(request, policy_id):

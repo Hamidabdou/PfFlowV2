@@ -569,12 +569,12 @@ def tuning_task():
             classes = Dscp.objects.filter(regroupement_class=reg)
             for classe in classes:
 
-                if classe.dscp_value == "AF43":
+                if classe.dscp_value == "AF31":
                     print(classe.drop_min_new)
                     classe.drop_min_old = classe.drop_min_new
                     classe.drop_max_old = classe.drop_max_new
-                    classe.drop_min_new = str(int(classe.drop_min_new) + 1)
-                    classe.drop_max_new = str(int(classe.drop_max_new) + 1)
+                    classe.drop_min_new = str(int(classe.drop_min_new) - 1)
+                    classe.drop_max_new = str(int(classe.drop_max_new) - 1)
 
                     TuningHistory.objects.create(tos=classe, policy_ref=policy, timestamp=datetime.now())
                     classe.save()
@@ -582,7 +582,7 @@ def tuning_task():
                     print(classe.drop_min_new)
                     classe.drop_min_old = classe.drop_min_new
                     classe.drop_max_old = classe.drop_max_new
-                    classe.drop_min_new = str(int(classe.drop_min_new) + 1)
+                    classe.drop_min_new = str(int(classe.drop_min_new) +1)
                     classe.drop_max_new = str(int(classe.drop_max_new) + 1)
 
                     TuningHistory.objects.create(tos=classe, policy_ref=policy, timestamp=datetime.now())
