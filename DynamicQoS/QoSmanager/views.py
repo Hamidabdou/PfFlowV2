@@ -294,7 +294,7 @@ def policy_on(request, police_id):
 def policy_delete(request, policy_id):
     obj = Policy.objects.get(id=policy_id)
     if obj.deploy:
-        devices = Device.objects.filter(policy_ref_id=policy_id)
+        devices = Device.objects.all()
         threads = []
         for device in devices:
             threads.append(Thread(target=device.remove_policy, args=policy_id))
@@ -321,7 +321,7 @@ def policy_delete(request, policy_id):
 def policy_off(request, police_id):
     obj = Policy.objects.get(id=police_id)
     if obj.deploy:
-        devices = Device.objects.filter(policy_ref_id=police_id)
+        devices = Device.objects.all()
         threads = []
         for device in devices:
             threads.append(Thread(target=device.remove_policy, args=police_id))
@@ -512,7 +512,7 @@ def policies(request):
 @login_required(login_url='/login/')
 def policy_deployment(request, police_id):
     # policeIn = PolicyIn.objects.get(policy_ref_id=police_id)
-    devices = Device.objects.filter(policy_ref_id=police_id)
+    devices = Device.objects.all()
     threads = []
     for device in devices:
         threads.append(Thread(target=device.deploy_policy, args=police_id))
@@ -639,7 +639,7 @@ def policy_deployment(request, police_id):
 
 
 def devices(request, policy_id):
-    devices = Device.objects.filter(policy_ref_id=policy_id)
+    devices = Device.objects.all()
     device_len = len(devices)
     wan = 0
     ingress = 0
@@ -665,7 +665,7 @@ def devices(request, policy_id):
 
 
 def nbar_discover(request, policy_id):
-    devices = Device.objects.filter(policy_ref_id=policy_id)
+    devices = Device.objects.all()
     threads = []
     for device in devices:
         threads.append(Thread(target=device.enable_nbar))
@@ -679,7 +679,7 @@ def nbar_discover(request, policy_id):
 
 @login_required(login_url='/login/')
 def nbar_discover_applications(request, policy_id):
-    devices = Device.objects.filter(policy_ref_id=policy_id)
+    devices = Device.objects.all()
     application = []
     nbar_apps = Application.objects.all()
     apps = BusinessApp.objects.all()
@@ -715,7 +715,7 @@ def nbar_discover_applications(request, policy_id):
 
 @login_required(login_url='/login/')
 def policy_remove(request, police_id):
-    devices = Device.objects.filter(policy_ref_id=police_id)
+    devices = Device.objects.all()
     threads = []
     for device in devices:
         threads.append(Thread(target=device.remove_policy, args=police_id))
@@ -751,7 +751,7 @@ def all_tuning(request):
 
 
 def run_tuning(request):
-    # tuning_task()
+    tuning_task()
     return HttpResponseRedirect(reverse('all_tuning', kwargs={}))
 
 

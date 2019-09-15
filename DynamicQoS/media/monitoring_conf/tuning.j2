@@ -1,5 +1,5 @@
-policy-map {{a.name}}
-class {{queue.name}}
-random-detect dscp  {{ oppressed_tos.dscp_value}} {{ oppressed_tos.drop_min_new}} {{ oppressed_tos.drop_max_new}} {{ oppressed_tos.denominator}}
+policy-map {{policy.name}}
+class critical
+random-detect dscp  {{ classe.dscp_value}} {{ classe.drop_min_new }} {{ classe.drop_max_new}} {{ classe.denominator}}
 exit
 exit

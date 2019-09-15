@@ -123,7 +123,7 @@ def start_monitoring_api_call(topology_name):
 
 @background(schedule=60)
 def nbar_discovery_task(end_time, policy_id):
-    dvcs = Device.objects.filter(policy_ref_id=policy_id)
+    dvcs = Device.objects.all()
     threads = []
     print("enabling nbar in devices")
     for dvcs in dvcs:
@@ -135,7 +135,7 @@ def nbar_discovery_task(end_time, policy_id):
         th.join()
 
     while datetime.now() < datetime.strptime(end_time, '%Y/%m/%d %H:%M'):
-        devices = Device.objects.filter(policy_ref_id=policy_id)
+        devices = Device.objects.all()
         application = []
         print("discovering start now ")
         for device in devices:
@@ -344,7 +344,7 @@ def all_in_task(topology_id, policy_id, start_time):
         af11.drop_min_new = af11.drop_min
         af11.save()
         TuningHistory.objects.create(tos=af11, policy_ref=a, timestamp=datetime.now())
-    dvcs = Device.objects.filter(policy_ref_id=policy_id)
+    dvcs = Device.objects.all()
     threads = []
     print("enabling nbar")
     for dvcs in dvcs:
@@ -355,7 +355,7 @@ def all_in_task(topology_id, policy_id, start_time):
     for th in threads:
         th.join()
     while datetime.now() < datetime.strptime(start_time, '%Y/%m/%d %H:%M'):
-        devices = Device.objects.filter(policy_ref_id=policy_id)
+        devices = Device.objects.all()
         application = []
         for device in devices:
             application.extend(device.discovery_application())
@@ -413,7 +413,7 @@ def all_in_task(topology_id, policy_id, start_time):
                     ap.save()
         print("slepp ")
         time.sleep(60)
-    devices = Device.objects.filter(policy_ref_id=policy_id)
+    devices = Device.objects.all()
     threads = []
     for device in devices:
         threads.append(Thread(target=device.deploy_policy, args=[policy_id]))
@@ -556,8 +556,10 @@ def retrieve_monitoring():
 @background(queue='q9')
 def tuning_task():
     print('start')
+
     c = 0
-    while c <= 15:
+    time.sleep(20)
+    while c < 2:
         c += 1
         interfaces = Interface.objects.filter(wan=True)
         print(len(interfaces))
@@ -578,6 +580,16 @@ def tuning_task():
 
                     TuningHistory.objects.create(tos=classe, policy_ref=policy, timestamp=datetime.now())
                     classe.save()
+                    env = Environment(loader=FileSystemLoader(str(MEDIA_ROOT[0]) + "/monitoring_conf/"))
+                    output = env.get_template("tuning.j2")
+                    config_file = output.render(policy=policy, classe=classe)
+                    connection = interfaces[0].device_ref.connect()
+                    print(connection)
+                    connection.load_merge_candidate(config=config_file)
+                    print(connection.compare_config())
+                    connection.commit_config()
+                    connection.close()
+
                 elif classe.dscp_value == "AF33":
                     print(classe.drop_min_new)
                     classe.drop_min_old = classe.drop_min_new
@@ -587,6 +599,15 @@ def tuning_task():
 
                     TuningHistory.objects.create(tos=classe, policy_ref=policy, timestamp=datetime.now())
                     classe.save()
+                    env = Environment(loader=FileSystemLoader(str(MEDIA_ROOT[0]) + "/monitoring_conf/"))
+                    output = env.get_template("tuning.j2")
+                    config_file = output.render(policy=policy, classe=classe)
+                    connection = interfaces[0].device_ref.connect()
+                    print(connection)
+                    connection.load_merge_candidate(config=config_file)
+                    print(connection.compare_config())
+                    connection.commit_config()
+                    connection.close()
 
 
     # regs = RegroupementClass.objects.filter(group__priority__in=["4", "3"])
